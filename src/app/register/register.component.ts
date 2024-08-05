@@ -29,18 +29,14 @@ export class RegisterComponent {
     console.log('Phone:', this.phone);
   }
   register() {
-    const message = `
-      phone: ${this.phone},
-      password: ${this.password},
-      retypePassword: ${this.retypePassword},
-      fullName: ${this.fullName}`;
     const apiUrl = 'http://localhost:9090/api/v1/users/register';
 
     const registerData = {
-      phone: this.phone,
+      phone_number: this.phone,
       fullname: this.fullName,
+      email: '',
       password: this.password,
-      retypePassword: this.retypePassword,
+      retype_password: this.retypePassword,
       facebook_account_id: '',
       google_account_id: '',
       role_id: 2,
@@ -49,12 +45,7 @@ export class RegisterComponent {
     this.http.post(apiUrl, registerData, { headers: headers }).subscribe({
       next: (response: any) => {
         debugger;
-        // xử lý kết quả trả về khi đăng ký thành công
-        if ((response && response.status === 200) || response.status === 201) {
-          this.router.navigate(['/login']);
-        } else {
-          //xử lý kết quả trả về khi đăng ký thất bại
-        }
+        this.router.navigate(['/login']);
       },
       complete: () => {
         debugger;

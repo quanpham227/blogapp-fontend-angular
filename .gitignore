@@ -1,0 +1,89 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+# System files
+.DS_Store
+Thumbs.db
+
+# Visual Studio Code
+.vscode/
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+.history
+*.code-workspace
+
+# Angular specific
+.angular/cache
+.angular/cli
+.angular/language-service
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+*.log
+*.gz
+*.zip
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Coverage reports
+coverage
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.swn
+*.pid
+*.seed
+*.pid.lock
+
+# Output of 'ng build'
+/dist/
+/build/
+
+# Output of 'ng test', 'ng e2e'
+/coverage/
+/test-results/
+
+# Compiled JavaScript files
+*.js
+*.d.ts
+*.js.map
+
+# Compiled CSS files
+*.css
+*.css.map
+
+# Compiled HTML files
+*.html
+
+# System files
+.DS_Store
+Thumbs.db

@@ -34,8 +34,8 @@ import { HttpClientModule } from '@angular/common/http';
     //HomeComponent
     //BlogComponent,
     //BlogDetailComponent,
-    // LoginComponent,
-    RegisterComponent,
+    LoginComponent,
+    // RegisterComponent,
   ],
 })
 export class AppModule {}

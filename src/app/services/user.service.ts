@@ -14,7 +14,6 @@ export class UserService {
   private apiConfig = {
     headers: this.createHeaders(),
   };
-
   private createHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json',

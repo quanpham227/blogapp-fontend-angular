@@ -1,8 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { LoginDTO } from 'src/app/dtos/user/login.dto';
-import { UserService } from './../services/user.service';
+import { LoginDTO } from '../../dtos/user/login.dto';
+import { UserService } from '../../services/user.service';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LoginResponse } from '../../responses/user/login.response';
+import { TokenService } from '../../services/token.service';
 
 @Component({
   selector: 'app-login',
@@ -14,9 +16,17 @@ export class LoginComponent {
   phoneNumber: string = '0971999569';
   password: string = '123456';
 
-  constructor(private router: Router, private useService: UserService) {}
+  constructor(
+    private router: Router,
+    private useService: UserService,
+    private tokenService: TokenService
+  ) {}
   onPhoneNumberChange() {
     console.log('Phone:', this.phoneNumber);
+  }
+  onPasswordChange(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.password = inputElement.value;
   }
   login() {
     const message = `phone: ${this.phoneNumber}, password: ${this.password}`;
@@ -25,8 +35,11 @@ export class LoginComponent {
       password: this.password,
     };
     this.useService.login(loginDTO).subscribe({
-      next: (response: any) => {
+      next: (response: LoginResponse) => {
+        // muốn sử dụng token trong các yêu cầu API
         debugger;
+        const { token } = response;
+        this.tokenService.setToken(token);
         //this.router.navigate(['']);
       },
       complete: () => {

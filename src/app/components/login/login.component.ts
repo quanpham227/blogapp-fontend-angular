@@ -5,6 +5,8 @@ import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginResponse } from '../../responses/user/login.response';
 import { TokenService } from '../../services/token.service';
+import { RoleService } from '../../services/role.service'; // Import RoleService
+import { Role } from '../models/role'; // Đường dẫn đến model Role
 
 @Component({
   selector: 'app-login',
@@ -16,11 +18,34 @@ export class LoginComponent {
   phoneNumber: string = '0971999569';
   password: string = '123456';
 
+  roles: Role[] = []; // Mảng roles
+  rememberMe: boolean = true;
+  selectedRole: Role | undefined; // Biến để lưu giá trị được chọn từ dropdown
+
   constructor(
     private router: Router,
-    private useService: UserService,
-    private tokenService: TokenService
+    private userService: UserService,
+    private tokenService: TokenService,
+    private roleService: RoleService // Inject Role
   ) {}
+
+  ngOnInit() {
+    // Gọi API lấy danh sách roles và lưu vào biến roles
+    debugger;
+    this.roleService.getRoles().subscribe({
+      next: (roles: Role[]) => {
+        // Sử dụng kiểu Role[]
+        debugger;
+        this.roles = roles;
+        this.selectedRole = roles.length > 0 ? roles[0] : undefined;
+      },
+      error: (error: any) => {
+        debugger;
+        console.error('Error getting roles:', error);
+      },
+    });
+  }
+
   onPhoneNumberChange() {
     console.log('Phone:', this.phoneNumber);
   }
@@ -29,25 +54,30 @@ export class LoginComponent {
     this.password = inputElement.value;
   }
   login() {
-    const message = `phone: ${this.phoneNumber}, password: ${this.password}`;
+    const message = `phone: ${this.phoneNumber}` + `password: ${this.password}`;
+    //alert(message);
+    debugger;
+
     const loginDTO: LoginDTO = {
       phone_number: this.phoneNumber,
       password: this.password,
+      role_id: this.selectedRole?.id ?? 1,
     };
-    this.useService.login(loginDTO).subscribe({
+    this.userService.login(loginDTO).subscribe({
       next: (response: LoginResponse) => {
-        // muốn sử dụng token trong các yêu cầu API
         debugger;
         const { token } = response;
-        this.tokenService.setToken(token);
-        //this.router.navigate(['']);
+        if (this.rememberMe) {
+          this.tokenService.setToken(token);
+        }
+        //this.router.navigate(['/login']);
       },
       complete: () => {
         debugger;
       },
-      error: (error) => {
+      error: (error: any) => {
         debugger;
-        alert(`Can't login, error: ${error.error.message}`);
+        alert(error.error.message);
       },
     });
   }

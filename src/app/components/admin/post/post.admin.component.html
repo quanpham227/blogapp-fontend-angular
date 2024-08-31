@@ -1,0 +1,90 @@
+<div class="pagetitle">
+  <h1>Post List</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/admin/dashboard">Dashboard</a>
+      </li>
+      <li class="breadcrumb-item">Post</li>
+      <li class="breadcrumb-item active">List</li>
+    </ol>
+  </nav>
+</div>
+<!-- End Page Title -->
+<div class="list-post">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Post</h5>
+          <!-- Table with stripped rows -->
+          <table class="table datatable">
+            <thead>
+              <tr class="text-center">
+                <th>Id</th>
+                <th>title</th>
+                <th>Status</th>
+                <th>created_at</th>
+                <th>updated_at</th>
+                <th>thumbnail</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="text-center" *ngFor="let post of posts">
+                <td>{{ post.id }}</td>
+                <td>{{ post.title }}</td>
+                <td>{{ post.status }}</td>
+                <td>{{ post.created_at | date }}</td>
+                <td>{{ post.updated_at | date }}</td>
+                <td>
+                  <img
+                    src="{{ post.thumbnail_url }}"
+                    alt="{{ post.title }}"
+                    class="thumbnail"
+                    width="50px"
+                    height="30px"
+                  />
+                </td>
+
+                <td class="col-1">
+                  <i class="bi bi-pencil-square view-icon"></i>
+                  <i class="bi bi-trash trash-icon"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <div class="blog-pagination d-flex justify-content-center">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          <li class="page-item" *ngIf="currentPage > 1">
+            <a class="page-link" (click)="onPageChange(1)">First</a>
+          </li>
+          <li class="page-item" *ngIf="currentPage > 1">
+            <a class="page-link" (click)="onPageChange(currentPage - 1)"
+              >Previous</a
+            >
+          </li>
+          <ng-container *ngFor="let page of visiblePages">
+            <li class="page-item" [ngClass]="{ active: page === currentPage }">
+              <a class="page-link" (click)="onPageChange(page)">{{ page }}</a>
+            </li>
+          </ng-container>
+          <li class="page-item" *ngIf="currentPage < totalPages">
+            <a class="page-link" (click)="onPageChange(currentPage + 1)"
+              >Next</a
+            >
+          </li>
+          <li class="page-item" *ngIf="currentPage < totalPages">
+            <a class="page-link" (click)="onPageChange(totalPages)">Last</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>

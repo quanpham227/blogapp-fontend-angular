@@ -1,0 +1,125 @@
+<!-- ======= Top Bar ======= -->
+<section id="topbar" class="fixed-top d-flex align-items-center">
+  <div
+    class="container d-flex justify-content-center justify-content-md-between"
+  >
+    <div class="contact-info d-flex align-items-center">
+      <i class="bi bi-envelope d-flex align-items-center"
+        ><a href="mailto:contact@example.com">pidn-hr&#64;poongin.co.kr</a></i
+      >
+      <i class="bi bi-phone d-flex align-items-center ms-4"
+        ><span>(+84) 236-379-6756</span></i
+      >
+    </div>
+    <div class="social-links d-none d-md-flex">
+      <a href="https://www.facebook.com/pivinadanang" class="facebook"
+        ><i class="bi bi-facebook"></i
+      ></a>
+      <a href="https://www.youtube.com/@PIVINADANANG" class="youtube"
+        ><i class="bi bi-youtube"></i
+      ></a>
+      <!-- ======= Login ======= -->
+      <div>
+        <ng-container *ngIf="userResponse">
+          <ng-container
+            ngbPopover="Tài khoản của tôi,Đăng xuất"
+            popoverTitle="User Actions"
+            triggers="click"
+            [placement]="'bottom'"
+          >
+            <a
+              class="nav-link"
+              [ngbPopover]="popoverContent"
+              (click)="togglePopover($event)"
+            >
+              {{ userResponse.fullname }}
+            </a>
+            <ng-template #popoverContent>
+              <div class="popover-list">
+                <a class="popover-item" (click)="handleItemClick(0)"
+                  >Tài khoản của tôi</a
+                >
+                <a class="popover-item" (click)="handleItemClick(1)"
+                  >Đăng xuất</a
+                >
+              </div>
+            </ng-template>
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="!userResponse">
+          <a class="nav-link" routerLink="/login"
+            ><i class="bi bi-person-fill" style="margin-right: 5px"></i> Đăng
+            nhập</a
+          >
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======= Header ======= -->
+<header id="header" class="fixed-top d-flex align-items-center">
+  <div class="container d-flex align-items-center justify-content-between">
+    <div class="logo">
+      <h1>
+        <a routerLink="/">
+          <img src="/assets/images/LOGO.png" class="img-fluid" alt="logo" />
+          PI DANANG
+        </a>
+      </h1>
+    </div>
+
+    <nav id="navbar" class="navbar">
+      <ul>
+        <li>
+          <a
+            class="nav-link"
+            [ngClass]="{ active: activeNavItem === 0 }"
+            (click)="scrollToSection('hero', 0)"
+            routerLink="/"
+            >TRANG CHỦ</a
+          >
+        </li>
+        <li>
+          <a
+            class="nav-link"
+            [ngClass]="{ active: activeNavItem === 1 }"
+            (click)="scrollToSection('about', 1)"
+            >GIỚI THIỆU</a
+          >
+        </li>
+        <li>
+          <a
+            class="nav-link"
+            [ngClass]="{ active: activeNavItem === 2 }"
+            (click)="scrollToSection('clients', 2)"
+            >KHÁCH HÀNG</a
+          >
+        </li>
+        <li class="dropdown">
+          <a
+            routerLink="/blog"
+            class="nav-link"
+            [ngClass]="{ active: activeNavItem === 3 }"
+            (click)="handleBlogClick($event)"
+            ><span>Blog</span>
+          </a>
+        </li>
+        <li>
+          <a
+            class="nav-link"
+            [ngClass]="{ active: activeNavItem === 4 }"
+            (click)="scrollToSection('contact', 4)"
+            >LIÊN HỆ</a
+          >
+        </li>
+      </ul>
+      <i
+        class="bi bi-list mobile-nav-toggle"
+        (click)="toggleMobileNav($event)"
+      ></i>
+    </nav>
+    <!-- .navbar -->
+  </div>
+</header>
+<!-- End Header -->

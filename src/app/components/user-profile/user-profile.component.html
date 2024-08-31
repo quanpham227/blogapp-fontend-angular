@@ -1,0 +1,66 @@
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="card p-4 shadow-lg">
+    <h3 class="card-title text-center mb-4">Cập nhật thông tin người dùng</h3>
+    <form [formGroup]="userProfileForm">
+      <div class="mb-3">
+        <label for="name" class="form-label">Tên</label>
+        <input
+          type="text"
+          class="form-control"
+          id="fullname"
+          placeholder="Nhập tên của bạn"
+          formControlName="fullname"
+          [class.is-invalid]="
+            userProfileForm.get('fullname')!.invalid &&
+            userProfileForm.get('fullname')!.touched
+          "
+        />
+      </div>
+      <div class="mb-3">
+        <label for="phone_number" class="form-label">Số điện thoại</label>
+        <input
+          type="tel"
+          class="form-control"
+          id="phone_number"
+          placeholder="Nhập số điện thoại của bạn"
+          formControlName="phone_number"
+        />
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Mật khẩu</label>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          placeholder="Nhập mật khẩu"
+          formControlName="password"
+          required
+          [class.is-invalid]="
+            userProfileForm.get('password')!.invalid &&
+            userProfileForm.get('password')!.touched
+          "
+        />
+      </div>
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label"
+          >Nhập lại mật khẩu</label
+        >
+        <input
+          type="password"
+          class="form-control"
+          required
+          id="retype_password"
+          placeholder="Nhập lại mật khẩu"
+          formControlName="retype_password"
+          [class.is-invalid]="
+            userProfileForm.get('retype_password')!.invalid &&
+            userProfileForm.get('retype_password')!.touched
+          "
+        />
+      </div>
+      <button type="button" class="btn btn-primary w-100" (click)="save()">
+        Cập nhật
+      </button>
+    </form>
+  </div>
+</div>

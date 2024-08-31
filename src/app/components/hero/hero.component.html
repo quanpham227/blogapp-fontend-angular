@@ -1,0 +1,27 @@
+<!-- Hero Section -->
+<section id="hero">
+  <div class="hero-container">
+    <div id="heroCarousel" class="swiper-container">
+      <div class="swiper-wrapper">
+        <div *ngFor="let slide of slides; let i = index" class="swiper-slide">
+          <div
+            class="slide-content"
+            [style.background-image]="'url(' + slide.image + ')'"
+          >
+            <div class="carousel-content">
+              <h2>{{ slide.title }}</h2>
+              <p>{{ slide.description }}</p>
+              <!-- <a href="#about" class="btn-get-started scrollto">Read More</a> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Add Pagination -->
+      <div class="swiper-pagination"></div>
+      <!-- Add Navigation -->
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+    </div>
+  </div>
+</section>
+<!-- End Hero -->

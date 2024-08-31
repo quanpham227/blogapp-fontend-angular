@@ -1,0 +1,145 @@
+<div
+  class="modal fade show"
+  id="imageModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="imageModalLabel"
+  style="display: block"
+>
+  <div class="modal-dialog modal-xl custom-modal" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <ul class="nav nav-tabs" id="imageTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              [class.active]="activeTab === 'upload'"
+              id="upload-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#upload"
+              type="button"
+              role="tab"
+              aria-controls="upload"
+              [attr.aria-selected]="activeTab === 'upload'"
+              (click)="setActiveTab('upload')"
+            >
+              Upload Image
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link"
+              [class.active]="activeTab === 'library'"
+              id="library-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#library"
+              type="button"
+              role="tab"
+              aria-controls="library"
+              [attr.aria-selected]="activeTab === 'library'"
+              (click)="setActiveTab('library')"
+            >
+              Media Library
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="modal-body tab-content">
+        <div
+          class="tab-pane fade"
+          [class.show]="activeTab === 'upload'"
+          [class.active]="activeTab === 'upload'"
+          id="upload"
+          role="tabpanel"
+          aria-labelledby="upload-tab"
+        >
+          <div
+            class="dropzone"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+          >
+            <p>Drag & drop files here, or click to select files</p>
+            <input type="file" (change)="onFileChange($event)" />
+          </div>
+          <div
+            *ngIf="uploadingImage || uploadComplete"
+            class="progress-wrapper"
+          >
+            <div class="file-info">
+              <i class="bi bi-file-earmark-ppt-fill file-icon"></i>
+              <span class="file-name">{{ selectedFileName }}</span>
+              <div class="progress custom-progress">
+                <div
+                  class="progress-bar custom-progress-bar"
+                  role="progressbar"
+                  [style.width.%]="uploadProgress"
+                  [attr.aria-valuenow]="uploadProgress"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  {{ uploadProgress }}%
+                </div>
+              </div>
+              <i
+                *ngIf="uploadComplete && uploadSuccess"
+                class="bi bi-check-circle upload-checkmark"
+              ></i>
+            </div>
+          </div>
+        </div>
+        <div
+          class="tab-pane fade"
+          [class.show]="activeTab === 'library'"
+          [class.active]="activeTab === 'library'"
+          id="library"
+          role="tabpanel"
+          aria-labelledby="library-tab"
+        >
+          <div *ngIf="images.length > 0" class="image-gallery d-flex flex-wrap">
+            <div
+              *ngFor="let image of images"
+              class="image-item"
+              (click)="selectImage(image.image_url)"
+            >
+              <img [src]="image.image_url" class="img-thumbnail" />
+              <div
+                *ngIf="selectedImage === image.image_url"
+                class="image-checkmark"
+              >
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="images.length === 0" class="text-center">
+            <p>No images found. Please upload images.</p>
+          </div>
+          <div class="text-center mt-3">
+            <button
+              *ngIf="!allImagesLoaded"
+              (click)="loadMoreImages()"
+              class="btn btn-primary"
+            >
+              Load More
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          Close
+        </button>
+        <button
+          *ngIf="selectedImage"
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmSelection()"
+        >
+          Confirm Selection
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,124 @@
+.container {
+  color: rgb(5, 5, 5);
+  height: 100vh;
+}
+
+.login-form {
+  margin-top: 50px;
+  background-color: rgb(252, 252, 252);
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 500px;
+  border: 1px solid rgb(9, 22, 198);
+  align-items: center;
+  justify-content: center;
+}
+
+.login-header {
+  text-align: center;
+  color: rgb(8, 8, 8);
+  margin-bottom: 20px;
+}
+
+.form-control {
+  background-color: transparent;
+  border: 1px solid rgb(191, 190, 190);
+  color: rgb(4, 4, 4);
+}
+
+.form-control:focus {
+  color: rgb(0, 0, 0);
+  background-color: transparent;
+  outline: none;
+  border-color: transparent;
+}
+
+.divider-nospace {
+  border-top: 1px solid white;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+}
+
+.checkbox-text {
+  color: rgb(0, 0, 0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Màu checkbox khi được chọn */
+.checkbox-text input[type='checkbox']:checked {
+  border-color: white;
+  background-color: rgb(57, 40, 242);
+}
+
+.form-check-input {
+  margin-right: 5px;
+}
+
+.register-link {
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+}
+
+.register-link:hover {
+  color: rgb(57, 40, 242);
+  text-decoration: underline;
+}
+
+.access-right {
+  margin-top: 20px;
+  width: 200px;
+  color: rgb(0, 0, 0);
+  border: 1px solid rgb(57, 40, 242);
+}
+
+.access-right:focus {
+  border: 1px solid rgb(57, 40, 242);
+}
+
+.form-control::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+  /* Firefox */
+}
+
+.form-control:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: rgba(5, 5, 5, 0.4);
+}
+
+.form-control::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.login-button {
+  background: rgb(86, 91, 235);
+  color: white;
+  border-radius: 30px;
+  width: 100%;
+  padding: 10px 0;
+  margin-top: 20px;
+  border: none;
+}
+
+.divider {
+  height: 1px;
+  background-color: rgb(57, 40, 242);
+  /* background-color: rgb(105, 244, 181) */
+  margin: 20px;
+}

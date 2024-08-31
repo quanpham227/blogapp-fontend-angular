@@ -1,0 +1,73 @@
+/*--------------------------------------------------------------
+# Recent Blog Posts Section
+--------------------------------------------------------------*/
+.recent-posts .post-box {
+  transition: 0.3s;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-posts .post-box .post-img {
+  overflow: hidden;
+  position: relative;
+}
+
+.recent-posts .post-box .post-img img {
+  transition: 0.5s;
+}
+
+.recent-posts .post-box .meta {
+  margin-top: 15px;
+}
+
+.recent-posts .post-box .meta .post-date {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-primary);
+}
+
+.recent-posts .post-box .meta .post-author {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-secondary);
+}
+
+.recent-posts .post-box .post-title {
+  font-size: 18px;
+  color: var(--color-secondary);
+  font-weight: 700;
+  margin: 15px 0 0 0;
+  position: relative;
+  transition: 0.3s;
+}
+
+.recent-posts .post-box p {
+  margin: 15px 0 0 0;
+  color: rgba(27, 47, 69, 0.7);
+}
+
+.recent-posts .post-box .readmore {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  line-height: 1;
+  transition: 0.3s;
+  margin-top: 15px;
+}
+
+.recent-posts .post-box .readmore i {
+  line-height: 0;
+  margin-left: 4px;
+  font-size: 18px;
+}
+
+.recent-posts .post-box:hover .post-title {
+  color: var(--color-primary);
+}
+
+.recent-posts .post-box:hover .post-img img {
+  transform: scale(1.1);
+}

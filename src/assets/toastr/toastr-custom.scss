@@ -1,0 +1,24 @@
+.toast {
+  min-width: 200px; /* Chiều rộng tối thiểu */
+  max-width: 300px; /* Chiều rộng tối đa */
+  padding: 5px 5px; /* Khoảng cách bên trong, giảm xuống */
+  font-size: 8px; /* Kích thước chữ, giảm xuống */
+  line-height: 1.2; /* Chiều cao dòng, giúp giảm chiều cao tổng thể */
+  white-space: nowrap; /* Ngăn văn bản xuống dòng */
+  overflow: hidden; /* Ẩn phần văn bản tràn */
+  text-overflow: ellipsis; /* Thêm dấu ba chấm khi văn bản tràn */
+}
+.toast-success {
+  background-color: #0e7626; /* Màu nền cho toastr thành công */
+  color: #1d11bc; /* Màu chữ cho toastr thành công */
+}
+
+.toast-error {
+  background-color: #8f252e; /* Màu nền cho toastr lỗi */
+  color: #721c24; /* Màu chữ cho toastr lỗi */
+}
+
+/* Tùy chỉnh thanh tiến trình */
+.toast-progress {
+  height: 3px; /* Chiều cao của thanh tiến trình */
+}

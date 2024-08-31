@@ -1,0 +1,61 @@
+<div class="pagetitle">
+  <h1>Clients</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Dashboard</a></li>
+      <li class="breadcrumb-item">Client</li>
+      <li class="breadcrumb-item active">List category</li>
+    </ol>
+  </nav>
+</div>
+<!-- End Page Title -->
+<div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="d-flex justify-content-end mb-3">
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          (click)="addClient()"
+        >
+          Add new client
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Clients</h5>
+          <!-- Table with stripped rows -->
+          <table class="table datatable">
+            <thead>
+              <tr class="text-center">
+                <th class="col-1">Id</th>
+                <th class="col-3">Name</th>
+                <th class="col-3">Logo</th>
+                <th class="col-1">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let client of clients" class="text-center">
+                <td class="col-1">{{ client.id }}</td>
+                <td class="col-3">{{ client.name }}</td>
+                <td class="col-3">
+                  <img class="img-client" [src]="client.logo" />
+                </td>
+                <td class="col-1">
+                  <i
+                    class="bi bi-pencil-square view-icon"
+                    (click)="editClient(client.id)"
+                  ></i>
+                  <i
+                    class="bi bi-trash trash-icon"
+                    (click)="openDeleteModal(client.id)"
+                  ></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

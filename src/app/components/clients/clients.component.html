@@ -1,0 +1,16 @@
+<section id="clients" class="clients">
+  <div class="container" data-aos="zoom-in">
+    <div class="section-title">
+      <span>CLIENTS</span>
+      <h2>KHÁCH HÀNG</h2>
+    </div>
+    <div class="clients-slider swiper">
+      <div class="swiper-wrapper align-items-center">
+        <div class="swiper-slide" *ngFor="let client of clients">
+          <img [src]="client.logo" class="img-fluid" [alt]="client.name" />
+        </div>
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
+</section>

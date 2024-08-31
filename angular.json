@@ -20,19 +20,40 @@
             "outputPath": "dist/blogapp-fontend",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "src/assets/tinymce",
+                "output": "/tinymce/"
+              }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "node_modules/font-awesome/css/font-awesome.min.css",
+              "node_modules/swiper/swiper-bundle.min.css",
+              "node_modules/typeface-open-sans/index.css",
+              "node_modules/typeface-nunito/index.css",
+              "node_modules/typeface-poppins/index.css",
+              "node_modules/aos/dist/aos.css",
+              "node_modules/font-awesome/css/font-awesome.min.css",
+              "node_modules/ngx-toastr/toastr.css",
+              "src/assets/toastr/toastr-custom.scss",
+              "src/assets/tinymce/skins/ui/oxide/skin.min.css",
+              "src/assets/tinymce/skins/ui/oxide/content.min.css"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/aos/dist/aos.js",
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+              "src/assets/tinymce/tinymce.min.js"
+            ],
             "server": "src/main.server.ts",
             "prerender": true,
             "ssr": {
@@ -84,23 +105,26 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "/tinymce/"
+              }
             ],
-            "styles": [
-              "src/styles.scss"
-            ],
-            "scripts": []
+            "styles": ["src/styles.scss"],
+            "scripts": ["node_modules/tinymce/tinymce.min.js"]
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "9c7efa42-2738-42d9-a72f-1a4e53091c0d"
   }
 }

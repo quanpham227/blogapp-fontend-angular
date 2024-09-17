@@ -27,6 +27,7 @@ export class CategoryAddOrUpdateAdminComponent implements OnInit {
     id: null,
     name: '',
     code: '',
+    description: '',
     postCount: 0,
   };
 

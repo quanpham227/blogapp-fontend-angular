@@ -1,4 +1,10 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Client } from '../../../models/client';
@@ -11,6 +17,9 @@ import { ApiResponse } from '../../../models/response';
 import { stripHtml } from '../../../utils/strip-html'; // Import hàm stripHtml
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InsertClientAdminComponent } from '../insert-client/insert-client.admin.component';
+import { ClientRequest } from '../../../request/client.request';
+import { UpdateClientAdminComponent } from '../update-client/update-client.admin.component';
 
 @Component({
   selector: 'app-client-admin',
@@ -22,21 +31,19 @@ import { FormsModule } from '@angular/forms';
 export class ClientAdminComponent implements OnInit {
   clients: Client[] = [];
   clientIdToDelete: number | null = null;
-  private navigationStateMessage: string | null = null;
   private modalRef: NgbModalRef | null = null;
   private routerSubscription: Subscription | null = null;
+  menuVisible = false;
+  selectedClientId: number | null = null;
 
   constructor(
     private clientService: ClientService,
-    private router: Router,
     private toastr: ToastrService,
     private modalService: NgbModal,
-    @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
 
   ngOnInit() {
     this.getClients();
-    this.checkNavigationState();
   }
 
   ngOnDestroy(): void {
@@ -60,7 +67,28 @@ export class ClientAdminComponent implements OnInit {
   }
 
   addClient() {
-    this.router.navigate(['admin/client-add']);
+    const modalRef = this.modalService.open(InsertClientAdminComponent);
+    modalRef.componentInstance.addClient.subscribe((client: ClientRequest) => {
+      this.clientService.insertClient(client).subscribe({
+        next: (response: ApiResponse<Client>) => {
+          if (response.status === 'OK') {
+            this.toastr.success(response.message);
+            this.getClients();
+          } else {
+            // Xử lý lỗi server trả về
+            this.toastr.error(response.message);
+          }
+        },
+        error: (error: any) => {
+          // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+          const errorMessage =
+            error.error?.message ||
+            'An unexpected error occurred. Please try again.';
+          this.toastr.error(errorMessage);
+          console.error('Error:', error);
+        },
+      });
+    });
   }
 
   openDeleteModal(id: number | null): void {
@@ -111,29 +139,55 @@ export class ClientAdminComponent implements OnInit {
 
   editClient(id: number | null): void {
     if (id !== null) {
-      this.router.navigate(['admin/client-edit', id]);
+      const modalRef = this.modalService.open(UpdateClientAdminComponent);
+      modalRef.componentInstance.clientId = id; // Truyền ID vào modal
+      modalRef.componentInstance.updateClient.subscribe(
+        (client: ClientRequest) => {
+          this.clientService.updateClient(id, client).subscribe({
+            next: (response: ApiResponse<Client>) => {
+              if (response.status === 'OK') {
+                this.toastr.success(response.message);
+                this.getClients();
+              } else {
+                // Xử lý lỗi server trả về
+                this.toastr.error(response.message);
+              }
+            },
+            error: (error: any) => {
+              // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+              const errorMessage =
+                error.error?.message ||
+                'An unexpected error occurred. Please try again.';
+              this.toastr.error(errorMessage);
+              console.error('Error:', error);
+            },
+          });
+        },
+      );
+    } else {
+      console.error('Category ID is null');
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (this.menuVisible) {
+      this.menuVisible = false;
+      this.selectedClientId = null;
+    }
+  }
+  toggleMenu(event: Event, clientId: number | null): void {
+    if (clientId !== null) {
+      if (this.selectedClientId === clientId && this.menuVisible) {
+        this.menuVisible = false;
+        this.selectedClientId = null;
+      } else {
+        this.menuVisible = true;
+        this.selectedClientId = clientId;
+      }
+      event.stopPropagation(); // Ensure no other unwanted events are triggered
     } else {
       console.error('Client ID is null');
     }
-  }
-  private checkNavigationState(): void {
-    this.routerSubscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        const navigation = this.router.getCurrentNavigation();
-        const state = navigation?.extras?.state as NavigationState;
-        if (state?.message) {
-          this.navigationStateMessage = state.message;
-        }
-      }
-    });
-
-    if (this.navigationStateMessage) {
-      this.toastr.success(this.navigationStateMessage);
-      this.navigationStateMessage = null;
-    }
-  }
-  // Hàm để loại bỏ các thẻ HTML khỏi description
-  getPlainText(html: string): string {
-    return stripHtml(html, this.platformId);
   }
 }

@@ -1,0 +1,57 @@
+::ng-deep .modal-dialog {
+  max-width: 50%; // Tăng kích thước modal lên 80% của màn hình
+  margin: auto; // Đảm bảo modal nằm giữa màn hình theo chiều ngang
+  display: flex;
+  align-items: center; // Căn giữa theo chiều dọc
+  min-height: calc(
+    100% - 1rem
+  ); // Đảm bảo modal không vượt quá chiều cao màn hình
+}
+
+::ng-deep .modal-header,
+::ng-deep .modal-footer {
+  border: none; // Loại bỏ đường kẻ ngăn cách
+  border-radius: 0;
+}
+
+::ng-deep .modal-header,
+::ng-deep .modal-body {
+  padding: 1.5rem; // Tăng khoảng cách bên trong các phần của modal
+}
+
+::ng-deep .modal-footer {
+  display: flex;
+  justify-content: flex-end; // Đưa các nút về phía cuối
+}
+
+.modal-title {
+  font-family: Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 100;
+  color: #2b3337;
+}
+.btn-cancel {
+  width: 80px;
+  height: 40px;
+  background-color: #fff;
+  cursor: pointer;
+  border: 1px solid rgb(167, 170, 173);
+}
+
+.btn-add {
+  width: 80px;
+  height: 40px;
+  cursor: pointer;
+  background-color: rgb(34, 112, 177);
+  color: rgb(255, 255, 255);
+  border: 1px solid rgb(167, 170, 173);
+}
+.btn-add:hover {
+  background-color: rgb(3, 93, 157);
+}
+
+.text-danger {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

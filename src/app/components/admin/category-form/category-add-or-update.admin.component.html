@@ -1,11 +1,11 @@
 <div class="pagetitle">
-  <h1>{{ categoryId ? 'Update Category' : 'Add New Category' }}</h1>
+  <h1>{{ categoryId ? "Update Category" : "Add New Category" }}</h1>
   <nav>
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a routerLink="/dashboard">Dashboard</a></li>
       <li class="breadcrumb-item">Category</li>
       <li class="breadcrumb-item active">
-        {{ categoryId ? 'Update Category' : 'Add Category' }}
+        {{ categoryId ? "Update Category" : "Add Category" }}
       </li>
     </ol>
   </nav>
@@ -18,7 +18,7 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">
-            {{ categoryId ? 'Update Category' : 'Add New Category' }}
+            {{ categoryId ? "Update Category" : "Add New Category" }}
           </h5>
           <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
             <div class="row mb-3">
@@ -65,7 +65,7 @@
                   class="btn btn-primary"
                   [disabled]="categoryForm.invalid"
                 >
-                  {{ categoryId ? 'Update' : 'Save' }}
+                  {{ categoryId ? "Update" : "Save" }}
                 </button>
               </div>
             </div>

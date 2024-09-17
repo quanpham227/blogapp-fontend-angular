@@ -97,11 +97,8 @@ export class HeaderComponent implements OnInit {
 
   handleItemClick(index: number): void {
     if (index === 1) {
-      this.userService.removeUserFromLocalStorage();
-      this.tokenService.removeToken();
-      this.userResponse = this.userService.getFromLocalStorage();
-    }
-    if (index === 0) {
+      this.userService.logout();
+    } else if (index === 0) {
       this.router.navigate(['/user-profile']);
     }
     this.isPopoverOpen = false; // Close the popover after clicking an item

@@ -81,7 +81,7 @@
   margin: 0;
 }
 
-.blog .blog-details .meta-top ul li+li {
+.blog .blog-details .meta-top ul li + li {
   padding-left: 20px;
 }
 
@@ -140,7 +140,7 @@
   display: inline-block;
 }
 
-.blog .blog-details .meta-bottom .tags li+li::before {
+.blog .blog-details .meta-bottom .tags li + li::before {
   padding-right: 6px;
   color: var(--color-default);
   content: ",";
@@ -187,8 +187,6 @@
   color: rgba(var(--color-gray-rgb), 0.8);
   margin-bottom: 0;
 }
-
-
 
 /*--------------------------------------------------------------
 # Blog Comments

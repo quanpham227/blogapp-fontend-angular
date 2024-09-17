@@ -1,4 +1,141 @@
-.img-client {
-  width: 100px;
-  height: 35px;
+.admin.client-page {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+
+  .title {
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  .input-wrapper {
+    display: flex;
+    width: 100%;
+    border: 1px solid #d4d4d4;
+    border-radius: 5px;
+    margin-bottom: 0px;
+
+    i {
+      flex: 4%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: none;
+    }
+
+    .search {
+      flex: 78%;
+      height: 53px; /* Chiều cao của input */
+      border: none;
+      outline: none;
+    }
+
+    .button-container {
+      flex: 17%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #ffff;
+
+      .custom-btn {
+        height: 28px;
+        border: none;
+        background-color: rgb(18, 94, 150);
+        color: #ddd;
+      }
+    }
+  }
+
+  .list-category {
+    margin-top: -18px;
+
+    .list-category-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 55px;
+      padding: 0; /* Loại bỏ khoảng cách bên trong */
+      border-bottom: 1px solid #ddd;
+      border-left: 1px solid #ddd; /* Thêm đường kẻ dưới mỗi danh mục */
+      border-right: 1px solid #ddd; /* Thêm đường kẻ dưới mỗi danh mục */
+
+      .left-icon {
+        flex: 0 0 auto; /* Không co giãn */
+        width: 55px; /* Điều chỉnh kích thước */
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: rgb(140, 143, 148);
+      }
+
+      .right-icon {
+        position: relative; /* Để định vị menu tùy chọn */
+        flex: 0 0 auto; /* Không co giãn */
+        width: 70px; /* Điều chỉnh kích thước */
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+
+        .options-menu {
+          display: block;
+          position: absolute;
+          top: 100%; /* Đặt menu dưới biểu tượng ba dấu chấm */
+          right: 0;
+          background-color: #fff;
+          border: 1px solid #ddd;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+          z-index: 1000;
+          width: 200px; /* Điều chỉnh độ rộng của menu */
+          padding: 0; /* Thêm khoảng cách bên trong menu */
+
+          &::before {
+            content: "";
+            position: absolute;
+            top: -10px; /* Đặt mũi nhọn phía trên menu */
+            right: 10px; /* Điều chỉnh vị trí của mũi nhọn */
+            border-width: 0 10px 10px 10px;
+            border-style: solid;
+            border-color: transparent transparent #ddd transparent;
+          }
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: -9px; /* Đặt mũi nhọn phía trên menu */
+            right: 11px; /* Điều chỉnh vị trí của mũi nhọn */
+            border-width: 0 9px 9px 9px;
+            border-style: solid;
+            border-color: transparent transparent #fff transparent;
+          }
+
+          .option-item {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+
+            i {
+              margin-right: 5px;
+            }
+
+            &:hover {
+              background-color: rgb(18, 94, 150);
+              color: #fff;
+            }
+          }
+        }
+      }
+
+      .category-name {
+        flex: 1; /* Chiếm toàn bộ không gian còn lại */
+        height: 100%;
+        margin: 0; /* Loại bỏ khoảng cách mặc định của thẻ p */
+        text-align: left; /* Căn trái */
+        display: flex; /* Sử dụng Flexbox */
+        align-items: center; /* Căn giữa theo chiều dọc */
+      }
+    }
+  }
 }

@@ -1,13 +1,14 @@
 import { LoginDTO } from './../dtos/user/login.dto';
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { RegisterDTO } from '../../app/dtos/user/register.dto';
 import { environment } from '../../environments/environment';
 import { UserResponse } from '../..//app/responses/user/user.response';
 import { UpdateUserDTO } from '../../app/dtos/user/update.user';
-import { ApiResponse } from '../../app/models/response';
 import { DOCUMENT } from '@angular/common';
+import { TokenService } from '../services/token.service'; // Thêm TokenService
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +17,7 @@ export class UserService {
   private apiRegister = `${environment.apiBaseUrl}/users/register`;
   private apiLogin = `${environment.apiBaseUrl}/users/login`;
   private apiUserDetail = `${environment.apiBaseUrl}/users/details`;
+  private apiRefreshToken = `${environment.apiBaseUrl}/users`;
   localStorage?: Storage;
 
   private apiConfig = {
@@ -29,6 +31,8 @@ export class UserService {
 
   constructor(
     private http: HttpClient,
+    private tokenService: TokenService,
+    private router: Router,
     @Inject(DOCUMENT) private document: Document,
   ) {
     this.localStorage = this.document.defaultView?.localStorage;
@@ -39,7 +43,30 @@ export class UserService {
   }
 
   login(loginDTO: LoginDTO): Observable<any> {
-    return this.http.post(this.apiLogin, loginDTO, this.apiConfig);
+    return this.http.post(this.apiLogin, loginDTO, this.apiConfig).pipe(
+      tap((response: any) => {
+        const { token, refresh_token } = response.data;
+
+        if (token && refresh_token) {
+          // Lưu access_token và refresh_token vào localStorage
+          this.tokenService.setToken(token);
+          this.tokenService.setRefreshToken(refresh_token);
+          console.log('Tokens saved to localStorage.');
+        }
+      }),
+    );
+  }
+
+  // Phương thức refresh token
+  refreshToken(): Observable<any> {
+    const refresh_token = this.tokenService.getRefreshToken();
+    return this.http.post(
+      `${this.apiRefreshToken}/refreshToken`,
+      { refresh_token: refresh_token }, // Đảm bảo tên trường là refresh_token
+      {
+        headers: this.createHeaders(),
+      },
+    );
   }
   getUserDetail(token: String) {
     return this.http.post(this.apiUserDetail, {
@@ -87,7 +114,7 @@ export class UserService {
     try {
       // Kiểm tra sự tồn tại của localStorage
       if (!this.localStorage) {
-        console.error('localStorage is not available.');
+        //console.error('localStorage is not available.');
         return null;
       }
       //get user from local storage
@@ -106,7 +133,6 @@ export class UserService {
   }
 
   removeUserFromLocalStorage(): void {
-    debugger;
     try {
       // Kiểm tra sự tồn tại của localStorage
       if (!this.localStorage) {
@@ -121,5 +147,14 @@ export class UserService {
       console.error('Error removing user data from local storage:', error);
       // Handle the error as needed
     }
+  }
+
+  logout() {
+    this.removeUserFromLocalStorage();
+    this.tokenService.removeToken();
+    this.tokenService.removeRefreshToken();
+    this.router.navigate(['/login']).then(() => {
+      console.log('User has been logged out.');
+    });
   }
 }

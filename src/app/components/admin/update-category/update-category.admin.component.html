@@ -1,0 +1,66 @@
+<div class="modal-header">
+  <h4 class="modal-title">Cập nhật chuyên mục</h4>
+</div>
+<div class="modal-body">
+  <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <input
+        type="text"
+        id="name"
+        class="form-control"
+        placeholder="Tên mục"
+        formControlName="name"
+      />
+      <div
+        *ngIf="
+          categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid
+        "
+        class="text-danger"
+      >
+        <div *ngIf="categoryForm.get('name')?.errors?.['required']">
+          Tên mục là bắt buộc.
+        </div>
+        <div *ngIf="categoryForm.get('name')?.errors?.['minlength']">
+          Tên mục phải có ít nhất 3 ký tự.
+        </div>
+        <div *ngIf="categoryForm.get('name')?.errors?.['maxlength']">
+          Tên mục không được vượt quá 50 ký tự.
+        </div>
+      </div>
+    </div>
+    <div class="form-group mt-5">
+      <label for="description">Mô tả</label>
+      <textarea
+        id="description"
+        class="form-control description"
+        formControlName="description"
+        rows="3"
+      ></textarea>
+      <div
+        *ngIf="
+          categoryForm.get('description')?.touched &&
+          categoryForm.get('description')?.invalid
+        "
+        class="text-danger"
+      >
+        <div *ngIf="categoryForm.get('description')?.errors?.['required']">
+          Mô tả là bắt buộc.
+        </div>
+        <div *ngIf="categoryForm.get('description')?.errors?.['minlength']">
+          Mô tả phải có ít nhất 3 ký tự.
+        </div>
+        <div *ngIf="categoryForm.get('description')?.errors?.['maxlength']">
+          Mô tả không được vượt quá 255 ký tự.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="activeModal.dismiss()">
+        Huỷ
+      </button>
+      <button type="submit" class="btn-add" [disabled]="categoryForm.invalid">
+        Cập nhật
+      </button>
+    </div>
+  </form>
+</div>

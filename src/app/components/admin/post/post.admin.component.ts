@@ -17,7 +17,7 @@ export class PostAdminComponent implements OnInit {
   posts: Post[] = [];
   categories: Category[] = [];
   selectedCategoryId: number = 0;
-  currentPage: number = 0;
+  currentPage: number = 1; // Sửa đổi để bắt đầu từ trang 1
   itemsPerPage: number = 12;
   pages: number[] = [];
   totalPages: number = 0;
@@ -35,11 +35,11 @@ export class PostAdminComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentPage =
-      Number(this.localStorage?.getItem('currentProductAdminPage')) || 0;
+      Number(this.localStorage?.getItem('currentProductAdminPage')) || 1;
     this.getPosts(
       this.keyword,
       this.selectedCategoryId,
-      this.currentPage,
+      this.currentPage - 1,
       this.itemsPerPage,
     );
   }
@@ -49,57 +49,48 @@ export class PostAdminComponent implements OnInit {
     page: number,
     limit: number,
   ) {
-    debugger;
     this.postService
       .getPosts(keyword, selectedCategoryId, page, limit)
       .subscribe({
         next: (response: any) => {
-          debugger;
-          this.posts = response.posts;
-          console.log(response.posts);
-          this.totalPages = response.totalPages;
+          this.posts = response.data.posts;
+          this.totalPages = response.data.totalPages;
           this.visiblePages = this.generateVisiblePageArray(
             this.currentPage,
             this.totalPages,
           );
         },
-        complete: () => {
-          debugger;
-        },
         error: (error: any) => {
-          debugger;
           console.error('Error fetching posts:', error);
         },
       });
   }
+
   onPageChange(page: number) {
-    debugger;
-
-    this.currentPage = page < 0 ? 0 : page;
-    this.localStorage?.setItem(
-      'currentProductAdminPage',
-      String(this.currentPage),
-    );
-
-    this.getPosts(
-      this.keyword,
-      this.selectedCategoryId,
-      this.currentPage,
-      this.itemsPerPage,
-    );
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.getPosts(
+        this.keyword,
+        this.selectedCategoryId,
+        this.currentPage - 1,
+        this.itemsPerPage,
+      );
+    }
   }
 
   generateVisiblePageArray(currentPage: number, totalPages: number): number[] {
-    const maxVisiblePages = 5;
+    const maxVisiblePages = 5; // Số trang tối đa để hiển thị
     const halfVisiblePages = Math.floor(maxVisiblePages / 2);
 
     let startPage = Math.max(currentPage - halfVisiblePages, 1);
     let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
+    // Điều chỉnh khi có ít trang hơn maxVisiblePages
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(endPage - maxVisiblePages + 1, 1);
     }
 
+    // Chỉ trả về các trang trong khoảng hợp lệ
     return new Array(endPage - startPage + 1)
       .fill(0)
       .map((_, index) => startPage + index);

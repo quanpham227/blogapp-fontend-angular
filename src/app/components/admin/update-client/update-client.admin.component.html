@@ -1,0 +1,103 @@
+<div class="modal-header">
+  <h4 class="modal-title">Cập nhật Khách Hàng</h4>
+</div>
+<div class="modal-body">
+  <form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <input
+        type="text"
+        id="name"
+        class="form-control"
+        placeholder="Tên mục mới"
+        formControlName="name"
+      />
+      <div
+        *ngIf="
+          clientForm.get('name')?.touched && clientForm.get('name')?.invalid
+        "
+        class="text-danger"
+      >
+        <div *ngIf="clientForm.get('name')?.errors?.['required']">
+          Tên mục là bắt buộc.
+        </div>
+        <div *ngIf="clientForm.get('name')?.errors?.['minlength']">
+          Tên khách hàng phải có ít nhất 3 ký tự.
+        </div>
+        <div *ngIf="clientForm.get('name')?.errors?.['maxlength']">
+          Tên khách hàng không được vượt quá 50 ký tự.
+        </div>
+      </div>
+    </div>
+    <div class="form-group mt-3">
+      <label for="description">Mô tả</label>
+      <textarea
+        id="description"
+        class="form-control description"
+        formControlName="description"
+        rows="3"
+      ></textarea>
+      <div
+        *ngIf="
+          clientForm.get('description')?.touched &&
+          clientForm.get('description')?.invalid
+        "
+        class="text-danger"
+      >
+        <div *ngIf="clientForm.get('description')?.errors?.['required']">
+          Mô tả là bắt buộc.
+        </div>
+        <div *ngIf="clientForm.get('description')?.errors?.['minlength']">
+          Mô tả phải có ít nhất 3 ký tự.
+        </div>
+        <div *ngIf="clientForm.get('description')?.errors?.['maxlength']">
+          Mô tả không được vượt quá 255 ký tự.
+        </div>
+      </div>
+    </div>
+    <div class="form-group mt-3">
+      <div class="logo-container">
+        <!-- Sử dụng flexbox để căn chỉnh -->
+        <div class="logo-text">
+          <label class="" for="logo">Logo</label>
+        </div>
+        <!-- Thêm khối chứa chữ "Logo" -->
+        <div class="image-container">
+          <img
+            *ngIf="clientForm.get('logo')?.value; else emptyImage"
+            [src]="clientForm.get('logo')?.value"
+            alt="Logo"
+            class="img-thumbnail"
+          />
+          <ng-template #emptyImage>
+            <div class="empty-image img-thumbnail"></div>
+          </ng-template>
+          <div class="image-actions">
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              (click)="openLogoModal()"
+            >
+              Select Logo
+            </button>
+            <button
+              *ngIf="clientForm.get('logo')?.value"
+              type="button"
+              class="btn btn-sm btn-danger"
+              (click)="removeLogo()"
+            >
+              Remove Logo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="activeModal.dismiss()">
+        Huỷ
+      </button>
+      <button type="submit" class="btn-add" [disabled]="clientForm.invalid">
+        Cập nhật
+      </button>
+    </div>
+  </form>
+</div>

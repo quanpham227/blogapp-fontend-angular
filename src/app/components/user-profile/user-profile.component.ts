@@ -53,17 +53,16 @@ export class UserProfileComponent implements OnInit {
     this.token = this.tokenService.getToken();
     this.userService.getUserDetail(this.token).subscribe({
       next: (response: any) => {
-        debugger;
         this.userResponse = {
-          id: response.id,
-          fullname: response.fullname,
-          email: response.email,
-          phone_number: response.phone_number,
-          profile_image: response.profile_image,
-          is_active: response.is_active,
-          facebook_account_id: response.facebook_account_id,
-          google_account_id: response.google_account_id,
-          role: response.role,
+          id: response.data.id,
+          fullname: response.data.fullname,
+          email: response.data.email,
+          phone_number: response.data.phone_number,
+          profile_image: response.data.profile_image,
+          is_active: response.data.is_active,
+          facebook_account_id: response.data.facebook_account_id,
+          google_account_id: response.data.google_account_id,
+          role: response.data.role,
         };
         this.userProfileForm.patchValue({
           fullname: this.userResponse?.fullname ?? '',

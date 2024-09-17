@@ -27,13 +27,13 @@ export class PostService {
     return this.http.get<Post[]>(this.apiGetPots, { params });
   }
   getDetailPost(slug: string): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(
-      `${environment.apiBaseUrl}/posts/${slug}`,
-    );
+    return this.http.get<ApiResponse<Post>>(`${this.apiGetPots}/${slug}`);
   }
-  getRecentPosts(limit: number): Observable<Post[]> {
-    const params = new HttpParams().set('limit', limit.toString());
-    return this.http.get<Post[]>(`${environment.apiBaseUrl}/posts/recent`, {
+  getRecentPosts(page: number, limit: number): Observable<Post[]> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    return this.http.get<Post[]>(`${this.apiGetPots}/recent`, {
       params,
     });
   }

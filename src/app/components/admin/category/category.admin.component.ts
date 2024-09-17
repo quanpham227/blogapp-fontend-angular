@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CategoryService } from '../../../services/category.service';
 import { ApiResponse } from '../../../models/response';
 import { Category } from '../../../models/category';
@@ -10,6 +10,9 @@ import { ConfirmModalComponent } from '../shared/components/confirm-modal/confir
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InsertCategoryAdminComponent } from '../insert-category/insert-category.admin.component';
+import { CategoryRequest } from '../../../request/category.request';
+import { UpdateCategoryAdminComponent } from '../update-category/update-category.admin.component';
 
 @Component({
   selector: 'app-category-admin',
@@ -24,6 +27,8 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
   private navigationStateMessage: string | null = null;
   private modalRef: NgbModalRef | null = null;
   private routerSubscription: Subscription | null = null;
+  menuVisible = false;
+  selectedCategoryId: number | null = null;
 
   constructor(
     private categoryService: CategoryService,
@@ -56,7 +61,31 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
   }
 
   addCategory(): void {
-    this.router.navigate(['admin/category-add']);
+    const modalRef = this.modalService.open(InsertCategoryAdminComponent);
+    modalRef.componentInstance.addCategory.subscribe(
+      (category: CategoryRequest) => {
+        // Gọi phương thức insertCategory từ CategoryService để thêm chuyên mục mới
+        this.categoryService.insertCategory(category).subscribe({
+          next: (response: ApiResponse<Category>) => {
+            if (response.status === 'OK') {
+              this.toastr.success(response.message);
+              this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
+            } else {
+              // Xử lý lỗi server trả về
+              this.toastr.error(response.message);
+            }
+          },
+          error: (error: any) => {
+            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+            const errorMessage =
+              error.error?.message ||
+              'An unexpected error occurred. Please try again.';
+            this.toastr.error(errorMessage);
+            console.error('Error:', error);
+          },
+        });
+      },
+    );
   }
 
   openDeleteModal(id: number | null): void {
@@ -107,7 +136,32 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
 
   editCategory(id: number | null): void {
     if (id !== null) {
-      this.router.navigate(['admin/category-edit', id]);
+      const modalRef = this.modalService.open(UpdateCategoryAdminComponent);
+      modalRef.componentInstance.categoryId = id; // Truyền ID vào modal
+      modalRef.componentInstance.updateCategory.subscribe(
+        (category: CategoryRequest) => {
+          // Gọi phương thức updateCategory từ CategoryService để cập nhật chuyên mục
+          this.categoryService.updateCategory(id, category).subscribe({
+            next: (response: ApiResponse<Category>) => {
+              if (response.status === 'OK') {
+                this.toastr.success(response.message);
+                this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
+              } else {
+                // Xử lý lỗi server trả về
+                this.toastr.error(response.message);
+              }
+            },
+            error: (error: any) => {
+              // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+              const errorMessage =
+                error.error?.message ||
+                'An unexpected error occurred. Please try again.';
+              this.toastr.error(errorMessage);
+              console.error('Error:', error);
+            },
+          });
+        },
+      );
     } else {
       console.error('Category ID is null');
     }
@@ -127,6 +181,27 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
     if (this.navigationStateMessage) {
       this.toastr.success(this.navigationStateMessage);
       this.navigationStateMessage = null;
+    }
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (this.menuVisible) {
+      this.menuVisible = false;
+      this.selectedCategoryId = null;
+    }
+  }
+  toggleMenu(event: Event, categoryId: number | null): void {
+    if (categoryId !== null) {
+      if (this.selectedCategoryId === categoryId && this.menuVisible) {
+        this.menuVisible = false;
+        this.selectedCategoryId = null;
+      } else {
+        this.menuVisible = true;
+        this.selectedCategoryId = categoryId;
+      }
+      event.stopPropagation(); // Ensure no other unwanted events are triggered
+    } else {
+      console.error('Category ID is null');
     }
   }
 }

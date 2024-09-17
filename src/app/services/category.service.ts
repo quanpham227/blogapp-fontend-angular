@@ -4,6 +4,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Category } from '../models/category';
+import { CategoryRequest } from '../request/category.request';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class CategoryService {
     return this.http.get<ApiResponse<Category[]>>(this.apiCategories);
   }
 
-  insertCategory(category: Category): Observable<any> {
+  insertCategory(category: CategoryRequest): Observable<any> {
     return this.http.post(this.apiCategories, category);
   }
 
@@ -29,7 +30,7 @@ export class CategoryService {
 
   updateCategory(
     id: number,
-    category: Category,
+    category: CategoryRequest,
   ): Observable<ApiResponse<Category>> {
     return this.http.put<ApiResponse<Category>>(
       `${this.apiCategories}/${id}`,

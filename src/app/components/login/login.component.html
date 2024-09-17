@@ -23,14 +23,19 @@
           <div class="form-group password-field">
             <label for="password">Mật khẩu</label>
             <input
-              type="password"
+              [type]="passwordVisible ? 'text' : 'password'"
               [(ngModel)]="password"
               (input)="onPasswordChange($event)"
               placeholder="Ít nhất 3 ký tự"
               class="form-control"
               id="password"
             />
-            <i class="password-toggle fas fa-eye-slash"></i>
+            <i
+              class="password-toggle fas"
+              [ngClass]="passwordVisible ? 'fa-eye' : 'fa-eye-slash'"
+              (click)="togglePasswordVisibility()"
+            ></i>
+
             <div class="divider-nospace"></div>
             <p
               class="text-danger"

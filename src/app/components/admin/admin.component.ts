@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { UserResponse } from '../../responses/user/user.response';
 import { UserService } from '../../services/user.service';
 import { TokenService } from '../../services/token.service';
@@ -17,6 +17,7 @@ export class AdminComponent implements OnInit {
   userResponse?: UserResponse | null;
   activeComponent: string = ''; // Thêm thuộc tính này
   localStorage?: Storage;
+  isSidebarVisible: boolean = true;
 
   constructor(
     private userService: UserService,
@@ -38,14 +39,14 @@ export class AdminComponent implements OnInit {
   }
 
   logout() {
-    this.userService.removeUserFromLocalStorage();
-    this.tokenService.removeToken();
-    this.userResponse = this.userService.getFromLocalStorage();
-    this.router.navigate(['/login']);
+    this.userService.logout();
   }
 
   showAdminComponent(componentName: string): void {
     this.activeComponent = componentName;
     this.router.navigate([`/admin/${componentName}`]);
+  }
+  toggleSidebar() {
+    this.isSidebarVisible = !this.isSidebarVisible;
   }
 }

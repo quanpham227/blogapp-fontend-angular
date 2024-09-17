@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Client } from '../../app/models/client';
+import { ClientRequest } from '../request/client.request';
 @Injectable({
   providedIn: 'root',
 })
@@ -15,7 +16,7 @@ export class ClientService {
     return this.http.get<ApiResponse<Client[]>>(this.apiClients);
   }
 
-  insertClient(client: Client): Observable<ApiResponse<Client>> {
+  insertClient(client: ClientRequest): Observable<ApiResponse<Client>> {
     return this.http.post<ApiResponse<Client>>(this.apiClients, client);
   }
 
@@ -26,7 +27,10 @@ export class ClientService {
     return this.http.get<ApiResponse<Client>>(`${this.apiClients}/${id}`);
   }
 
-  updateClient(id: number, client: Client): Observable<ApiResponse<Client>> {
+  updateClient(
+    id: number,
+    client: ClientRequest,
+  ): Observable<ApiResponse<Client>> {
     return this.http.put<ApiResponse<Client>>(
       `${this.apiClients}/${id}`,
       client,

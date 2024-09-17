@@ -21,16 +21,16 @@ export class RecentPostsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.getRecentPosts(4);
+    this.getRecentPosts(0, 4);
   }
 
-  getRecentPosts(limit: number) {
-    this.postService.getRecentPosts(limit).subscribe({
+  getRecentPosts(page: number, limit: number) {
+    this.postService.getRecentPosts(page, limit).subscribe({
       next: (response: any) => {
         debugger;
 
-        this.recentPosts = response.posts;
-        console.log('recent post', response.posts);
+        this.recentPosts = response.data.posts;
+        console.log('recent post', response.data.posts);
       },
       complete: () => {},
       error: (error: any) => {

@@ -7,6 +7,8 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 })
 export class TokenService {
   private readonly TOKEN_KEY = 'access_token';
+  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
+
   private jwtHelperService = new JwtHelperService();
   localStorage?: Storage;
 
@@ -20,6 +22,17 @@ export class TokenService {
   setToken(token: string): void {
     this.localStorage?.setItem(this.TOKEN_KEY, token);
   }
+
+  // Getter cho refresh token
+  getRefreshToken(): string {
+    return this.localStorage?.getItem(this.REFRESH_TOKEN_KEY) ?? '';
+  }
+
+  // Setter cho refresh token
+  setRefreshToken(refreshToken: string): void {
+    this.localStorage?.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+  }
+
   getUserId(): number {
     let token = this.getToken();
     if (!token) {
@@ -32,10 +45,15 @@ export class TokenService {
   removeToken(): void {
     this.localStorage?.removeItem(this.TOKEN_KEY);
   }
+  removeRefreshToken(): void {
+    this.localStorage?.removeItem(this.REFRESH_TOKEN_KEY);
+  }
+
   isTokenExpired(): boolean {
-    if (this.getToken() == null) {
-      return false;
+    const token = this.getToken();
+    if (!token) {
+      return true; // Nếu không có token, coi như hết hạn
     }
-    return this.jwtHelperService.isTokenExpired(this.getToken()!);
+    return this.jwtHelperService.isTokenExpired(token); // Trả về true nếu token hết hạn
   }
 }

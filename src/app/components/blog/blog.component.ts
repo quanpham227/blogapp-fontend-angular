@@ -41,7 +41,7 @@ export class BlogComponent implements OnInit {
       this.itemsPerPage,
     );
     this.getCategories();
-    this.getRecentPosts(5); // Fetch 5 recent posts
+    this.getRecentPosts(0, 5); // Fetch 5 recent posts
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -82,11 +82,11 @@ export class BlogComponent implements OnInit {
       .subscribe({
         next: (response: any) => {
           debugger;
-          this.posts = response.posts;
+          this.posts = response.data.posts;
           console.log(response.posts);
-          this.totalPages = response.totalPages;
+          this.totalPages = response.data.totalPages;
           this.visiblePages = this.generateVisiblePageArray(
-            this.currentPage,
+            page + 1,
             this.totalPages,
           );
         },
@@ -100,13 +100,13 @@ export class BlogComponent implements OnInit {
       });
   }
 
-  getRecentPosts(limit: number) {
-    this.postService.getRecentPosts(limit).subscribe({
+  getRecentPosts(page: number, limit: number) {
+    this.postService.getRecentPosts(page, limit).subscribe({
       next: (response: any) => {
         debugger;
 
-        this.recentPosts = response.posts;
-        console.log('recent post', response.posts);
+        this.recentPosts = response.data.posts;
+        console.log('recent post', response.data.posts);
       },
       complete: () => {},
       error: (error: any) => {
@@ -116,27 +116,29 @@ export class BlogComponent implements OnInit {
   }
 
   onPageChange(page: number) {
-    debugger;
-    this.currentPage = page;
-    this.getPosts(
-      this.keyword,
-      this.selectedCategoryId,
-      this.currentPage,
-      this.itemsPerPage,
-    );
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.getPosts(
+        this.keyword,
+        this.selectedCategoryId,
+        this.currentPage - 1,
+        this.itemsPerPage,
+      );
+    }
   }
 
   generateVisiblePageArray(currentPage: number, totalPages: number): number[] {
-    const maxVisiblePages = 5;
+    const maxVisiblePages = 5; // Số trang tối đa để hiển thị
     const halfVisiblePages = Math.floor(maxVisiblePages / 2);
 
     let startPage = Math.max(currentPage - halfVisiblePages, 1);
     let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
+    // Điều chỉnh khi có ít trang hơn maxVisiblePages
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(endPage - maxVisiblePages + 1, 1);
     }
-
+    // Chỉ trả về các trang trong khoảng hợp lệ
     return new Array(endPage - startPage + 1)
       .fill(0)
       .map((_, index) => startPage + index);

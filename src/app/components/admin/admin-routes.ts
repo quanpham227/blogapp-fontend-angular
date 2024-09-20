@@ -10,6 +10,8 @@ import { ContactAdminComponent } from './contact/contact.admin.component';
 import { NotfoundAdminComponent } from './notfound/notfound.admin.component';
 import { CategoryAddOrUpdateAdminComponent } from './category-form/category-add-or-update.admin.component';
 import { ClientAddOrUpdateAdminComponent } from './client-form/client-add-or-update.admin.component';
+import { MediaAdminComponent } from './media/media.admin.component';
+import { EmailAdminComponent } from './email/email.admin.component';
 
 export const adminRoutes: Routes = [
   {
@@ -36,6 +38,14 @@ export const adminRoutes: Routes = [
       {
         path: 'slides',
         component: SlideAdminComponent,
+      },
+      {
+        path: 'media',
+        component: MediaAdminComponent,
+      },
+      {
+        path: 'emails',
+        component: EmailAdminComponent,
       },
       {
         path: 'profile',

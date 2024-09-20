@@ -1,0 +1,19 @@
+.admin-email-page {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+
+  .title {
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  .content {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    .email-illustration {
+      max-width: 250px;
+      margin-bottom: 20px;
+    }
+  }
+}

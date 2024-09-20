@@ -26,6 +26,7 @@ export class ImageSelectModalAdminComponent implements OnInit {
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
+  selectedObjectType: string = '';
   uploadProgress: number = 0;
   uploadingImage: boolean = false;
   uploadSuccess: boolean = false;
@@ -42,26 +43,43 @@ export class ImageSelectModalAdminComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadImages(this.keyword, this.currentPage, this.itemsPerPage);
+    this.loadImages(
+      this.keyword,
+      this.selectedObjectType,
+      this.currentPage,
+      this.itemsPerPage,
+    );
   }
 
-  loadImages(keyword: string, page: number, limit: number) {
-    this.imageService.getImages(keyword, page, limit).subscribe({
-      next: (response: any) => {
-        this.images = [...this.images, ...response.images]; // Giữ nguyên các hình ảnh trước đó và thêm hình ảnh mới
-        this.totalPages = response.totalPages;
-        this.currentPage++;
-        if (this.currentPage >= this.totalPages) {
-          this.allImagesLoaded = true;
-        }
-      },
-      error: (error: any) => {
-        console.error('Error fetching posts:', error);
-      },
-    });
+  loadImages(
+    keyword: string,
+    selectedObjectType: string,
+    page: number,
+    limit: number,
+  ) {
+    this.imageService
+      .getImages(keyword, selectedObjectType, page, limit)
+      .subscribe({
+        next: (response: any) => {
+          this.images = [...this.images, ...response.images]; // Giữ nguyên các hình ảnh trước đó và thêm hình ảnh mới
+          this.totalPages = response.totalPages;
+          this.currentPage++;
+          if (this.currentPage >= this.totalPages) {
+            this.allImagesLoaded = true;
+          }
+        },
+        error: (error: any) => {
+          console.error('Error fetching posts:', error);
+        },
+      });
   }
   loadMoreImages(): void {
-    this.loadImages(this.keyword, this.currentPage, this.itemsPerPage);
+    this.loadImages(
+      this.keyword,
+      this.selectedObjectType,
+      this.currentPage,
+      this.itemsPerPage,
+    );
   }
   onFileChange(event: any): void {
     const file = event.target.files[0];

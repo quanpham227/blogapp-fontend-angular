@@ -18,6 +18,14 @@ export class AdminComponent implements OnInit {
   activeComponent: string = ''; // Thêm thuộc tính này
   localStorage?: Storage;
   isSidebarVisible: boolean = true;
+  navStates: { [key: string]: boolean } = {
+    postNav: false,
+    userNav: false,
+    interfaceNav: false,
+    settingNav: false,
+    // Thêm các nav khác nếu cần
+  };
+  isMenuCollapsed: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -48,5 +56,23 @@ export class AdminComponent implements OnInit {
   }
   toggleSidebar() {
     this.isSidebarVisible = !this.isSidebarVisible;
+  }
+  toggleNav(nav: string, firstSubComponent: string) {
+    this.navStates[nav] = !this.navStates[nav];
+    if (this.navStates[nav]) {
+      this.activeComponent = firstSubComponent;
+      this.showAdminComponent(firstSubComponent);
+    }
+  }
+  toggleMenuCollapse() {
+    this.isMenuCollapsed = !this.isMenuCollapsed;
+    if (this.isMenuCollapsed) {
+      // Đóng tất cả các menu con khi sidebar thu nhỏ
+      for (let nav in this.navStates) {
+        if (this.navStates.hasOwnProperty(nav)) {
+          this.navStates[nav] = false;
+        }
+      }
+    }
   }
 }

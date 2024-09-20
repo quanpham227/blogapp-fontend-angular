@@ -8,4 +8,8 @@ export interface Image {
   object_type: string;
   file_type: string;
   file_size: number;
+  is_used: boolean;
+  usage_count: number;
+  isTemporary?: boolean; // Thuộc tính tùy chọn để đánh dấu hình ảnh tạm thời
+  isUploading?: boolean; // Thuộc tính tùy chọn để đánh dấu hình ảnh đang được tải lên
 }

@@ -1,0 +1,475 @@
+.media {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+
+  .title {
+    font-size: 20px;
+    font-weight: 400;
+  }
+}
+
+.media-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 2px solid #dee2e6;
+  height: 50px; /* Đặt chiều cao cố định */
+  gap: 0; /* Đảm bảo không có khoảng cách thừa giữa các phần */
+  position: relative;
+
+  .media-source-dropdown {
+    height: 100%;
+    width: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0; /* Loại bỏ khoảng cách thừa */
+
+    .btn {
+      border-radius: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      background-color: #fff;
+      border: none;
+      color: #818080;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .dropdown-menu :hover {
+      background-color: rgb(34, 112, 177);
+      color: #ffffff;
+    }
+  }
+
+  .media-nav-search-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 65%; /* Chiều rộng của toàn bộ khối */
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    position: relative;
+    border-right: 1px solid #dee2e6;
+
+    .media-categories-nav {
+      width: 85%;
+      .nav-pills {
+        display: flex;
+        align-items: center;
+        height: 100%;
+
+        .nav-link {
+          position: relative;
+          border-radius: 0;
+          transition: background-color 0.3s;
+          color: rgb(0, 103, 173);
+          padding: 10px 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+
+          &:hover {
+            background-color: rgb(215, 224, 230);
+          }
+
+          &.active {
+            background-color: rgb(215, 224, 230);
+            color: #0e0e0f;
+            border-bottom: 2px solid #000;
+          }
+        }
+      }
+    }
+
+    .media-search-icon {
+      font-size: 1.5rem;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+      margin-right: 5px;
+    }
+
+    .media-search-input {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: white;
+      z-index: 1;
+      border: 1px solid #dee2e6;
+      padding: 0;
+      border-radius: 0;
+      width: 100%; /* Chiếm toàn bộ chiều rộng */
+      box-sizing: border-box;
+
+      input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        padding: 0 10px;
+        outline: none;
+      }
+    }
+
+    &.active .media-search-input {
+      display: block;
+      left: 0;
+      right: 0;
+      width: 100%; /* Đảm bảo input chiếm toàn bộ chiều rộng của khối */
+    }
+  }
+
+  .media-storage-info {
+    height: 100%;
+    width: 25%; /* Điều chỉnh kích thước */
+
+    .plan-storage__storage-label {
+      position: relative;
+      text-align: center;
+      width: 100%;
+      padding-top: 10px; /* Đẩy chữ và đường kẻ xuống */
+      font-size: 12px; /* Điều chỉnh cỡ chữ nhỏ hơn */
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0px; /* Tăng khoảng cách từ đường kẻ đến chữ */
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: 60%; /* Điều chỉnh độ dài của đường kẻ */
+        border-top: 3px solid #676666; /* Màu và độ dày của đường kẻ */
+      }
+    }
+  }
+}
+
+.media-upload-bar {
+  position: sticky;
+  top: 0;
+  margin-top: 15px;
+  z-index: 1000; /* Đảm bảo phần tử nằm trên các phần tử khác */
+  padding: 10px; /* Khoảng cách bên trong */
+  border: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between; /* Căn đều các phần tử bên trong */
+  align-items: center; /* Căn giữa theo chiều dọc */
+
+  .btn-upload {
+    background-color: rgb(34, 112, 177);
+    color: white;
+    border-radius: 0;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    margin-right: 10px; /* Khoảng cách giữa nút tải lên và nút xóa */
+    height: 30px;
+
+    i {
+      margin-right: 5px; /* Khoảng cách giữa biểu tượng và văn bản */
+    }
+  }
+
+  .object-type {
+    display: flex;
+    align-items: center;
+    margin-right: 10px; /* Khoảng cách giữa nút tải lên và nút xóa */
+    height: 30px;
+
+    .form-select {
+      height: 30px; /* Chiều cao bằng với nút tải lên */
+      font-size: 12px; /* Kích thước chữ nhỏ bằng nút tải lên */
+      padding: 0 10px; /* Đảm bảo khoảng cách bên trong hợp lý */
+      padding-right: 30px; /* Thêm khoảng cách để tránh mũi tên xổ xuống che chữ */
+      border: 1px solid #dee2e6; /* Đường viền giống với các nút khác */
+      border-radius: 0; /* Loại bỏ bo tròn nếu cần */
+      transition:
+        background-color 0.3s,
+        color 0.3s; /* Thêm hiệu ứng chuyển đổi mượt mà */
+    }
+
+    .form-select:valid {
+      background-color: rgb(34, 112, 177); /* Màu nền khi đã chọn */
+      color: white; /* Màu chữ khi đã chọn */
+    }
+
+    .form-select:hover,
+    .form-select:focus {
+      background-color: rgb(34, 112, 177);
+      color: white; /* Màu chữ khi hover */
+    }
+
+    .form-select option:hover {
+      background-color: rgb(
+        34,
+        112,
+        177
+      ); /* Màu nền của các tùy chọn khi hover */
+      color: white; /* Màu chữ của các tùy chọn khi hover */
+    }
+  }
+
+  .action {
+    display: flex;
+    align-items: center; /* Đảm bảo nút xóa căn giữa theo chiều dọc */
+    border: 1px solid #dee2e6;
+    height: 30px;
+    .btn-edit {
+      color: #6c757d;
+      border-radius: 0;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      height: 100%; /* Đảm bảo nút xóa chiếm toàn bộ chiều cao của .action */
+      padding: 0 10px; /* Khoảng cách bên trong nút xóa */
+
+      &:hover {
+        color: rgb(34, 112, 177);
+      }
+
+      i {
+        margin-right: 5px; /* Khoảng cách giữa biểu tượng và nút xóa */
+      }
+    }
+    .btn-remove {
+      color: #6c757d;
+      border-radius: 0;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      height: 100%; /* Đảm bảo nút xóa chiếm toàn bộ chiều cao của .action */
+      padding: 0 10px; /* Khoảng cách bên trong nút xóa */
+
+      &:hover {
+        color: rgb(255, 42, 0);
+      }
+
+      i {
+        margin-right: 5px; /* Khoảng cách giữa biểu tượng và nút xóa */
+      }
+    }
+  }
+
+  .slider-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    width: 20%;
+
+    i {
+      color: #6c757d;
+    }
+
+    .small-icon {
+      font-size: 0.8rem; /* Kích thước nhỏ hơn cho icon đầu tiên */
+    }
+
+    .large-icon {
+      font-size: 1.4rem; /* Kích thước lớn hơn cho icon cuối */
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin: 0 10px; /* Khoảng cách giữa các biểu tượng và thanh trượt */
+    }
+  }
+}
+
+.image-card {
+  position: relative; /* Đặt vị trí tương đối để các phần tử con có thể định vị tuyệt đối */
+  border: 1px solid #dee2e6;
+  overflow: hidden;
+  margin-bottom: 5px;
+
+  img {
+    width: 100%;
+    height: 100px;
+    display: block;
+    transition: transform 0.3s ease; /* Hiệu ứng chuyển đổi cho hình ảnh */
+  }
+
+  &:hover {
+    transform: scale(1.05); /* Phóng to hình ảnh khi hover */
+    border: 1px solid rgb(34, 112, 177); /* Đổi màu viền khi hover */
+  }
+
+  img.temporary {
+    opacity: 0.5; /* Hiển thị hình ảnh mờ */
+  }
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #007bff;
+  }
+
+  .selected-index {
+    position: absolute;
+    top: 10px; /* Khoảng cách từ trên cùng của hình ảnh */
+    right: 10px; /* Khoảng cách từ bên phải của hình ảnh */
+    background-color: rgb(34, 112, 177); /* Nền màu đen với độ trong suốt */
+    color: rgb(255, 255, 255); /* Màu chữ trắng */
+    padding: 5px 10px; /* Khoảng cách bên trong */
+    border-radius: 50%; /* Bo tròn để tạo hình tròn */
+    font-size: 14px; /* Kích thước chữ */
+    font-weight: bold; /* Chữ đậm */
+  }
+
+  &.selected {
+    border-color: rgb(6, 41, 69); /* Đổi màu viền khi được chọn */
+  }
+}
+.deleting-spinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #007bff;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Đảm bảo rằng nó hiển thị trên các phần tử khác */
+}
+
+.load-more {
+  background-color: rgb(34, 112, 177); // Màu nền cho nút
+  color: white; // Màu chữ cho nút
+  border: none; // Loại bỏ đường viền mặc định
+  padding: 0.5rem 1rem; // Khoảng cách bên trong nút
+  font-size: 12px; // Kích thước font chữ
+  cursor: pointer; // Con trỏ chuột khi hover
+
+  &:hover {
+    background-color: #0056b3; // Thay đổi màu nền khi hover
+  }
+
+  &:focus {
+    outline: none; // Loại bỏ viền khi focus
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); // Thêm bóng đổ khi focus
+  }
+}
+
+/* Đảm bảo các phần tử con của .media-nav-search-container không bị tràn ra ngoài */
+@media (max-width: 768px) {
+  .media-nav-search-container {
+    flex-direction: column; /* Chuyển sang bố cục cột trên màn hình nhỏ */
+    align-items: flex-start; /* Căn chỉnh các phần tử con theo chiều dọc */
+    width: 100%; /* Đảm bảo container chiếm toàn bộ chiều rộng */
+    border-right: none; /* Loại bỏ đường viền bên phải */
+
+    .media-categories-nav,
+    .media-search-input {
+      width: 100%; /* Đảm bảo các phần tử con chiếm toàn bộ chiều rộng */
+      margin-bottom: 10px; /* Khoảng cách giữa các phần tử con */
+    }
+
+    .media-search-icon {
+      margin-left: 0; /* Loại bỏ khoảng cách bên trái */
+    }
+  }
+}
+::ng-deep .modal-dialog {
+  max-width: 70%; // Tăng kích thước modal lên 70% của màn hình
+  margin: auto; // Đảm bảo modal nằm giữa màn hình theo chiều ngang
+  display: flex;
+  align-items: center; // Căn giữa theo chiều dọc
+  min-height: calc(
+    100% - 1rem
+  ); // Đảm bảo modal không vượt quá chiều cao màn hình
+  border-radius: 10px; // Làm tròn các góc
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Thêm bóng đổ
+
+  .modal-content {
+    border-radius: 10px; // Làm tròn các góc của nội dung modal
+    overflow: hidden; // Đảm bảo các phần tử con không vượt ra ngoài
+  }
+
+  .modal-header {
+    background-color: #f8f9fa; // Màu nền cho header
+    border-bottom: 1px solid #dee2e6; // Đường viền dưới cho header
+    padding: 1rem; // Khoảng cách bên trong
+    .modal-title {
+      font-family: Arial, sans-serif;
+      font-size: 18px; // Tăng kích thước font
+      font-weight: bold; // Đậm font chữ
+    }
+  }
+
+  .modal-body {
+    padding: 1rem; // Khoảng cách bên trong
+    .row {
+      margin: 0; // Loại bỏ khoảng cách mặc định
+    }
+  }
+
+  .image-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-color: rgb(246, 247, 247);
+    border: 1px solid #dee2e6; // Đường viền cho phần preview
+    border-radius: 5px; // Làm tròn các góc
+    padding: 1rem; // Khoảng cách bên trong
+    img {
+      max-width: 300px; // Đảm bảo hình ảnh không vượt quá kích thước container
+      max-height: 300px; // Giới hạn chiều cao của hình ảnh
+      border-radius: 5px; // Làm tròn các góc của hình ảnh
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Thêm bóng đổ cho hình ảnh
+    }
+  }
+
+  .image-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; // Khoảng cách giữa các phần tử
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem; // Khoảng cách giữa nhãn và input
+
+      .form-label {
+        flex: 0 0 100px; // Đặt chiều rộng cố định cho nhãn
+        font-weight: bold; // Đậm font chữ
+      }
+
+      .form-control {
+        flex: 1; // Input chiếm phần còn lại của không gian
+        margin-bottom: 0.5rem; // Khoảng cách dưới giữa các input
+      }
+    }
+
+    p {
+      margin-bottom: 0.5rem; // Khoảng cách dưới giữa các đoạn văn
+      strong {
+        font-weight: bold; // Đậm font chữ cho các nhãn
+      }
+    }
+  }
+
+  .modal-footer {
+    background-color: #f8f9fa; // Màu nền cho footer
+    border-top: 1px solid #dee2e6; // Đường viền trên cho footer
+    padding: 1rem; // Khoảng cách bên trong
+    display: flex;
+    justify-content: flex-end; // Căn phải các nút trong footer
+    .btn {
+      border-radius: 5px; // Làm tròn các góc của nút
+      padding: 0.5rem 1rem; // Khoảng cách bên trong nút
+    }
+  }
+}

@@ -28,6 +28,7 @@ export class UpdateClientAdminComponent {
   // Tạo một EventEmitter để phát sự kiện thêm category
   @Output() updateClient = new EventEmitter<ClientRequest>();
   selectedLogoUrl: string | null = null;
+  selectedPublicId: string | null = null;
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -54,6 +55,7 @@ export class UpdateClientAdminComponent {
         ],
       ],
       logo: ['', Validators.required],
+      public_id: [''],
     });
   }
   ngOnInit(): void {
@@ -90,9 +92,13 @@ export class UpdateClientAdminComponent {
     const modalRef = this.modalService.open(ImageSelectModalAdminComponent);
     modalRef.componentInstance.objectType = 'clients'; // Truyền object_type vào modal
     modalRef.result.then(
-      (result: string) => {
-        this.selectedLogoUrl = result;
-        this.clientForm.patchValue({ logo: result });
+      (result: { url: string; publicId: string }) => {
+        this.selectedLogoUrl = result.url;
+        this.selectedPublicId = result.publicId;
+        this.clientForm.patchValue({
+          logo: result.url,
+          public_id: result.publicId,
+        });
       },
       (reason) => {
         console.log('Modal dismissed: ' + reason);

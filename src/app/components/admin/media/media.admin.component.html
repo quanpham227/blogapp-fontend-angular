@@ -79,10 +79,10 @@
           <li class="nav-item">
             <button
               class="nav-link"
-              [class.active]="selectedObjectType === 'videos'"
-              (click)="filterMedia('videos')"
+              [class.active]="selectedObjectType === 'unused'"
+              (click)="filterMedia('unused')"
             >
-              Videos
+              Unused
             </button>
           </li>
         </ul>
@@ -152,6 +152,9 @@
       </button>
       <button class="btn btn-remove" (click)="openConfirmModal()">
         <i class="fas fa-trash"></i> Remove
+      </button>
+      <button class="btn btn-unselect" (click)="unSelectAll()">
+        <i class="fas fa-times-circle"></i> Unselect
       </button>
     </div>
     <div class="slider-container d-flex align-items-center">

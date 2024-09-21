@@ -22,6 +22,7 @@ export class InsertClientAdminComponent {
   clientForm: FormGroup;
   clientId: number | null = null;
   selectedLogoUrl: string | null = null;
+  selectedPublicId: string | null = null; // Thêm thuộc tính này
 
   // Tạo một EventEmitter để phát sự kiện thêm category
   @Output() addClient = new EventEmitter<ClientRequest>();
@@ -49,6 +50,7 @@ export class InsertClientAdminComponent {
         ],
       ],
       logo: ['', Validators.required],
+      public_id: ['', Validators.required], // Thêm trường này vào form
     });
   }
 
@@ -63,9 +65,13 @@ export class InsertClientAdminComponent {
     const modalRef = this.modalService.open(ImageSelectModalAdminComponent);
     modalRef.componentInstance.objectType = 'clients'; // Truyền object_type vào modal
     modalRef.result.then(
-      (result: string) => {
-        this.selectedLogoUrl = result;
-        this.clientForm.patchValue({ logo: result });
+      (result: { url: string; publicId: string }) => {
+        this.selectedLogoUrl = result.url;
+        this.selectedPublicId = result.publicId;
+        this.clientForm.patchValue({
+          logo: result.url,
+          public_id: result.publicId,
+        });
       },
       (reason) => {
         console.log('Modal dismissed: ' + reason);

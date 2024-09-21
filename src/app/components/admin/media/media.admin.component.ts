@@ -46,18 +46,23 @@ export class MediaAdminComponent {
     this.loadImages();
   }
 
-  async loadImages() {
+  async loadImages(append: boolean = true, usage?: number) {
     try {
       const response = await firstValueFrom(
         this.imageService.getImages(
           this.keyword,
-          this.selectedObjectType,
+          usage === 0 ? '' : this.selectedObjectType, // Truyền objectType rỗng nếu usage là 0
           this.currentPage,
           this.itemsPerPage,
+          usage,
         ),
       );
       if (response) {
-        this.images = [...this.images, ...response.images];
+        if (append) {
+          this.images = [...this.images, ...response.images];
+        } else {
+          this.images = response.images;
+        }
         this.totalPages = response.totalPages;
         this.totalFileSize = response.totalFileSizes;
         this.currentPage++;
@@ -69,9 +74,6 @@ export class MediaAdminComponent {
       console.error('Error fetching images:', error);
       this.toastr.error('Lỗi khi tải hình ảnh');
     }
-  }
-  loadMoreImages(): void {
-    this.loadImages();
   }
 
   // Hàm để chuyển đổi hiển thị của ô tìm kiếm
@@ -94,12 +96,20 @@ export class MediaAdminComponent {
       this.renderer.setStyle(this.searchInput.nativeElement, 'display', 'none');
     }
   }
+  loadMoreImages(): void {
+    if (this.selectedObjectType === 'unused') {
+      this.loadImages(true, 0);
+    } else {
+      this.loadImages(true);
+    }
+  }
 
   filterMedia(type: string) {
     this.selectedObjectType = type;
     this.currentPage = 0;
     this.images = [];
-    this.loadImages();
+    const usage = type === 'unused' ? 0 : undefined;
+    this.loadImages(false, usage);
   }
 
   onFileChange(event: Event): void {
@@ -154,7 +164,7 @@ export class MediaAdminComponent {
             }; // Cập nhật hình ảnh với dữ liệu từ server
           }
           // Gọi lại hàm loadImages để cập nhật danh sách hình ảnh từ server
-          this.loadImages();
+          this.loadImages(true);
         } else if (event.status === 'error') {
           this.toastr.error(event.message);
           // Xóa hình ảnh tạm thời nếu tải lên thất bại
@@ -208,7 +218,7 @@ export class MediaAdminComponent {
       });
       this.selectedImages = [];
       this.currentPage = 0;
-      this.loadImages();
+      this.loadImages(false); // Gọi hàm loadImages với append là false
     } catch (error) {
       console.error('Error deleting images:', error);
       this.toastr.error('Lỗi khi xóa hình ảnh');
@@ -272,5 +282,8 @@ export class MediaAdminComponent {
     modalRef.componentInstance.confirm.subscribe(() => {
       this.removeSelectedImages();
     });
+  }
+  unSelectAll(): void {
+    this.selectedImages = [];
   }
 }

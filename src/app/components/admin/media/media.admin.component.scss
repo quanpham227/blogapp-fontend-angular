@@ -13,17 +13,18 @@
   align-items: center;
   justify-content: space-between;
   border: 2px solid #dee2e6;
-  height: 50px; /* Đặt chiều cao cố định */
+  height: auto; /* Cho phép chiều cao tự động mở rộng */
   gap: 0; /* Đảm bảo không có khoảng cách thừa giữa các phần */
   position: relative;
+  flex-wrap: wrap; /* Cho phép các phần tử con chuyển sang hàng mới khi không đủ chỗ */
 
   .media-source-dropdown {
-    height: 100%;
-    width: 10%;
+    width: 7%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 0; /* Loại bỏ khoảng cách thừa */
+    flex: 1 1 auto; /* Đảm bảo các phần tử con co giãn đều */
 
     .btn {
       border-radius: 0;
@@ -38,37 +39,33 @@
       font-size: 1.2rem;
       cursor: pointer;
     }
-
-    .dropdown-menu :hover {
-      background-color: rgb(34, 112, 177);
-      color: #ffffff;
-    }
   }
 
   .media-nav-search-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 65%; /* Chiều rộng của toàn bộ khối */
+    width: 68%; /* Chiều rộng của toàn bộ khối */
     margin: 0;
     padding: 0;
-    height: 100%;
+    height: auto; /* Cho phép chiều cao tự động mở rộng */
     position: relative;
     border-right: 1px solid #dee2e6;
+    flex: 1 1 auto; /* Đảm bảo các phần tử con co giãn đều */
+    flex-wrap: wrap; /* Cho phép các phần tử con chuyển sang hàng mới khi không đủ chỗ */
 
     .media-categories-nav {
-      width: 85%;
       .nav-pills {
         display: flex;
         align-items: center;
-        height: 100%;
+        height: auto; /* Cho phép chiều cao tự động mở rộng */
+        flex-wrap: wrap; /* Cho phép các phần tử con chuyển sang hàng mới khi không đủ chỗ */
 
         .nav-link {
           position: relative;
           border-radius: 0;
           transition: background-color 0.3s;
           color: rgb(0, 103, 173);
-          padding: 10px 15px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -129,6 +126,7 @@
   .media-storage-info {
     height: 100%;
     width: 25%; /* Điều chỉnh kích thước */
+    flex: 1 1 auto; /* Đảm bảo các phần tử con co giãn đều */
 
     .plan-storage__storage-label {
       position: relative;
@@ -228,7 +226,8 @@
       display: flex;
       align-items: center;
       height: 100%; /* Đảm bảo nút xóa chiếm toàn bộ chiều cao của .action */
-      padding: 0 10px; /* Khoảng cách bên trong nút xóa */
+      padding: 0 5px; /* Khoảng cách bên trong nút xóa */
+      border-right: 1px solid #dee2e6;
 
       &:hover {
         color: rgb(34, 112, 177);
@@ -245,7 +244,25 @@
       display: flex;
       align-items: center;
       height: 100%; /* Đảm bảo nút xóa chiếm toàn bộ chiều cao của .action */
-      padding: 0 10px; /* Khoảng cách bên trong nút xóa */
+      padding: 0 5px; /* Khoảng cách bên trong nút xóa */
+      border-right: 1px solid #dee2e6;
+
+      &:hover {
+        color: rgb(255, 42, 0);
+      }
+
+      i {
+        margin-right: 5px; /* Khoảng cách giữa biểu tượng và nút xóa */
+      }
+    }
+    .btn-unselect {
+      color: #6c757d;
+      border-radius: 0;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      height: 100%; /* Đảm bảo nút xóa chiếm toàn bộ chiều cao của .action */
+      padding: 0 5px; /* Khoảng cách bên trong nút xóa */
 
       &:hover {
         color: rgb(255, 42, 0);
@@ -470,6 +487,35 @@
     .btn {
       border-radius: 5px; // Làm tròn các góc của nút
       padding: 0.5rem 1rem; // Khoảng cách bên trong nút
+    }
+  }
+}
+@media (max-width: 768px) {
+  .media-filter-bar {
+    flex-direction: column; /* Chuyển sang bố cục cột */
+    height: auto; /* Cho phép chiều cao tự động mở rộng */
+    padding: 10px; /* Thêm khoảng cách bên trong */
+  }
+
+  .media-source-dropdown,
+  .media-nav-search-container,
+  .media-storage-info {
+    width: 100%; /* Đảm bảo các phần tử con chiếm toàn bộ chiều rộng */
+    margin-bottom: 10px; /* Khoảng cách giữa các phần tử con */
+  }
+
+  .media-nav-search-container {
+    flex-direction: column; /* Chuyển sang bố cục cột */
+    align-items: flex-start; /* Căn chỉnh các phần tử con theo chiều dọc */
+    border-right: none; /* Loại bỏ đường viền bên phải */
+
+    .media-categories-nav,
+    .media-search-input {
+      width: 100%; /* Đảm bảo các phần tử con chiếm toàn bộ chiều rộng */
+    }
+
+    .media-search-icon {
+      margin-left: 0; /* Loại bỏ khoảng cách bên trái */
     }
   }
 }

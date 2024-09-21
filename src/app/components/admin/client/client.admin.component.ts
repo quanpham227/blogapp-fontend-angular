@@ -56,7 +56,6 @@ export class ClientAdminComponent implements OnInit {
     this.clientService.getClients().subscribe({
       next: (response: any) => {
         this.clients = response.data;
-        console.log(response.data);
       },
       complete: () => {},
       error: (error: any) => {

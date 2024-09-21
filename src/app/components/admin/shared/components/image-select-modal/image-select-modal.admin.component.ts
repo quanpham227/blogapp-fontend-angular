@@ -26,7 +26,6 @@ export class ImageSelectModalAdminComponent implements OnInit {
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
-  selectedObjectType: string = '';
   uploadProgress: number = 0;
   uploadingImage: boolean = false;
   uploadSuccess: boolean = false;
@@ -45,38 +44,31 @@ export class ImageSelectModalAdminComponent implements OnInit {
   ngOnInit(): void {
     this.loadImages(
       this.keyword,
-      this.selectedObjectType,
+      this.objectType,
       this.currentPage,
       this.itemsPerPage,
     );
   }
 
-  loadImages(
-    keyword: string,
-    selectedObjectType: string,
-    page: number,
-    limit: number,
-  ) {
-    this.imageService
-      .getImages(keyword, selectedObjectType, page, limit)
-      .subscribe({
-        next: (response: any) => {
-          this.images = [...this.images, ...response.images]; // Giữ nguyên các hình ảnh trước đó và thêm hình ảnh mới
-          this.totalPages = response.totalPages;
-          this.currentPage++;
-          if (this.currentPage >= this.totalPages) {
-            this.allImagesLoaded = true;
-          }
-        },
-        error: (error: any) => {
-          console.error('Error fetching posts:', error);
-        },
-      });
+  loadImages(keyword: string, objectType: string, page: number, limit: number) {
+    this.imageService.getImages(keyword, objectType, page, limit).subscribe({
+      next: (response: any) => {
+        this.images = [...this.images, ...response.images]; // Giữ nguyên các hình ảnh trước đó và thêm hình ảnh mới
+        this.totalPages = response.totalPages;
+        this.currentPage++;
+        if (this.currentPage >= this.totalPages) {
+          this.allImagesLoaded = true;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error fetching posts:', error);
+      },
+    });
   }
   loadMoreImages(): void {
     this.loadImages(
       this.keyword,
-      this.selectedObjectType,
+      this.objectType,
       this.currentPage,
       this.itemsPerPage,
     );
@@ -168,7 +160,15 @@ export class ImageSelectModalAdminComponent implements OnInit {
 
   confirmSelection(): void {
     if (this.selectedImage) {
-      this.activeModal.close(this.selectedImage);
+      const selectedImage = this.images.find(
+        (image) => image.image_url === this.selectedImage,
+      );
+      if (selectedImage) {
+        this.activeModal.close({
+          url: selectedImage.image_url,
+          publicId: selectedImage.public_id,
+        });
+      }
     }
   }
 

@@ -234,7 +234,7 @@
     top: 30px;
     left: 0;
     bottom: 0;
-    width: 300px;
+    width: 270px;
     z-index: 996;
     transition: all 0.3s;
     overflow: auto;
@@ -451,7 +451,7 @@
 @media (min-width: 768px) {
   #main,
   #footer {
-    margin-left: 300px;
+    margin-left: 270px;
   }
 
   .collapsed-menu #main,
@@ -465,6 +465,6 @@
   }
 
   .toggle-sidebar .sidebar {
-    left: -300px;
+    left: -270px;
   }
 }

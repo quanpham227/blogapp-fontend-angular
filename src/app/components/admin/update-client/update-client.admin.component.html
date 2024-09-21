@@ -63,8 +63,8 @@
         <!-- Thêm khối chứa chữ "Logo" -->
         <div class="image-container">
           <img
-            *ngIf="clientForm.get('logo')?.value; else emptyImage"
-            [src]="clientForm.get('logo')?.value"
+            *ngIf="selectedLogoUrl; else emptyImage"
+            [src]="selectedLogoUrl"
             alt="Logo"
             class="img-thumbnail"
           />
@@ -80,7 +80,7 @@
               Select Logo
             </button>
             <button
-              *ngIf="clientForm.get('logo')?.value"
+              *ngIf="selectedLogoUrl"
               type="button"
               class="btn btn-sm btn-danger"
               (click)="removeLogo()"

@@ -9,11 +9,12 @@ import { ToastrService } from 'ngx-toastr';
 import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
 import { checkFile, FileValidationResult } from '../../../utils/file-validator';
 import { firstValueFrom } from 'rxjs';
+import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
 
 @Component({
   selector: 'app-media',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LazyLoadDirective],
   templateUrl: './media.admin.component.html',
   styleUrl: './media.admin.component.scss',
 })

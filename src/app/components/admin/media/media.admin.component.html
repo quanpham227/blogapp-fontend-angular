@@ -173,7 +173,8 @@
       >
         <div class="image-card" [class.selected]="isSelected(image)">
           <img
-            [src]="image.image_url"
+            [appLazyLoad]="image.image_url"
+            alt="{{ image.file_name }}"
             alt="Image"
             class="img-fluid"
             [class.temporary]="image.isTemporary"

@@ -11,6 +11,7 @@ import { adminRoutes } from './components/admin/admin-routes';
 import { provideToastr } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EditorModule } from '@tinymce/tinymce-angular';
+import { LazyLoadDirective } from './directives/lazy-load.directive';
 
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(BrowserAnimationsModule),
     provideHttpClient(),
     importProvidersFrom(EditorModule),
+    importProvidersFrom(LazyLoadDirective),
     provideToastr({
       timeOut: 5000,
       positionClass: 'toast-top-right',

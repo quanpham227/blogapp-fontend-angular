@@ -1,0 +1,179 @@
+/*--------------------------------------------------------------
+  # Sidebar
+  --------------------------------------------------------------*/
+.sidebar-admin {
+  position: fixed;
+  top: 30px;
+  left: 0;
+  bottom: 0;
+  width: 270px;
+  z-index: 996;
+  transition: all 0.3s;
+  overflow: auto;
+  overflow-x: hidden; /* Ẩn thanh trượt ngang */
+  scrollbar-width: thin;
+  scrollbar-color: #aab7cf transparent;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+  background-color: rgb(35, 40, 46);
+  &.toggle-sidebar {
+    left: -270px;
+  }
+  &.collapsed-menu {
+    width: 50px; /* Thu gọn sidebar */
+
+    .sidebar-nav .nav-link {
+      justify-content: center;
+      padding: 5px 0;
+    }
+
+    .sidebar-nav .nav-link span {
+      display: none;
+    }
+
+    .sidebar-nav .nav-content {
+      padding-left: 0;
+      padding: 5px 0 0 0;
+    }
+  }
+  @media (max-width: 768px) {
+    left: -270px; /* Ẩn sidebar khi kích thước màn hình nhỏ hơn 768px */
+    &.open {
+      display: block;
+      left: 0;
+    }
+  }
+  .sidebar-nav {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    margin-top: 20px;
+    cursor: pointer;
+
+    li {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 7px;
+    }
+
+    .nav-heading {
+      text-transform: uppercase;
+      color: #899bbd;
+      margin: 10px 0 5px 15px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      transition: 0.3;
+      padding: 5px 0;
+      margin: 0;
+      width: 100%;
+      color: rgb(208, 209, 210);
+      position: relative;
+      white-space: nowrap;
+
+      &:hover {
+        color: rgb(1, 185, 235);
+      }
+      &.active {
+        background-color: rgb(1, 115, 169);
+        color: rgb(255, 255, 255);
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 4px;
+        background-color: transparent;
+        transition: background-color 0.3s;
+      }
+
+      &:hover::before,
+      &.active::before {
+        background-color: rgb(1, 185, 235);
+      }
+
+      &.active::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        border: solid transparent;
+        border-width: 6px 8px 8px 0;
+        border-right-color: rgb(246, 247, 247);
+      }
+      i {
+        font-size: 18px;
+        margin-right: 10px;
+        margin-left: 15px;
+        color: rgb(157, 166, 174);
+      }
+      &.active i {
+        color: rgb(255, 255, 255);
+      }
+      &:hover i {
+        color: rgb(1, 185, 235);
+      }
+    }
+
+    .nav-content {
+      padding: 5px 0 0 0;
+      margin: 0;
+      list-style: none;
+      background-color: rgb(50, 55, 59);
+      display: none;
+
+      &.show {
+        display: block;
+      }
+
+      a {
+        display: flex;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        color: rgb(157, 166, 174);
+        transition: 0.3s;
+        padding: 5px 0;
+        width: 100%;
+        position: relative;
+
+        &:hover {
+          color: rgb(1, 185, 235);
+        }
+
+        &.active {
+          color: rgb(255, 255, 255);
+        }
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 4px;
+          background-color: transparent;
+          transition: background-color 0.3s;
+        }
+
+        &:hover::before,
+        &.active::before {
+          background-color: rgb(1, 185, 235);
+        }
+
+        span {
+          margin-left: 30px;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

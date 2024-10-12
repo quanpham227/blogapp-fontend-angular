@@ -16,6 +16,9 @@ export class CategoryService {
   getCategories(): Observable<ApiResponse<Category[]>> {
     return this.http.get<ApiResponse<Category[]>>(this.apiCategories);
   }
+  getTopCategoriesByPostCount(): Observable<ApiResponse<Category[]>> {
+    return this.http.get<ApiResponse<Category[]>>(`${this.apiCategories}/top`);
+  }
 
   insertCategory(category: CategoryRequest): Observable<any> {
     return this.http.post(this.apiCategories, category);

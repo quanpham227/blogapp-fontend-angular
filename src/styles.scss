@@ -1,86 +1,206 @@
-html {
-  scroll-behavior: smooth;
-}
+.web-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng chiều cao của màn hình */
+  html {
+    scroll-behavior: smooth;
+  }
 
-body {
-  font-family: 'Open Sans', sans-serif;
-  color: #444444;
-}
+  body {
+    font-family: "Open Sans", sans-serif;
+    color: #444444;
+  }
 
-a {
-  color: #01b1d7;
-  text-decoration: none;
-
-  &:hover {
-    color: #0dd3fe;
+  a {
+    color: #01b1d7;
     text-decoration: none;
-  }
-}
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: 'Raleway', sans-serif;
-}
-
-/*--------------Sections General---------*/
-section {
-  padding: 60px 0;
-  scroll-margin-top: 70px;
-}
-
-.section-bg {
-  background-color: #f2fdff;
-}
-
-.section-title {
-  text-align: center;
-  padding: 30px 0;
-  position: relative;
-
-  h2 {
-    font-size: 32px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    padding-bottom: 0;
-    color: #354144;
-    position: relative;
-    z-index: 2;
+    &:hover {
+      color: #0dd3fe;
+      text-decoration: none;
+    }
   }
 
-  span {
-    position: absolute;
-    top: 30px;
-    color: #f3f5f5;
-    left: 0;
-    right: 0;
-    z-index: 1;
-    font-weight: 700;
-    font-size: 52px;
-    text-transform: uppercase;
-    line-height: 0;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Raleway", sans-serif;
+  }
+  .content {
+    flex: 1; /* Phần nội dung sẽ chiếm không gian còn lại giữa header và footer */
+    padding-top: 114px;
   }
 
-  p {
-    margin-bottom: 0;
-    position: relative;
-    z-index: 2;
+  /*--------------Sections General---------*/
+  section {
+    padding: 60px 0;
+    scroll-margin-top: 70px;
   }
-}
 
-@media (max-width: 575px) {
+  .section-bg {
+    background-color: #f2fdff;
+  }
+
   .section-title {
+    text-align: center;
+    padding: 30px 0;
+    position: relative;
+
     h2 {
+      font-size: 32px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      padding-bottom: 0;
+      color: #354144;
+      position: relative;
+      z-index: 2;
+    }
+
+    span {
+      position: absolute;
+      top: 30px;
+      color: #f3f5f5;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      font-weight: 700;
+      font-size: 52px;
+      text-transform: uppercase;
+      line-height: 0;
+    }
+
+    p {
+      margin-bottom: 0;
+      position: relative;
+      z-index: 2;
+    }
+  }
+
+  @media (max-width: 575px) {
+    .section-title h2 {
       font-size: 28px;
       margin-bottom: 15px;
     }
 
-    span {
+    .section-title span {
       font-size: 38px;
     }
   }
+}
+
+.admin-layout {
+  font-size: 14px;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  background: #f0f0f0;
+  scroll-behavior: smooth;
+
+  a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "roboto, sans-serif";
+  }
+}
+// /* Tùy chỉnh CSS cho ngx-toastr */
+// .toast {
+//   background-color: #ffffff !important; /* Màu nền trắng */
+//   color: #000000 !important; /* Màu chữ đen */
+//   padding: 10px 20px; /* Điều chỉnh padding */
+//   white-space: nowrap; /* Không cho phép nội dung xuống dòng */
+//   overflow: hidden; /* Ẩn phần nội dung vượt ra ngoài */
+//   text-overflow: ellipsis; /* Hiển thị dấu "..." khi nội dung quá dài */
+//   height: 50px; /* Giới hạn chiều cao */
+//   max-width: 300px; /* Điều chỉnh độ rộng của toastr */
+//   line-height: 50px; /* Chiều cao dòng để căn giữa nội dung */
+//   display: flex;
+//   align-items: center; /* Đảm bảo nội dung nằm giữa theo chiều dọc */
+// }
+
+// /* Đảm bảo màu sắc của chữ trong các thông báo toastr */
+// .toast-message {
+//   white-space: nowrap; /* Không xuống dòng */
+//   overflow: hidden; /* Ẩn phần dư */
+//   text-overflow: ellipsis; /* Hiển thị dấu "..." khi nội dung quá dài */
+//   flex-grow: 1; /* Đảm bảo phần text chiếm đủ không gian */
+//   text-align: center; /* Căn giữa text */
+// }
+
+// /* Giới hạn chiều cao của toastr */
+// .toast-success,
+// .toast-error {
+//   height: 50px; /* Giới hạn chiều cao tối đa */
+//   max-height: 50px;
+// }
+
+// /* Đặt màu sắc cho icon và chữ cho các loại toastr */
+// .toast-success {
+//   color: #000000 !important; /* Màu chữ đen */
+//   background-color: #dbdada !important; /* Màu nền trắng */
+//   border-left: 10px solid #28a745 !important; /* Viền trái màu xanh lá cho thông báo thành công */
+//   border-bottom: 3px solid #52c66d !important;
+// }
+
+// .toast-error {
+//   color: #000000 !important; /* Màu chữ đen */
+//   background-color: #dfdbdb !important; /* Màu nền trắng */
+//   border-left: 10px solid #dc3545 !important; /* Viền trái màu đỏ cho thông báo lỗi */
+//   border-bottom: 3px solid #f0a9b0 !important;
+// }
+
+// /* Đặt màu sắc cho icon theo loại thông báo */
+// .toast-success .toast-icon {
+//   color: #28a745 !important; /* Màu icon cho thông báo thành công */
+//   background-color: #52c66d !important; /* Màu nền icon cho thông báo thành công */
+// }
+
+// .toast-error .toast-icon {
+//   color: #dc3545 !important; /* Màu icon cho thông báo lỗi */
+// }
+
+/* Tùy chỉnh CSS cho modal */
+
+.admin-modal .modal-dialog {
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  margin: 0 auto; /* Đảm bảo căn giữa theo chiều ngang */
+}
+
+.admin-modal .modal-content {
+  background-color: #f8f9fa;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Tùy chỉnh CSS cho modal-select-image */
+
+.admin-image-modal .modal-dialog {
+  align-items: center; /* Căn giữa theo chiều dọc */
+  width: 80%;
+  max-width: 90%; /* Đảm bảo modal không bị quá rộng */
+  height: 80%;
+  max-height: 90%; /* Đảm bảo modal không bị quá cao */
+}
+.admin-image-modal .modal-content {
+  background-color: #f8f9fa;
+  border: 0;
+  border-radius: 0;
+}
+#tinymce-editor {
+  border: 1px solid #dbdbdb; /* Thay đổi màu sắc và độ dày của border theo ý muốn */
+  border-radius: 0px; /* Tùy chọn: Thêm border-radius nếu muốn */
 }

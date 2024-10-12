@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 })
 export class BlogDetailComponent implements OnInit {
   post: Post | null = null;
+  errorMessage: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -24,6 +25,7 @@ export class BlogDetailComponent implements OnInit {
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
+      console.log('Slug:', slug);
       if (slug) {
         this.getPostDetail(slug);
       }
@@ -35,14 +37,16 @@ export class BlogDetailComponent implements OnInit {
       next: (response: ApiResponse<Post>) => {
         if (response && response.data) {
           this.post = response.data;
+          this.errorMessage = null;
           console.log('Post details:', this.post);
         } else {
+          this.errorMessage = 'Invalid response structure';
           console.error('Invalid response structure:', response);
         }
       },
       error: (error: any) => {
+        this.errorMessage = 'Error fetching post details';
         console.error('Error fetching post details:', error);
-        // Optionally, you can set this.post to null or show an error message in the UI
         this.post = null;
       },
       complete: () => {

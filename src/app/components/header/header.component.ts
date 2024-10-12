@@ -69,10 +69,6 @@ export class HeaderComponent implements OnInit {
         element.getBoundingClientRect().top + window.scrollY;
       const offsetPosition = elementPosition - headerOffset;
 
-      // Debug log to check calculated positions
-      console.log('Element Position:', elementPosition);
-      console.log('Offset Position:', offsetPosition);
-
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth',

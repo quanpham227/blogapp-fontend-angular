@@ -1,0 +1,22 @@
+.main {
+  margin-top: 30px;
+  padding: 20px 10px;
+  transition: all 0.3s;
+  min-height: calc(100vh - 30px - 80px);
+  margin-left: 270px; /* Khoảng cách khi sidebar hiển thị */
+
+  &.shifted {
+    margin-left: 0; /* Khoảng cách khi sidebar ẩn */
+  }
+
+  &.collapsed {
+    margin-left: 50px; /* Khoảng cách khi sidebar thu gọn */
+  }
+  @media (max-width: 768px) {
+    margin-left: 0; /* Đẩy main qua trái khi sidebar ẩn */
+  }
+
+  @media (max-width: 1199px) {
+    padding: 20px;
+  }
+}

@@ -62,8 +62,13 @@ export class InsertClientAdminComponent {
   }
 
   openLogoModal(): void {
-    const modalRef = this.modalService.open(ImageSelectModalAdminComponent);
-    modalRef.componentInstance.objectType = 'clients'; // Truyền object_type vào modal
+    const modalRef = this.modalService.open(ImageSelectModalAdminComponent, {
+      centered: true, // Căn giữa theo chiều dọc
+      backdrop: 'static', // Không cho phép đóng khi click ngoài
+      keyboard: true, //  cho phép đóng bằng phím Esc
+      windowClass: 'admin-image-modal', // Class tùy chỉnh cho modal
+      size: 'lg', // Sử dụng kích thước lớn
+    });
     modalRef.result.then(
       (result: { url: string; publicId: string }) => {
         this.selectedLogoUrl = result.url;

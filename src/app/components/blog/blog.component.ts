@@ -146,7 +146,6 @@ export class BlogComponent implements OnInit {
 
   // Hàm xử lý sự kiện khi sản phẩm được bấm vào
   onPostClick(slug: string) {
-    debugger;
     // Điều hướng đến trang detail-blog với slug là tham số
     this.router.navigate(['/blog-detail', slug]);
   }

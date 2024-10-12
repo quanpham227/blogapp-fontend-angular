@@ -1,98 +1,256 @@
-.post-page {
-  .title {
-    margin-bottom: 20px;
+.admin-posts {
+  font-size: 14px;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  font-weight: 100;
+  .admin-posts__title {
+    font-family: "Roboto", Arial, Helvetica, sans-serif;
+    font-size: 23px;
+    font-weight: 400;
+  }
 
-    h1 {
-      font-size: 24px;
-      font-weight: bold;
-    }
+  .admin-posts__nav {
+    list-style: none; // Loại bỏ dấu chấm đầu dòng
+    padding: 0;
+    margin: 0;
+    display: flex; // Hiển thị các mục theo hàng ngang
+    margin-bottom: 10px;
 
-    .breadcrumb {
-      font-size: 14px;
-      font-family: "Nunito", sans-serif;
-      color: #899bbd;
-      font-weight: 600;
-
-      a {
-        color: #899bbd;
-        transition: 0.3s;
+    .admin-posts__nav-item {
+      .admin-posts__nav-link {
+        text-decoration: none; // Loại bỏ gạch chân
+        color: rgb(18, 94, 150); // Màu chữ
+        font-weight: normal; // Chữ đậm
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-family: "Roboto", Arial, Helvetica, sans-serif;
+        font-size: 15px;
+        font-weight: 100;
 
         &:hover {
-          color: #51678f;
+          color: rgb(4, 50, 84); // Màu chữ khi hover
+        }
+
+        .admin-posts__nav-badge {
+          color: #000000; // Màu chữ của badge
+          border-radius: 10px; // Bo tròn góc
+          padding: 2px 3px; // Khoảng cách bên trong
+          font-size: 14px; // Kích thước chữ nhỏ hơn
         }
       }
+    }
+    .admin-posts__nav-separator {
+      color: #6c757d;
+      margin: 0 2px;
+    }
+  }
+  .admin-posts__search {
+    margin-bottom: 10px;
+    margin-left: auto;
 
-      .breadcrumb-item::before {
-        color: #899bbd;
-      }
+    .admin-posts__search-input {
+      border: 1px solid rgb(195, 196, 199);
+      border-radius: 0;
+      width: calc(100% - 110px); /* Điều chỉnh độ rộng của input */
+    }
 
-      .active {
-        color: #51678f;
-        font-weight: 600;
+    .admin-posts__add-post {
+      background-color: #fff;
+      border: 1px solid rgb(195, 196, 199);
+      border-radius: 0;
+      color: #000;
+      font-size: 12px;
+      margin-left: 10px;
+      width: 200px; /* Điều chỉnh độ rộng của nút */
+
+      &:hover {
+        background-color: rgb(4, 152, 175);
+        color: #fff;
       }
     }
   }
-  .list-post {
-    .btn-primary {
-      background-color: #4154f1;
-      border-color: #4154f1;
 
-      &:hover {
-        background-color: #717ff5;
-        border-color: #717ff5;
+  .admin-posts__table {
+    width: 100%;
+    border: 1px solid rgb(195, 196, 199);
+    border-collapse: collapse;
+
+    thead {
+      tr {
+        th {
+          text-align: left;
+          font-weight: normal;
+          padding: 8px;
+
+          &.admin-posts__table-column i {
+            margin-right: 5px;
+            color: #787c82;
+            cursor: pointer;
+          }
+
+          &.admin-posts__table-column--checkbox {
+            width: 3%;
+            text-align: center;
+            .checkbox-all {
+              border: 1px solid rgb(195, 196, 199);
+            }
+          }
+          &.admin-posts__table-column--title {
+            width: 30%;
+            cursor: pointer;
+          }
+          &.admin-posts__table-column--author,
+          &.admin-posts__table-column--categories {
+            width: 16%;
+          }
+          &.admin-posts__table-column--stats {
+            width: 8%;
+            text-align: center;
+          }
+          &.admin-posts__table-column--comments {
+            width: 6%;
+            text-align: center;
+          }
+          &.admin-posts__table-column--featured {
+            width: 6%;
+            text-align: center;
+          }
+          &.admin-posts__table-column--date {
+            width: 15%;
+          }
+
+          .fa-sort-up.active,
+          .fa-sort-down.active {
+            color: rgb(0, 0, 0);
+          }
+
+          .fa-sort-up,
+          .fa-sort-down {
+            color: gray;
+          }
+        }
       }
     }
 
-    .card {
-      margin-bottom: 30px;
-      border: none;
-      border-radius: 5px;
-      box-shadow: 0px 0 30px rgba(1, 41, 112, 0.1);
+    tbody {
+      tr {
+        border: 1px solid rgb(195, 196, 199);
+        td {
+          text-align: left;
+          &.admin-posts__table-cell--checkbox {
+            width: 3%;
+            text-align: center;
+            cursor: pointer;
+            .checkbox-post {
+              border: 1px solid rgb(195, 196, 199);
+            }
+          }
+          &.admin-posts__table-cell--title {
+            display: flex;
+            align-items: flex-start;
+            border-bottom: 0;
 
-      .card-title {
-        padding: 20px 0 15px 0;
-        font-size: 18px;
-        font-weight: 500;
-        color: #012970;
-        font-family: "Poppins", sans-serif;
-      }
+            .admin-posts__thumbnail {
+              margin-right: 10px;
+              border-radius: 0;
 
-      .card-body {
-        padding: 0 20px 20px 20px;
-      }
-    }
+              img {
+                width: 50px;
+                height: 45px;
+                object-fit: cover;
+              }
+            }
 
-    .table {
-      font-size: 13px;
-      .text-center {
-        text-align: center;
-      }
+            .admin-posts__content {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
 
-      .col-2,
-      .col-4 {
-        padding: 10px;
-      }
-      .thumbnail {
-        width: 50px;
-        height: 30px;
-      }
-      .view-icon {
-        color: #4154f1;
-        cursor: pointer;
-        margin: 0 2px;
-      }
-      .trash-icon {
-        color: #ff0000;
-        cursor: pointer;
-        margin: 0 2px;
-      }
+              .admin-posts__title-actions {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
 
-      .view-icon:hover {
-        color: #4154f1;
-      }
+                .admin-posts__title {
+                  margin: 0;
+                  font-size: 14px;
+                  font-weight: bold;
+                  color: rgb(18, 94, 150);
+                  cursor: pointer;
+                }
 
-      .trash-icon:hover {
-        color: #ff0000;
+                .admin-posts__row-actions {
+                  font-size: 14px;
+                  margin-top: 4px;
+                  opacity: 0; /* Ẩn các hành động ban đầu */
+                  transition: opacity 0.3s; /* Thêm hiệu ứng chuyển đổi */
+                  .admin-posts__action {
+                    cursor: pointer;
+                    margin: 5px;
+                  }
+                }
+              }
+            }
+          }
+          &.admin-posts__table-cell--author,
+          &.admin-posts__table-cell--categories {
+            width: 16%;
+            cursor: pointer;
+            color: rgb(18, 94, 150);
+          }
+          &.admin-posts__table-cell--stats {
+            width: 8%;
+            text-align: center;
+
+            .admin-posts__stats-icon {
+              display: inline-flex;
+              justify-content: center;
+              align-items: center;
+              color: #787c82;
+              font-size: 18px;
+              cursor: pointer;
+              &:hover {
+                color: rgb(34, 113, 177);
+              }
+            }
+          }
+
+          &.admin-posts__table-cell--comments,
+          &.admin-posts__table-cell--ratings {
+            width: 6%;
+            text-align: center;
+            .admin-posts__icon {
+              display: inline-flex;
+              justify-content: center;
+              align-items: center;
+              color: #787c82;
+              font-size: 25px;
+              cursor: pointer;
+              position: relative; /* Đặt vị trí tương đối để chứa số lượng */
+              &:hover {
+                color: rgb(34, 113, 177);
+              }
+
+              .admin-posts__count-number {
+                position: absolute;
+                top: 40%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 9px;
+                color: white;
+              }
+            }
+          }
+          &.admin-posts__table-cell--date {
+            width: 15%;
+          }
+        }
+
+        &:hover {
+          .admin-posts__row-actions {
+            opacity: 1 !important; /* Hiển thị các hành động khi hover */
+          }
+        }
       }
     }
   }

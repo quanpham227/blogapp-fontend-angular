@@ -1,5 +1,14 @@
 <editor
+  id="tinymce-editor"
   [(ngModel)]="content"
   [init]="mergedConfig"
   (ngModelChange)="onContentChange($event)"
+  licenseKey="gpl"
+  (onFocus)="handleEvent($event)"
+  (onBlur)="handleEvent($event)"
+  (onKeyDown)="handleEvent($event)"
+  (onKeyUp)="handleEvent($event)"
+  (onMouseDown)="handleEvent($event)"
+  (onMouseUp)="handleEvent($event)"
+  (onChange)="handleEvent($event)"
 ></editor>

@@ -1,0 +1,190 @@
+<div class="admin-comment container mt-3">
+  <header class="admin-comment__header">
+    <div>
+      <h1 class="admin-comment__header-title">Bình luận</h1>
+      <p class="admin-comment__header-description text-muted">
+        Xem, trả lời, và quản lý mọi bình luận trên blog của bạn. Tìm hiểu thêm.
+      </p>
+    </div>
+  </header>
+  <div class="comment-list">
+    <div class="section-nav comment-navigation">
+      <div class="section-nav__panel">
+        <div class="section-nav-group">
+          <div class="section-nav-tabs">
+            <ul class="section-nav-tabs__list" role="menu">
+              <li class="section-nav-tab" role="none">
+                <a href="" class="section-nav-tab__link" role="menuitem">
+                  <span class="section-nav-tab__text"
+                    >Tất cả<span class="count">3</span></span
+                  >
+                </a>
+              </li>
+              <li class="section-nav-tab" role="none">
+                <a href="" class="section-nav-tab__link" role="menuitem">
+                  <span class="section-nav-tab__text"
+                    >Chờ duyệt<span class="count">0</span></span
+                  >
+                </a>
+              </li>
+              <li class="is-selected section-nav-tab" role="none">
+                <a href="" class="section-nav-tab__link" role="menuitem">
+                  <span class="section-nav-tab__text"
+                    >Đã duyệt<span class="count">3</span></span
+                  >
+                </a>
+              </li>
+              <li class="section-nav-tab" role="none">
+                <a href="" class="section-nav-tab__link" role="menuitem">
+                  <span class="section-nav-tab__text"
+                    >Spam<span class="count">0</span></span
+                  >
+                </a>
+              </li>
+              <li class="section-nav-tab" role="none">
+                <a href="" class="section-nav-tab__link" role="menuitem">
+                  <span class="section-nav-tab__text"
+                    >Đã xóa<span class="count">0</span></span
+                  >
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="comment-navigation__actions comment-navigation__open-bulk">
+          <ul class="segmented-control is-compact" role="radiogroup">
+            <li class="segmented-control__item is-selected" role="none">
+              <a
+                class="segmented-control__link"
+                role="radio"
+                aria-checked="true"
+              >
+                <span class="segmented-control__text">Mới nhất</span>
+              </a>
+            </li>
+            <li class="segmented-control__item" role="none">
+              <a
+                class="segmented-control__link"
+                role="radio"
+                aria-checked="false"
+              >
+                <span class="segmented-control__text">Cũ nhất</span>
+              </a>
+            </li>
+          </ul>
+          <button type="button" class="button is-compact">
+            Chỉnh sửa hàng loạt
+          </button>
+          <button
+            title="Cài đặt"
+            type="button"
+            class="button is-compact is-borderless"
+          >
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment List -->
+    <div class="comment-list__transition-wrapper">
+      <!-- Comment 1 -->
+      <div id="comment-3" class="card comment">
+        <div class="comment__detail">
+          <div class="comment__header">
+            <div class="comment__author">
+              <div class="comment__author-avatar">
+                <img
+                  alt="Hồng Quân Phạm"
+                  class="gravatar"
+                  src="https://2.gravatar.com/avatar/bc3c6bf53ea04c064757afefebc9067179a1a8aa8e3dd61310ce738312f08353?s=96&d=mm&r=G"
+                  width="32"
+                  height="32"
+                />
+              </div>
+              <div class="comment__author-info">
+                <strong class="comment__author-name">Hồng Quân Phạm</strong>
+                <div class="comment__date">
+                  <a
+                    href="/comment/hongquanqtqb.wordpress.com/3"
+                    title="30 Thg 09 2024 21:48"
+                    >3 phút trước</a
+                  >
+                  <span class="comment__author-url-separator">·</span>
+                </div>
+              </div>
+            </div>
+            <div class="comment__author-more-info">
+              <button type="button" class="button is-borderless"></button>
+            </div>
+          </div>
+
+          <!-- Comment Content -->
+          <div class="comment__content">
+            <div class="comment__post-link">
+              <i class="fas fa-pen"></i>
+              <a href="/comments/approved/hongquanqtqb.wordpress.com/108"
+                >sdasdsadsaádsadasd</a
+              >
+            </div>
+            <p>đasqdsadsad</p>
+          </div>
+
+          <!-- Comment Actions -->
+          <div class="comment__actions">
+            <button
+              type="button"
+              class="button comment__action comment__action-approve"
+            >
+              <i class="fas fa-check-circle"></i>
+              <span>Đã duyệt</span>
+            </button>
+            <button
+              type="button"
+              class="button comment__action comment__action-spam is-borderless"
+            >
+              <i class="fas fa-exclamation-circle"></i>
+              Spam
+            </button>
+            <button
+              type="button"
+              class="button comment__action comment__action-trash is-borderless"
+            >
+              <i class="fas fa-trash"></i>
+              Thùng rác
+            </button>
+            <button
+              type="button"
+              class="button comment__action comment__action-like is-borderless"
+            >
+              <i class="far fa-star"></i>
+              Thích
+            </button>
+            <button
+              type="button"
+              class="button comment__action comment__action-reply is-borderless"
+            >
+              <i class="fas fa-reply"></i>
+              Trả lời
+            </button>
+          </div>
+        </div>
+
+        <!-- Comment Reply Form -->
+        <form class="comment__reply">
+          <textarea
+            class="textarea-autosize comment__reply-textarea"
+            placeholder="Viết phản hồi ở đây"
+            rows="1"
+          ></textarea>
+          <div class="form__actions">
+            <button type="submit" class="button form-button is-primary">
+              Phản hồi
+            </button>
+            <button type="button" class="button form-button">Hủy</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

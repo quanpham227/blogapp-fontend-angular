@@ -1,0 +1,691 @@
+.col-8-5 {
+  flex: 0 0 70.833333%;
+  max-width: 70.833333%;
+}
+
+.col-3-5 {
+  flex: 0 0 29.166667%;
+  max-width: 29.166667%;
+}
+.admin-add-post {
+  padding: 5px 20px 5px 10px;
+  font-family: "Roboto", sans-serif;
+  .admin-add-post__loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    .admin-add-post__loading-spinner {
+      text-align: center;
+      .loading-spinner .fa-spinner {
+        font-size: 24px;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .admin-add-post__header {
+    margin-bottom: 20px;
+    .admin-add-post__header-title {
+      font-family: "Roboto", sans-serif;
+      font-size: 23px;
+      font-weight: 400;
+      margin: 0;
+      line-height: 1.3;
+    }
+  }
+  .admin-add-post__main {
+    .admin-add-post__content {
+      .admin-add-post__title {
+        width: 100%;
+        font-family: "Roboto", sans-serif;
+        font-size: 20px;
+        font-weight: 400;
+        margin-bottom: 15px;
+        height: 38px;
+        border-radius: 3px;
+        border: 1px solid rgb(140, 143, 148);
+        padding-left: 10px; /* Thêm khoảng cách cho chữ placeholder */
+        &:focus {
+          border: 2px solid rgb(18, 94, 150);
+          outline: none;
+        }
+      }
+    }
+  }
+  .admin-add-post__sidebar {
+    padding: 0;
+    margin: 0;
+    background-color: #ffffff;
+    border-radius: 0px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%; /* Đảm bảo sidebar chiếm hết chiều rộng */
+
+    .admin-add-post__category {
+      width: 100%;
+      border-radius: 0;
+      margin-bottom: 20px;
+
+      .admin-add-post__category-header {
+        height: 35px;
+        background-color: #ffffff;
+
+        .admin-add-post__category-title {
+          font-family: "Roboto", sans-serif;
+          font-size: 15px;
+          font-weight: 500;
+          margin: 0;
+          color: #3b3a3d;
+          width: 80%;
+        }
+        .admin-add-post__category-controls {
+          color: #787c82;
+          display: flex;
+          justify-content: space-between;
+          width: 20%;
+        }
+      }
+      .admin-add-post__category-body {
+        padding: 5px;
+        .admin-add-post__category-tabs {
+          margin-bottom: 0;
+          .admin-add-post__category-tab {
+            list-style: none;
+            padding: 5px 10px;
+            border-radius: 0;
+            font-size: 14px;
+            font-family: "Roboto", sans-serif;
+            color: #377dc0;
+            &:not(.active) {
+              border-bottom: 2px solid transparent; /* Viền trong suốt khi không active */
+            }
+            &.active {
+              color: #2b6dad;
+            }
+          }
+        }
+        .admin-add-post__category-content {
+          .admin-add-post__category-pane {
+            .admin-add-post__category-list {
+              list-style: none; /* Bỏ dấu chấm tròn của ul */
+              padding: 0; /* Bỏ khoảng cách padding */
+              border: none; /* Bỏ border của ul */
+
+              .admin-add-post__category-item {
+                border: none;
+                margin-bottom: 5px;
+                margin-left: 20px;
+
+                .admin-add-post__checkbox {
+                  display: inline-flex;
+                  align-items: center;
+                  cursor: pointer;
+                  position: relative;
+                  font-family: "Roboto", sans-serif;
+                  font-size: 13px;
+                }
+
+                .admin-add-post__checkbox input[type="radio"] {
+                  /* Ẩn checkbox mặc định */
+                  appearance: none;
+                  -webkit-appearance: none;
+                  width: 1rem;
+                  height: 1rem;
+                  background-color: #fff;
+                  border: 1px solid #8c8f94;
+                  border-radius: 4px;
+                  color: #50575e;
+                  position: relative;
+                  margin-right: 10px;
+                  cursor: pointer;
+                  display: inline-block;
+                  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+                  transition: 0.05s border-color ease-in-out;
+                }
+
+                .admin-add-post__checkbox input[type="radio"]:checked {
+                  background-color: #fff;
+                  border: 2px solid #266eb1; /* Màu viền khi được chọn */
+                }
+
+                .admin-add-post__checkbox input[type="radio"]:checked::after {
+                  /* Dấu tích bằng Font Awesome */
+                  content: "\f00c"; /* Mã Unicode của icon fa-check */
+                  font-family: "Font Awesome 6 Free"; /* Font của Font Awesome */
+                  font-weight: 900; /* Font Awesome yêu cầu sử dụng font-weight */
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%); /* Căn giữa dấu tích */
+                  color: #266eb1; /* Màu sắc của dấu tích */
+                  font-size: 12px; /* Kích thước của icon */
+                }
+
+                .admin-add-post__checkbox input[type="radio"]:focus {
+                  outline: none;
+                  border-color: #266eb1;
+                }
+              }
+            }
+          }
+          .admin-add-post__add-category {
+            margin: 0 10px;
+            .admin-add-post__add-category-btn {
+              font-size: 14px;
+              font-family: "Roboto", sans-serif;
+              color: #377dc0;
+            }
+            .admin-add-post__add-category-input {
+              width: 100%;
+              font-family: "Roboto", sans-serif;
+              font-size: 15px;
+              font-weight: 300;
+              margin-bottom: 15px;
+              height: 30px;
+              border-radius: 3px;
+              border: 1px solid rgb(140, 143, 148);
+              padding-left: 10px; /* Thêm khoảng cách cho chữ placeholder */
+              &:focus {
+                border: 2px solid rgb(18, 94, 150);
+                outline: none;
+              }
+            }
+            .admin-add-post__add-category-select {
+              display: flex;
+              width: 100%;
+              font-family: "Roboto", sans-serif;
+              font-size: 15px;
+              font-weight: 300;
+              line-height: 30px;
+              margin-bottom: 15px;
+              height: 30px;
+              border-radius: 3px;
+              justify-content: "center";
+              border: 1px solid rgb(140, 143, 148);
+              &:focus {
+                border: 2px solid rgb(18, 94, 150);
+                outline: none;
+              }
+            }
+            .admin-add-post__add-category-submit {
+              font-family: "Roboto", sans-serif;
+              font-size: 15px;
+              font-weight: 100;
+              margin-bottom: 15px;
+              height: 30px;
+              border-radius: 3px;
+              border: 1px solid #2271b1;
+              background-color: #f6f7f7;
+              color: #2271b1;
+              &:hover {
+                background-color: #b6b4c0;
+              }
+            }
+          }
+        }
+      }
+    }
+    .admin-add-post__publish {
+      margin-bottom: 20px;
+      width: 100%;
+      border-radius: 0;
+      .admin-add-post__publish-header {
+        height: 35px;
+        background-color: #ffffff;
+
+        .admin-add-post__publish-title {
+          font-family: "Roboto", sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          margin: 0;
+          color: #3b3a3d;
+          width: 80%;
+        }
+        .admin-add-post__publish-controls {
+          color: #787c82;
+          display: flex;
+          justify-content: space-between;
+          width: 20%;
+        }
+      }
+      .admin-add-post__publish-body {
+        font-weight: 300;
+        padding: 5px;
+        .admin-add-post__actions {
+          display: flex;
+          justify-content: end;
+          margin: 10px;
+          .admin-add-post__button-draft,
+          .admin-add-post__button-preview {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            font-weight: 100;
+            margin-bottom: 5px;
+            height: 30px;
+            border-radius: 3px;
+            border: 1px solid #2271b1;
+            background-color: #f6f7f7;
+            color: #2271b1;
+            &:hover {
+              background-color: #b6b4c0;
+            }
+          }
+        }
+        .admin-add-post__publish-details {
+          display: flex;
+          flex-direction: column;
+          margin: 5px 0 5px 0;
+
+          .admin-add-post__publish-status,
+          .admin-add-post__publish-visibility,
+          .admin-add-post__publish-revision,
+          .admin-add-post__publish-schedule {
+            font-size: 14px;
+            font-family: "Roboto", sans-serif;
+            margin: 10px 10px;
+            display: flex;
+            align-items: center;
+
+            i {
+              width: 20px; /* Đặt kích thước cố định cho icon */
+              text-align: center; /* Căn giữa icon */
+              margin-right: 10px; /* Khoảng cách giữa icon và văn bản */
+              font-size: 16px; /* Kích thước của icon */
+              color: #8e8d90; /* Màu sắc cho icon */
+            }
+
+            strong {
+              font-weight: 400; /* Làm đậm văn bản "Trạng thái", "Chế độ xem", "Bản thảo", "Đăng" */
+            }
+
+            span {
+              font-weight: 600; /* Giảm độ đậm cho các phần này */
+            }
+
+            a {
+              color: #1a5697;
+              text-decoration: underline;
+              cursor: pointer;
+              font-weight: 400;
+              margin-left: 5px;
+            }
+          }
+
+          .edit-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+
+            select {
+              display: flex;
+              font-family: "Roboto", sans-serif;
+              font-size: 15px;
+              font-weight: 300;
+              line-height: 30px;
+              height: 30px;
+              border-radius: 3px;
+              justify-content: "center";
+              border: 1px solid rgb(140, 143, 148);
+              &:focus {
+                border: 2px solid rgb(18, 94, 150);
+                outline: none;
+              }
+            }
+
+            button {
+              font-family: "Roboto", sans-serif;
+              font-size: 15px;
+              font-weight: 100;
+              height: 30px;
+              border-radius: 3px;
+              border: 1px solid #2271b1;
+              background-color: #f6f7f7;
+              margin-left: 5px;
+              color: #2271b1;
+              &:hover {
+                background-color: #b6b4c0;
+              }
+            }
+
+            a {
+              color: #1a5697;
+              text-decoration: underline;
+              cursor: pointer;
+              font-weight: 400;
+            }
+          }
+
+          .radio-group {
+            display: flex;
+            align-items: center;
+            margin-left: 5px;
+            font-family: "Roboto", sans-serif;
+            font-weight: 100;
+
+            input[type="radio"] {
+              appearance: none;
+              -webkit-appearance: none;
+              width: 1rem;
+              height: 1rem;
+              padding: 0;
+              background-color: #fff;
+              border: 1px solid #8c8f94;
+              border-radius: 4px;
+              color: #50575e;
+              position: relative;
+              margin: 0px 5px 0px 0px;
+              cursor: pointer;
+              display: inline-block;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+              transition: 0.05s border-color ease-in-out;
+
+              &:checked {
+                background-color: #fff;
+                border: 2px solid #266eb1;
+              }
+              &:checked::after {
+                content: "\f00c";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: #266eb1;
+                font-size: 12px;
+              }
+              &:focus {
+                outline: none;
+                border-color: #266eb1;
+              }
+            }
+
+            label {
+              margin-right: 10px;
+              font-size: 16px;
+              color: #333;
+            }
+          }
+        }
+      }
+      .admin-add-post__publish-footer {
+        .admin-add-post__button-remove {
+          font-size: 14px;
+          margin: 0;
+          padding: 0;
+          font-family: "Roboto", sans-serif;
+          color: #c86b72;
+        }
+        .admin-add-post__button-publish {
+          font-family: "Roboto", sans-serif;
+          font-size: 14px;
+          font-weight: 100;
+          margin-bottom: 5px;
+          height: 30px;
+          border-radius: 0px;
+          border: 1px solid #2271b1;
+          background-color: #2370b0;
+          color: #ffffff;
+          margin-right: 5px;
+          float: right;
+          transition:
+            opacity 0.3s,
+            background-color 0.3s; // Thêm hiệu ứng chuyển đổi
+
+          &:hover {
+            background-color: #0a61a9;
+          }
+          &:disabled {
+            background-color: #2370b0; // Màu nền khi nút bị disable
+            color: #ffffff; // Màu chữ khi nút bị disable
+            opacity: 0.5; // Độ mờ khi nút bị disable
+            cursor: not-allowed; // Thay đổi con trỏ chuột khi nút bị disable
+          }
+        }
+      }
+    }
+    .admin-add-post__tags {
+      margin-bottom: 20px;
+      width: 100%;
+      border-radius: 0;
+      .admin-add-post__tags-header {
+        height: 35px;
+        background-color: #ffffff;
+
+        .admin-add-post__tags-title {
+          font-family: "Roboto", sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          margin: 0;
+          color: #3b3a3d;
+          width: 80%;
+        }
+        .admin-add-post__tags-controls {
+          color: #787c82;
+          display: flex;
+          justify-content: space-between;
+          width: 20%;
+        }
+      }
+      .admin-add-post__tags-body {
+        font-weight: 300;
+        padding: 5px;
+
+        .admin-add-post__tags-input-group {
+          display: flex;
+          text-align: center;
+          margin-top: 10px;
+          .admin-add-post__tags-input {
+            width: 100%;
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            font-weight: 300;
+            margin-bottom: 15px;
+            margin-right: 10px;
+            height: 30px;
+            border-radius: 3px;
+            border: 1px solid rgb(140, 143, 148);
+            padding-left: 10px; /* Thêm khoảng cách cho chữ placeholder */
+            &:focus {
+              border: 2px solid rgb(18, 94, 150);
+              outline: none;
+            }
+          }
+          .admin-add-post__button-add-tag {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            font-weight: 100;
+            margin-bottom: 15px;
+            height: 30px;
+            border-radius: 3px;
+            border: 1px solid #2271b1;
+            background-color: #f6f7f7;
+            color: #2271b1;
+            &:hover {
+              background-color: #b6b4c0;
+            }
+          }
+        }
+        .admin-add-post__span-tags {
+          margin: 5px 5px 5px 10px;
+        }
+        .admin-add-post__tags-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+
+          .admin-add-post__tag {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 100;
+            color: #242628;
+            border-radius: 20px;
+
+            cursor: pointer;
+          }
+          .admin-add-post__tag i {
+            margin-left: 10px;
+            cursor: pointer;
+          }
+
+          .admin-add-post__tag i:hover {
+            color: #ff6347;
+          }
+        }
+        .admin-add-post__popular-tags {
+          margin: 5px 5px 5px 10px;
+        }
+      }
+    }
+    .admin-add-post__favorite {
+      margin-bottom: 20px;
+      width: 100%;
+      border-radius: 0;
+      .admin-add-post__favorite-header {
+        height: 35px;
+        background-color: #ffffff;
+
+        .admin-add-post__favorite-title {
+          font-family: "Roboto", sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          margin: 0;
+          color: #3b3a3d;
+          width: 80%;
+        }
+        .admin-add-post__favorite-controls {
+          color: #787c82;
+          display: flex;
+          justify-content: space-between;
+          width: 20%;
+        }
+      }
+      .admin-add-post__favorite-body {
+        margin-top: 10px;
+        padding: 0;
+        font-weight: 300;
+        .admin-add-post__favorite-list {
+          list-style: none; /* Bỏ dấu chấm tròn của ul */
+          padding: 0; /* Bỏ khoảng cách padding */
+          border: none; /* Bỏ border của ul */
+
+          .admin-add-post__favorite-item {
+            border: none;
+            margin-bottom: 5px;
+            margin-left: 20px;
+
+            .admin-add-post__checkbox {
+              display: inline-flex;
+              align-items: center;
+              cursor: pointer;
+              font-size: 16px;
+              position: relative;
+              font-family: "Roboto", sans-serif;
+              font-size: 14px;
+            }
+
+            .admin-add-post__checkbox input[type="checkbox"] {
+              /* Ẩn checkbox mặc định */
+              appearance: none;
+              -webkit-appearance: none;
+              width: 1rem;
+              height: 1rem;
+              background-color: #fff;
+              border: 1px solid #8c8f94;
+              border-radius: 4px;
+              color: #50575e;
+              position: relative;
+              margin-right: 10px;
+              cursor: pointer;
+              display: inline-block;
+              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+              transition: 0.05s border-color ease-in-out;
+            }
+
+            .admin-add-post__checkbox input[type="checkbox"]:checked {
+              background-color: #fff;
+              border: 2px solid #266eb1; /* Màu viền khi được chọn */
+            }
+
+            .admin-add-post__checkbox input[type="checkbox"]:checked::after {
+              /* Dấu tích bằng Font Awesome */
+              content: "\f00c"; /* Mã Unicode của icon fa-check */
+              font-family: "Font Awesome 6 Free"; /* Font của Font Awesome */
+              font-weight: 900; /* Font Awesome yêu cầu sử dụng font-weight */
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%); /* Căn giữa dấu tích */
+              color: #266eb1; /* Màu sắc của dấu tích */
+              font-size: 12px; /* Kích thước của icon */
+            }
+
+            .admin-add-post__checkbox input[type="checkbox"]:focus {
+              outline: none;
+              border-color: #266eb1;
+            }
+          }
+        }
+      }
+    }
+    .admin-add-post__thumbnail {
+      margin-top: 20px;
+      width: 100%;
+      border-radius: 0;
+      .admin-add-post__thumbnail-header {
+        height: 35px;
+        background-color: #ffffff;
+        .admin-add-post__thumbnail-title {
+          font-family: "Roboto", sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          margin: 0;
+          color: #3b3a3d;
+          width: 80%;
+        }
+        .admin-add-post__thumbnail-controls {
+          color: #787c82;
+          display: flex;
+          justify-content: space-between;
+          width: 20%;
+        }
+      }
+      .admin-add-post__thumbnail-body {
+        font-weight: 300;
+        padding: 5px;
+        .admin-add-post__thumbnail-img {
+          max-width: 96%;
+          height: auto;
+          cursor: pointer;
+          border: 1px solid #ddd;
+          border-radius: 0px;
+          transition: transform 0.2s;
+          margin-left: 5px;
+
+          &:hover {
+            transform: scale(1.03);
+          }
+        }
+        .admin-add-post__thumbnail-remove {
+          font-size: 14px;
+          font-family: "Roboto", sans-serif;
+          color: #c86b72;
+          cursor: pointer;
+        }
+        .admin-add-post__button-select-thumbnail {
+          font-size: 14px;
+          font-family: "Roboto", sans-serif;
+          color: #377dc0;
+        }
+      }
+    }
+  }
+}

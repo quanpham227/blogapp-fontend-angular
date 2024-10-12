@@ -24,7 +24,6 @@ export class ImageService {
     objectType: string,
     page: number,
     limit: number,
-    usage?: number,
   ): Observable<{
     images: Image[];
     totalPages: number;
@@ -35,9 +34,6 @@ export class ImageService {
       .set('object_type', objectType)
       .set('page', page.toString())
       .set('limit', limit.toString());
-    if (usage !== undefined) {
-      params = params.set('usage', usage.toString());
-    }
     return this.http.get<{
       images: Image[];
       totalPages: number;

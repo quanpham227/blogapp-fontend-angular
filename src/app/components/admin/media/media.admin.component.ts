@@ -1,10 +1,15 @@
-import { Component, ViewChild, ElementRef, Renderer2 } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ElementRef,
+  Renderer2,
+  OnInit,
+} from '@angular/core';
 import { Image } from '../../../models/image';
 import { ImageService } from '../../../services/image.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ApiResponse } from '../../../models/response';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
 import { checkFile, FileValidationResult } from '../../../utils/file-validator';
@@ -18,7 +23,7 @@ import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
   templateUrl: './media.admin.component.html',
   styleUrl: './media.admin.component.scss',
 })
-export class MediaAdminComponent {
+export class MediaAdminComponent implements OnInit {
   @ViewChild('searchInput', { static: false }) searchInput!: ElementRef;
   isSearchActive = false;
   images: Image[] = [];
@@ -47,15 +52,14 @@ export class MediaAdminComponent {
     this.loadImages();
   }
 
-  async loadImages(append: boolean = true, usage?: number) {
+  async loadImages(append: boolean = true) {
     try {
       const response = await firstValueFrom(
         this.imageService.getImages(
           this.keyword,
-          usage === 0 ? '' : this.selectedObjectType, // Truyền objectType rỗng nếu usage là 0
+          this.selectedObjectType, // Truyền objectType rỗng nếu usage là 0
           this.currentPage,
           this.itemsPerPage,
-          usage,
         ),
       );
       if (response) {
@@ -98,11 +102,7 @@ export class MediaAdminComponent {
     }
   }
   loadMoreImages(): void {
-    if (this.selectedObjectType === 'unused') {
-      this.loadImages(true, 0);
-    } else {
-      this.loadImages(true);
-    }
+    this.loadImages(true);
   }
 
   filterMedia(type: string) {
@@ -110,7 +110,7 @@ export class MediaAdminComponent {
     this.currentPage = 0;
     this.images = [];
     const usage = type === 'unused' ? 0 : undefined;
-    this.loadImages(false, usage);
+    this.loadImages(false);
   }
 
   onFileChange(event: Event): void {

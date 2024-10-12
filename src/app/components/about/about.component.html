@@ -6,33 +6,38 @@
     </div>
     <div class="row">
       <div class="col-lg-6">
-        <img src="assets/images/about-img.jpg" class="img-fluid" alt="" />
+        <img
+          *ngIf="about.image_url; else noImage"
+          [src]="about.image_url"
+          class="img-fluid"
+          alt="About Image"
+        />
+        <ng-template #noImage></ng-template>
       </div>
       <div class="col-lg-6 pt-4 pt-lg-0 content">
-        <h3 style="text-align: center">PI VINA DANANG CO.,LTD</h3>
-        <p class="fst-italic mt-4">
-          Công ty TNHH PI VINA ĐÀ NẴNG là doanh nghiệp 100% vốn đầu tư nước
-          ngoài, chuyên gia công hàng thời trang xuất khẩu đi các nước trên thế
-          giới.
+        <h3 style="text-align: center" *ngIf="about.title">
+          {{ about.title }}
+        </h3>
+        <p class="fst-italic mt-4" *ngIf="about.content">
+          {{ about.content }}
         </p>
-        <p class="fst-italic text-center">Trụ sở chính tại Seoul, Hàn Quốc</p>
+
         <ul>
-          <li>
-            <i class="bi bi-check-circle"></i> Địa chỉ: Lô P2, Đường số 6, Khu
-            công nghiệp Hòa Khánh, Hòa Khánh Bắc, Quận Liên Chiểu, Thành phố Đà
-            Nẵng, Việt Nam.
+          <li *ngIf="about.address">
+            <i class="bi bi-check-circle"></i> Địa chỉ:
+            {{ about.address }}
           </li>
-          <li>
-            <i class="bi bi-check-circle"></i> Điện thoại: (+84)-236-379-6756
-            hoặc (+84)-236-379-6757
+          <li *ngIf="about.phone_number">
+            <i class="bi bi-check-circle"></i> Điện thoại:
+            {{ about.phone_number }}
           </li>
-          <li>
-            <i class="bi bi-check-circle"></i> Hoạt động tại Việt Nam Tháng 6
-            năm 2016
+          <li *ngIf="about.founding_date">
+            <i class="bi bi-check-circle"></i> Hoạt động tại Việt Nam:
+            {{ about.founding_date }}
           </li>
-          <li>
-            <i class="bi bi-check-circle"></i> Mười thập kỷ kinh nghiệm trong
-            lĩnh vực may cao cấp
+          <li *ngIf="about.vision_statement">
+            <i class="bi bi-check-circle"></i>
+            {{ about.vision_statement }}
           </li>
           <li>
             <i class="bi bi-check-circle"></i> Chúng tôi quan tâm đến sự hài

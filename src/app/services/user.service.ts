@@ -1,7 +1,9 @@
 import { LoginDTO } from './../dtos/user/login.dto';
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators'; // Import catchError
+
 import { RegisterDTO } from '../../app/dtos/user/register.dto';
 import { environment } from '../../environments/environment';
 import { UserResponse } from '../..//app/responses/user/user.response';
@@ -36,6 +38,14 @@ export class UserService {
     @Inject(DOCUMENT) private document: Document,
   ) {
     this.localStorage = this.document.defaultView?.localStorage;
+    this.checkTokenValidity();
+  }
+
+  private checkTokenValidity() {
+    const token = this.tokenService.getToken();
+    if (token && this.tokenService.isTokenExpired()) {
+      this.logout();
+    }
   }
 
   register(registerDTO: RegisterDTO): Observable<any> {
@@ -68,28 +78,53 @@ export class UserService {
       },
     );
   }
-  getUserDetail(token: String) {
-    return this.http.post(this.apiUserDetail, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      }),
-    });
+  getUserDetail(token: string): Observable<UserResponse> {
+    this.checkTokenValidity(); // Kiểm tra token trước khi thực hiện yêu cầu API
+
+    return this.http
+      .post<UserResponse>(
+        this.apiUserDetail,
+        {},
+        {
+          // Sử dụng POST thay vì GET
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          }),
+        },
+      )
+      .pipe(
+        catchError((error) => {
+          if (error.status === 401) {
+            this.logout();
+          }
+          return throwError(() => new Error(error));
+        }),
+      );
   }
 
-  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO) {
-    debugger;
-    let userResponse = this.getFromLocalStorage();
-    return this.http.put(
-      `${this.apiUserDetail}/${userResponse?.id}`,
-      updateUserDTO,
-      {
+  updateUserDetail(
+    token: string,
+    updateUserDTO: UpdateUserDTO,
+  ): Observable<any> {
+    this.checkTokenValidity(); // Kiểm tra token trước khi thực hiện yêu cầu API
+
+    const userResponse = this.getFromLocalStorage();
+    return this.http
+      .put(`${this.apiUserDetail}/${userResponse?.id}`, updateUserDTO, {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         }),
-      },
-    );
+      })
+      .pipe(
+        catchError((error) => {
+          if (error.status === 401) {
+            this.logout();
+          }
+          return throwError(() => new Error(error));
+        }),
+      );
   }
 
   saveToLocalStorage(userResponse?: UserResponse) {

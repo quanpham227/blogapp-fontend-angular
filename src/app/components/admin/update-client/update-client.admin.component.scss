@@ -1,102 +1,101 @@
-::ng-deep .modal-dialog {
-  max-width: 45%; // Tăng kích thước modal lên 80% của màn hình
-  margin: auto; // Đảm bảo modal nằm giữa màn hình theo chiều ngang
-  display: flex;
-  align-items: center; // Căn giữa theo chiều dọc
-  min-height: calc(
-    100% - 1rem
-  ); // Đảm bảo modal không vượt quá chiều cao màn hình
-}
-
-::ng-deep .modal-header,
-::ng-deep .modal-footer {
-  border: none; // Loại bỏ đường kẻ ngăn cách
-  border-radius: 0;
-}
-
-::ng-deep .modal-header,
-::ng-deep .modal-body {
-}
-
-::ng-deep .modal-footer {
-  display: flex;
-  justify-content: flex-end; // Đưa các nút về phía cuối
-}
-
-.modal-title {
-  font-family: Arial, sans-serif;
-  font-size: 22px;
+.admin-update-client {
+  padding: 20px 20px;
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  font-size: 12px;
   font-weight: 100;
-  color: #2b3337;
-}
-.btn-cancel {
-  width: 80px;
-  height: 40px;
-  background-color: #fff;
-  cursor: pointer;
-  border: 1px solid rgb(167, 170, 173);
-}
+  input,
+  textarea {
+    border-radius: 0;
+  }
+  input:focus,
+  textarea:focus {
+    border: 1px solid rgb(34, 112, 177);
+    outline: 2px solid rgb(104, 179, 232); // Đặt màu và độ dày cho outline khi focus
+  }
 
-.btn-add {
-  width: 80px;
-  height: 40px;
-  cursor: pointer;
-  background-color: rgb(34, 112, 177);
-  color: rgb(255, 255, 255);
-  border: 1px solid rgb(167, 170, 173);
-}
-.btn-add:hover {
-  background-color: rgb(3, 93, 157);
-}
+  .admin-update-client__header {
+    .admin-update-client__header-title {
+      font-size: 20px; // Tăng kích thước font chữ cho tiêu đề
+      margin-bottom: 20px;
+    }
+  }
+  .admin-update-client__body {
+    .admin-update-client__error-container {
+      min-height: 20px; // Đặt chiều cao tối thiểu để chừa khoảng trống cho thông báo lỗi
+      margin-top: 10px; // Khoảng cách từ footer đến error container
+    }
+    .admin-update-client__image {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid rgb(34, 112, 177);
+      height: 150px;
+      overflow: hidden; // Ẩn phần hình ảnh tràn ra ngoài
+      position: relative; // Đặt vị trí tương đối để căn chỉnh các nút bên trong
 
-.text-danger {
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
-img {
-  width: 400px;
-  height: 140px;
-}
-.image-container {
-  position: relative;
-  display: flex;
-  justify-content: end;
-  height: 141px;
-}
+      .admin-update-client__image-filled,
+      .admin-update-client__image-empty {
+        width: 100%;
+        height: 100%;
+        border: 1px solid rgb(34, 112, 177);
+        padding: 2px;
+        object-fit: cover; // Đảm bảo hình ảnh vừa trong khung container
+      }
+      .admin-update-client__image-actions {
+        gap: 10px; // Khoảng cách giữa các nút
+        position: absolute; // Đặt vị trí tuyệt đối để căn chỉnh các nút
+        top: 50%; // Căn giữa theo chiều dọc
+        left: 50%; // Căn giữa theo chiều ngang
+        transform: translate(-50%, -50%); // Dịch chuyển để căn giữa chính xác
+        justify-content: center; // Căn giữa các nút theo chiều ngang
+        align-items: center; // Căn giữa các nút theo chiều dọc
+        z-index: 1; // Đảm bảo các nút nằm trên hình ảnh
+        display: none; // Ẩn các nút khi chưa hover vào hình ảnh
+        &:hover {
+          display: flex; // Hiển thị các nút khi hover vào hình ảnh
+        }
 
-.image-actions {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.5);
-}
+        .admin-update-client__select-image,
+        .admin-update-client__remove-image {
+          font-size: 12px;
+          padding: 5px 10px;
+          border: 1px solid rgb(34, 112, 177);
+          background-color: #dad0d0; // Đặt nền trắng mờ để dễ nhìn
 
-.image-container:hover .image-actions {
-  display: flex;
-}
+          &:hover {
+            border: 1px solid rgb(34, 112, 177);
+            background-color: rgba(
+              255,
+              253,
+              253,
+              0.8
+            ); // Thay đổi màu viền khi rê chuột vào
+          }
+        }
+      }
 
-.empty-image {
-  width: 400px;
-  height: 141px;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.logo-text {
-  height: 141px; // Đặt chiều cao của logo-text bằng với image-container
-  display: flex;
-  align-items: center;
-  flex: 1; // Chiếm phần còn lại của chiều rộng
-}
-.logo-container {
-  display: flex;
-  justify-content: space-between; // Đưa các phần tử về hai phía
-  align-items: center; // Căn giữa theo chiều dọc
+      &:hover .admin-update-client__image-actions {
+        display: flex; // Hiện các nút khi hover vào hình ảnh
+      }
+    }
+  }
+
+  .admin-update-client__footer {
+    display: flex;
+    justify-content: flex-end; // Căn chỉnh các nút về phía cuối
+    gap: 10px; // Khoảng cách giữa các nút
+    margin-top: 10px; // Đẩy footer xuống dưới cùng
+
+    .admin-update-client__cancel,
+    .admin-update-client__update {
+      // Thêm tên class cha
+      font-size: 14px;
+      padding: 10px 20px;
+      border: 1px solid #ddd;
+      &:hover {
+        border: 1px solid #aba9a9;
+        background-color: #ffffff; // Thay đổi màu nền khi rê chuột vào
+      }
+    }
+  }
 }

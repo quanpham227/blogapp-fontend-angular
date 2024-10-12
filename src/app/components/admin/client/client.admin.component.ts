@@ -66,7 +66,13 @@ export class ClientAdminComponent implements OnInit {
   }
 
   addClient() {
-    const modalRef = this.modalService.open(InsertClientAdminComponent);
+    const modalRef = this.modalService.open(InsertClientAdminComponent, {
+      centered: true, // Căn giữa theo chiều dọc
+      backdrop: 'static', // Không cho phép đóng khi click ngoài
+      keyboard: true, //  cho phép đóng bằng phím Esc
+      windowClass: 'admin-modal', // Class tùy chỉnh cho modal
+      size: 'md',
+    });
     modalRef.componentInstance.addClient.subscribe((client: ClientRequest) => {
       this.clientService.insertClient(client).subscribe({
         next: (response: ApiResponse<Client>) => {
@@ -78,6 +84,7 @@ export class ClientAdminComponent implements OnInit {
             this.toastr.error(response.message);
           }
         },
+        complete() {},
         error: (error: any) => {
           // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
           const errorMessage =
@@ -138,7 +145,13 @@ export class ClientAdminComponent implements OnInit {
 
   editClient(id: number | null): void {
     if (id !== null) {
-      const modalRef = this.modalService.open(UpdateClientAdminComponent);
+      const modalRef = this.modalService.open(UpdateClientAdminComponent, {
+        centered: true, // Căn giữa theo chiều dọc
+        backdrop: 'static', // Không cho phép đóng khi click ngoài
+        keyboard: true, //  cho phép đóng bằng phím Esc
+        windowClass: 'admin-modal', // Class tùy chỉnh cho modal
+        size: 'md',
+      });
       modalRef.componentInstance.clientId = id; // Truyền ID vào modal
       modalRef.componentInstance.updateClient.subscribe(
         (client: ClientRequest) => {

@@ -1,0 +1,36 @@
+<div class="post-preview">
+  <div class="container">
+    <div class="row g-5 justify-content-center">
+      <div class="col-lg-8 post-preview__content">
+        <div class="post-preview__details">
+          <h2 class="post-preview__details-title">{{ post.title }}</h2>
+          <div class="post-preview__details-meta">
+            <ul>
+              <li class="d-flex align-items-center">
+                <i class="bi bi-person"></i>
+                <a>{{ post.author || "John Doe" }}</a>
+              </li>
+              <li class="d-flex align-items-center">
+                <i class="bi bi-clock"></i>
+                <a
+                  ><time [attr.datetime]="post.date">{{
+                    post.date | date: "MMM d, y"
+                  }}</time></a
+                >
+              </li>
+              <li class="d-flex align-items-center">
+                <i class="bi bi-chat-dots"></i>
+                <a>{{ post.comments || "0 Comments" }}</a>
+              </li>
+            </ul>
+          </div>
+          <!-- End meta top -->
+          <div
+            class="post-preview__details-content"
+            [innerHTML]="post.content"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

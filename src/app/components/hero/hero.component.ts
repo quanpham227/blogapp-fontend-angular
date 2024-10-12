@@ -3,6 +3,8 @@ import { Slide } from '../../models/slide';
 import Swiper from 'swiper';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SlideService } from '../../services/slide.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-hero',
@@ -13,9 +15,13 @@ import { FormsModule } from '@angular/forms';
 })
 export class HeroComponent implements OnInit, AfterViewInit {
   slides: Slide[] = [];
+
   swiperSlides: Swiper | null = null;
 
-  constructor() {}
+  constructor(
+    private slideService: SlideService,
+    private toastr: ToastrService,
+  ) {}
 
   ngOnInit() {
     this.getSlides();
@@ -48,29 +54,15 @@ export class HeroComponent implements OnInit, AfterViewInit {
   }
 
   getSlides() {
-    // Gán dữ liệu mẫu trực tiếp cho slides
-    this.slides = [
-      {
-        id: 1,
-        title: 'WELCOME TO PI VINA DANANG',
-        description: '',
-        image:
-          'https://drive.google.com/thumbnail?id=1NF3-OFGlc3L1TQ4FEWQ6n8RSxTRQ70JA&sz=w4000',
+    this.slideService.getSlides().subscribe({
+      next: (response: any) => {
+        this.slides = response.data;
       },
-      {
-        id: 2,
-        title: '',
-        description: '',
-        image:
-          'https://drive.google.com/thumbnail?id=1j6wAQG_hCBuMshS-prR14KZNK9W_VP1Z&sz=w4000',
+      complete: () => {},
+      error: (error: any) => {
+        console.error('Error fetching clients:', error);
+        this.toastr.error('An error occurred while fetching clients.');
       },
-      {
-        id: 3,
-        title: '',
-        description: '',
-        image:
-          'https://drive.google.com/thumbnail?id=1G4KrVKKmV3NSHGrbYauDD_m1jMlpGnnv&sz=w4000',
-      },
-    ];
+    });
   }
 }

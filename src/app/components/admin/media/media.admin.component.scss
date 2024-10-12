@@ -70,6 +70,8 @@
           align-items: center;
           justify-content: center;
           height: 100%;
+          padding-right: 20px;
+          border-bottom: 2px solid transparent; /* Thêm border-bottom để đảm bảo nhất quán */
 
           &:hover {
             background-color: rgb(215, 224, 230);
@@ -151,9 +153,9 @@
 
 .media-upload-bar {
   position: sticky;
-  top: 0;
-  margin-top: 15px;
-  z-index: 1000; /* Đảm bảo phần tử nằm trên các phần tử khác */
+  top: 35px;
+  margin-top: 10px;
+  z-index: 900; /* Đảm bảo phần tử nằm trên các phần tử khác */
   padding: 10px; /* Khoảng cách bên trong */
   border: 1px solid #dee2e6;
   display: flex;
@@ -310,7 +312,11 @@
     width: 100%;
     height: 100px;
     display: block;
-    transition: transform 0.3s ease; /* Hiệu ứng chuyển đổi cho hình ảnh */
+    transition: opacity 5s ease-in-out; /* Đảm bảo rằng transition được áp dụng */
+    opacity: 0; /* Đặt opacity ban đầu */
+    .loaded & {
+      opacity: 1; /* Hiển thị hình ảnh khi đã tải xong */
+    }
   }
 
   &:hover {

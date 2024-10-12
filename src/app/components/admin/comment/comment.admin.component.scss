@@ -1,0 +1,96 @@
+.admin-media {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+
+  /* Media Header */
+  .media-header__title {
+    font-size: 20px;
+    font-weight: 400;
+  }
+
+  /* Comment Filter Bar */
+  .comment-filter__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    border: 2px solid #dee2e6;
+    position: relative;
+    height: auto;
+    flex-wrap: wrap;
+
+    /* Nav Container within Comment Filter */
+    .comment-filter__nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 68%;
+      margin: 0;
+      padding: 0;
+      height: auto;
+      position: relative;
+      border-right: 1px solid #dee2e6;
+      flex: 1 1 auto;
+      flex-wrap: wrap;
+
+      /* Categories Navigation */
+      .comment-filter__categories-nav {
+        .nav-pills {
+          display: flex;
+          align-items: center;
+          height: auto;
+          flex-wrap: wrap;
+
+          /* Nav Links */
+          .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgb(0, 103, 173);
+            border-radius: 0;
+            position: relative;
+            transition: background-color 0.3s;
+            height: 100%;
+            padding-right: 20px;
+            border-bottom: 2px solid transparent; /* Thêm border-bottom để đảm bảo nhất quán */
+            .badge {
+              display: inline-flex; /* Sử dụng inline-flex để căn giữa nội dung */
+              align-items: center; /* Căn giữa nội dung theo chiều dọc */
+              justify-content: center; /* Căn giữa nội dung theo chiều ngang */
+              padding: 0; /* Loại bỏ padding để đảm bảo hình tròn */
+              font-size: 13px; /* Giảm kích thước font để làm cho nét nhỏ hơn */
+              color: rgb(1, 1, 1);
+              text-align: center;
+              margin-left: 10px;
+              border-radius: 50%; /* Làm cho badge có hình tròn */
+              border: 1px solid rgb(121, 121, 121);
+              background-color: rgb(255, 255, 255); /* Thêm màu nền nếu cần */
+              line-height: 1; /* Đảm bảo nội dung được căn giữa */
+              min-width: 35px; /* Đặt chiều rộng tối thiểu */
+              min-height: 30px; /* Đặt chiều cao tối thiểu */
+              width: auto; /* Đặt chiều rộng tự động */
+              height: auto; /* Đặt chiều cao tự động */
+            }
+
+            &:hover {
+              background-color: rgb(215, 224, 230);
+            }
+
+            &.active {
+              background-color: rgb(215, 224, 230);
+              color: #0e0e0f;
+              border-bottom: 2px solid #000;
+            }
+          }
+        }
+      }
+
+      &.active .media-search-input {
+        display: block;
+        left: 0;
+        right: 0;
+        width: 100%; /* Đảm bảo input chiếm toàn bộ chiều rộng của khối */
+      }
+    }
+  }
+}

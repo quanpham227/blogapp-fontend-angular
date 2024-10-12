@@ -23,7 +23,7 @@
                       <i class="bi bi-clock"></i>
                       <a>
                         <time [attr.datetime]="post.created_at">{{
-                          post.created_at | date : 'MMM d, y'
+                          post.created_at | date: "MMM d, y"
                         }}</time>
                       </a>
                     </li>
@@ -133,7 +133,7 @@
                       <a (click)="onPostClick(post.slug)">{{ post.title }}</a>
                     </p>
                     <time [attr.datetime]="post.created_at">
-                      {{ post.created_at | date : 'MMM d, y' }}
+                      {{ post.created_at | date: "MMM d, y" }}
                     </time>
                   </div>
                 </div>

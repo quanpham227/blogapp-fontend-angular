@@ -14,6 +14,7 @@ import { ClientService } from '../../../services/client.service';
 import { ToastrService } from 'ngx-toastr';
 import { ApiResponse } from '../../../models/response';
 import { Client } from '../../../models/client';
+import e from 'express';
 
 @Component({
   selector: 'app-update-client-admin',
@@ -83,14 +84,17 @@ export class UpdateClientAdminComponent {
   }
   onSubmit() {
     if (this.clientForm.valid) {
+      console.log('Form is valid, submitting:', this.clientForm.value);
+
       this.updateClient.emit(this.clientForm.value);
       this.activeModal.close();
+    } else {
+      console.log('Form is invalid, cannot submit:', this.clientForm.value);
     }
   }
 
   openLogoModal(): void {
     const modalRef = this.modalService.open(ImageSelectModalAdminComponent);
-    modalRef.componentInstance.objectType = 'clients'; // Truyền object_type vào modal
     modalRef.result.then(
       (result: { url: string; publicId: string }) => {
         this.selectedLogoUrl = result.url;

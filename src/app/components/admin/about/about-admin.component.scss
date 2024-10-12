@@ -1,0 +1,48 @@
+.about-container {
+  background-color: #f8f9fa;
+  padding: 20px 30px 20px 30px;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 100;
+
+  h1 {
+    font-size: 24px;
+    color: #3f99f3;
+  }
+
+  .row {
+    margin-bottom: 1rem;
+
+    label {
+      font-weight: bold;
+      color: #495057;
+    }
+
+    .form-control-plaintext {
+      font-size: 1rem;
+      color: #6c757d;
+      word-break: break-all; /* Thêm thuộc tính này để xử lý URL dài */
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn {
+      &.btn-primary {
+        background-color: #4a84c2;
+        border-color: #007bff;
+      }
+
+      &.btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+      }
+
+      &.btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+      }
+    }
+  }
+}

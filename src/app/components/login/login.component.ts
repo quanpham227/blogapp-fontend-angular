@@ -43,11 +43,9 @@ export class LoginComponent implements OnInit {
   //Khi page được load
   ngOnInit() {
     // Gọi API lấy danh sách roles và lưu vào biến roles
-    debugger;
     this.roleService.getRoles().subscribe({
       next: (roles: Role[]) => {
         // Sử dụng kiểu Role[]
-        debugger;
         this.roles = roles;
         this.selectedRole = roles.length > 0 ? roles[0] : undefined;
       },

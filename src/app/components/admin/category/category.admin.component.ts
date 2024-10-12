@@ -75,6 +75,7 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
               this.toastr.error(response.message);
             }
           },
+          complete: () => {},
           error: (error: any) => {
             // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
             const errorMessage =

@@ -1,0 +1,29 @@
+/*--------------------------------------------------------------
+  # Footer
+  --------------------------------------------------------------*/
+.footer-admin {
+  padding: 20px 0;
+  transition: all 0.3s;
+  border-top: 1px solid #cddfff;
+  background: #ffffff;
+  height: 80px;
+  margin-left: 270px;
+  &.shifted {
+    margin-left: 0; /* Khoảng cách khi sidebar ẩn */
+  }
+  &.collapsed {
+    margin-left: 50px; /* Khoảng cách khi sidebar thu gọn */
+  }
+  @media (max-width: 768px) {
+    margin-left: 0; /* Đẩy footer qua trái khi sidebar ẩn */
+  }
+  .copyright,
+  .credits {
+    text-align: center;
+    color: rgb(1, 115, 169);
+  }
+
+  .credits {
+    padding-top: 5px;
+  }
+}

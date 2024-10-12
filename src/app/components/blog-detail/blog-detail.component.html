@@ -1,32 +1,28 @@
-<!-- ======= Blog Details Section ======= -->
+<!-- blog-detail.component.html -->
 <section id="blog" class="blog">
   <div class="container" data-aos="fade-up">
-    <div class="row g-5">
-      <div class="col-lg-12" *ngIf="post">
+    <div class="row g-5 justify-content-center">
+      <div class="col-lg-8" *ngIf="post; else errorTemplate">
         <article class="blog-details">
           <div class="post-img">
-            <img
-              [src]="post.thumbnail_url"
-              alt="{{ post.title }}"
-              class="img-fluid"
-            />
+            <img [src]="post.thumbnail_url" alt="" class="img-fluid" />
           </div>
           <h2 class="title">{{ post.title }}</h2>
           <div class="meta-top">
             <ul>
               <li class="d-flex align-items-center">
                 <i class="bi bi-person"></i>
-                <a href="blog-details.html">John Doe</a>
+                <a href="blog-details.html">{{ post.author_name }}</a>
               </li>
               <li class="d-flex align-items-center">
                 <i class="bi bi-clock"></i>
                 <a href="blog-details.html"
-                  ><time datetime="2020-01-01">Jan 1, 2022</time></a
+                  ><time datetime="2020-01-01">{{ post.created_at }}</time></a
                 >
               </li>
               <li class="d-flex align-items-center">
                 <i class="bi bi-chat-dots"></i>
-                <a href="blog-details.html">12 Comments</a>
+                <a href="blog-details.html">{{ post.comment_count }}</a>
               </li>
             </ul>
           </div>
@@ -34,84 +30,34 @@
           <div class="content">
             <p>{{ post.content }}</p>
           </div>
-          <!-- End post content -->
+          <div class="meta-bottom">
+            <i class="bi bi-tags"></i>
+            <ul class="tags">
+              <li><a>Creative</a></li>
+              <li><a>Tips</a></li>
+              <li><a>Marketing</a></li>
+            </ul>
+          </div>
+          <!-- End meta bottom -->
         </article>
         <!-- End blog post -->
         <div class="comments">
           <h4 class="comments-count">8 Comments</h4>
-
-          <div id="comment-1" class="comment">
-            <div class="d-flex">
-              <div class="comment-img">
-                <img src="../../../assets/images/219986.png" alt="" />
-              </div>
-              <div>
-                <h5>
-                  <a href="">Georgia Reader</a>
-                  <a href="#" class="reply"
-                    ><i class="bi bi-reply-fill"></i> Reply</a
-                  >
-                </h5>
-                <time datetime="2020-01-01">01 Jan,2022</time>
-                <p>
-                  Et rerum totam nisi. Molestiae vel quam dolorum vel voluptatem
-                  et et. Est ad aut sapiente quis molestiae est qui cum soluta.
-                  Vero aut rerum vel. Rerum quos laboriosam placeat ex qui. Sint
-                  qui facilis et.
-                </p>
-              </div>
-            </div>
-          </div>
-          <!-- End comment #1 -->
-
-          <div id="comment-2" class="comment">
-            <div class="d-flex">
-              <div class="comment-img">
-                <img src="../../../assets/images/219986.png" alt="" />
-              </div>
-              <div>
-                <h5>
-                  <a href="">Aron Alvarado</a>
-                  <a href="#" class="reply"
-                    ><i class="bi bi-reply-fill"></i> Reply</a
-                  >
-                </h5>
-                <time datetime="2020-01-01">01 Jan,2022</time>
-                <p>
-                  Ipsam tempora sequi voluptatem quis sapiente non. Autem itaque
-                  eveniet saepe. Officiis illo ut beatae.
-                </p>
-              </div>
-            </div>
-            <!-- End comment reply #1-->
-          </div>
-          <!-- End comment #2-->
-
-          <div class="reply-form">
-            <h4>Leave a Reply</h4>
-            <p>
-              Your email address will not be published. Required fields are
-              marked *
-            </p>
-            <form action="">
-              <div class="row">
-                <div class="col form-group">
-                  <textarea
-                    name="comment"
-                    class="form-control"
-                    placeholder="Your Comment*"
-                  ></textarea>
-                </div>
-              </div>
-              <button type="button" class="btn btn-primary">
-                Post Comment
-              </button>
-            </form>
-          </div>
+          <!-- Comments content -->
         </div>
         <!-- End blog comments -->
       </div>
+      <ng-template #errorTemplate>
+        <div class="col-lg-8">
+          <div class="alert alert-danger" role="alert">
+            {{ errorMessage }}
+          </div>
+        </div>
+      </ng-template>
     </div>
   </div>
 </section>
 <!-- End Blog Details Section -->
+<div *ngIf="!post">
+  <p>Loading...</p>
+</div>

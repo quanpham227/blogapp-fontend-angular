@@ -65,7 +65,6 @@
                   [content]="clientForm.get('description')?.value"
                   (contentChange)="onDescriptionChange($event)"
                   [editorConfig]="{ height: 300 }"
-                  [objectType]="'clients'"
                 ></app-tinymce-editor>
                 <div
                   *ngIf="

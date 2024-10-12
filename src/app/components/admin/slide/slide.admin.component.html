@@ -1,1 +1,60 @@
-<p>slide works!</p>
+<div class="admin-slide">
+  <div class="admin-slide__container mt-4">
+    <header class="admin-slide__header mb-4">
+      <h1 class="admin-slide__title">Slide</h1>
+      <p class="admin-slide__description text-muted">
+        Create, edit, and manage the slide on your site.
+      </p>
+    </header>
+
+    <div
+      class="admin-slide__input-wrapper d-flex justify-content-between align-items-center"
+    >
+      <div class="admin-slide__input-group position-relative">
+        <i class="bi bi-search admin-slide__icon"></i>
+        <input
+          type="search"
+          class="admin-slide__search-input"
+          placeholder="Tìm kiếm..."
+          aria-label="Tìm kiếm"
+        />
+      </div>
+      <button class="admin-slide__btn-add" type="button" (click)="addSlide()">
+        Thêm chuyên mục
+      </button>
+    </div>
+
+    <div class="admin-slide__list-slide">
+      <div class="admin-slide__list-slide-item" *ngFor="let slide of slides">
+        <i class="fas fa-folder admin-slide__left-icon"></i>
+        <p class="admin-slide__slide-name">{{ slide.title }}</p>
+        <div class="admin-slide__right-icon">
+          <i
+            class="bi bi-three-dots"
+            [class.rotate-icon]="menuVisible && selectedSlideId === slide.id"
+            (click)="toggleMenu($event, slide.id)"
+          ></i>
+          <div
+            class="admin-slide__options-menu"
+            *ngIf="menuVisible && selectedSlideId === slide.id"
+          >
+            <!-- Mũi tên chỉ vào icon -->
+            <div class="admin-slide__arrow"></div>
+            <div class="admin-slide__option-item" (click)="editSlide(slide.id)">
+              <i class="bi bi-pencil"></i> Sửa
+            </div>
+            <div
+              class="admin-slide__option-item"
+              (click)="openDeleteModal(slide.id)"
+            >
+              <i class="bi bi-trash"></i> Xóa
+            </div>
+            <div class="admin-slide__option-item">
+              <i class="bi bi-check-circle-fill"></i> Đặt làm mặc định
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

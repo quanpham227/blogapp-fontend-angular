@@ -1,0 +1,72 @@
+<div class="about-container mt-2">
+  <h1 class="text-center mb-4">About Information</h1>
+  <form [formGroup]="aboutForm" (ngSubmit)="onSubmit()">
+    <div *ngFor="let field of fields" class="mb-3 row">
+      <label [for]="field" class="col-sm-3 col-form-label">{{
+        fieldLabels[field]
+      }}</label>
+      <div class="col-sm-9">
+        <div *ngIf="!isEditing[field]" class="d-flex align-items-center">
+          <span class="form-control-plaintext">{{ getFieldValue(field) }}</span>
+          <button
+            type="button"
+            class="btn btn-primary ms-2"
+            (click)="editField(field)"
+          >
+            Edit
+          </button>
+        </div>
+        <div *ngIf="isEditing[field]" class="d-flex align-items-center">
+          <input
+            *ngIf="field !== 'content' && field !== 'vision_statement'"
+            [id]="field"
+            [formControlName]="field"
+            class="form-control"
+          />
+          <textarea
+            *ngIf="field === 'content' || field === 'vision_statement'"
+            [id]="field"
+            [formControlName]="field"
+            class="form-control"
+          ></textarea>
+          <button
+            type="button"
+            class="btn btn-success ms-2"
+            (click)="saveField(field)"
+          >
+            Save
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary ms-2"
+            (click)="cancelEdit(field)"
+          >
+            Cancel
+          </button>
+        </div>
+        <div
+          *ngIf="
+            aboutForm.controls[field].invalid &&
+            (aboutForm.controls[field].dirty ||
+              aboutForm.controls[field].touched)
+          "
+          class="text-danger mt-1"
+        >
+          <div *ngIf="aboutForm.controls[field].errors?.['required']">
+            {{ fieldLabels[field] }} không được để trống.
+          </div>
+          <div *ngIf="aboutForm.controls[field].errors?.['maxlength']">
+            Độ dài tối đa của {{ fieldLabels[field] }} là
+            {{
+              aboutForm.controls[field].errors?.["maxlength"].requiredLength
+            }}
+            ký tự.
+          </div>
+          <div *ngIf="aboutForm.controls[field].errors?.['email']">
+            Email không hợp lệ.
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

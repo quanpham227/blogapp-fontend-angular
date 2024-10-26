@@ -25,7 +25,6 @@ export class AboutComponent implements OnInit {
     this.aboutService.getAbout().subscribe({
       next: (response: any) => {
         this.about = response.data;
-        console.log(response.data);
       },
       complete: () => {},
       error: (error: any) => {

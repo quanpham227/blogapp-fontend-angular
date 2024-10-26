@@ -99,7 +99,7 @@ export class InsertPostAdminComponent implements OnInit {
       visibility: [PostVisibility.Public, Validators.required],
       tags: [[], [nonEmptyTagsValidator(), maxTagsValidator(5)]], // Sử dụng các validator tùy chỉnh
       thumbnail: [null, Validators.required], // Thêm thuộc tính thumbnail
-      public_id: [null, Validators.required], // Thêm thuộc tính public_id
+      public_id: [null], // Thêm thuộc tính public_id
     });
 
     this.newCategoryNameControl = new FormControl('', [

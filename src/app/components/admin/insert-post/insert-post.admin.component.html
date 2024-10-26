@@ -1,5 +1,5 @@
 <form [formGroup]="postForm" (ngSubmit)="onSubmitPost()">
-  <div class="admin-add-post">
+  <div class="admin-add-post container">
     <div class="admin-add-post__loading loading-container" *ngIf="isLoading">
       <div class="admin-add-post__loading-spinner loading-spinner">
         <i class="fa fa-spinner fa-spin"></i> Đang lưu bài viết...
@@ -19,7 +19,7 @@
           />
           <app-tinymce-editor
             class="admin-add-post__editor"
-            [editorConfig]="{ height: 1200 }"
+            [editorConfig]="{ height: 975 }"
             formControlName="content"
           ></app-tinymce-editor>
         </div>

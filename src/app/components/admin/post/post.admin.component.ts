@@ -1,9 +1,9 @@
-import { Component, inject, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PostService } from '../../../services/post.service';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { Post } from '../../../models/post';
 import { Category } from '../../../models/category';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbDateStruct, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CategoryService } from '../../../services/category.service';
@@ -12,6 +12,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { PostStatus } from '../../../enums/post-status.enum';
 import { ToastrService } from 'ngx-toastr';
 import { filter } from 'rxjs/operators';
+import { MessageService } from '../../../services/message.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-post-admin',
@@ -27,7 +29,6 @@ export class PostAdminComponent implements OnInit {
   selectedCategoryId: number = 0;
   currentPage: number = 1; // Sửa đổi để bắt đầu từ trang 1
   itemsPerPage: number = 12;
-  pages: number[] = [];
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
@@ -45,18 +46,20 @@ export class PostAdminComponent implements OnInit {
   selectedPosts: Set<number> = new Set<number>(); // Set chứa ID của các bài viết đã chọn
   allPostsSelected: boolean = false; // Biến kiểm tra xem tất cả checkbox đã được chọn hay chưa
 
+  private routerSubscription: Subscription;
+
   constructor(
     private router: Router,
     private toast: ToastrService,
     private postService: PostService,
     private categoryService: CategoryService,
+    private messageService: MessageService,
   ) {
     this.localStorage = document.defaultView?.localStorage;
-    this.router.events
+    this.routerSubscription = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
-        const navigation = this.router.getCurrentNavigation();
-        const message = navigation?.extras?.state?.['message'];
+        const message = this.messageService.getMessage();
         if (message) {
           this.toast.success(message);
         }
@@ -86,6 +89,12 @@ export class PostAdminComponent implements OnInit {
     this.getCategories();
     this.getPostCounts();
   }
+
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
   getCategories() {
     this.categoryService.getCategories().subscribe({
       next: (response: any) => {
@@ -107,16 +116,22 @@ export class PostAdminComponent implements OnInit {
     createdAt?: string,
   ) {
     this.postService
-      .getPosts(keyword, selectedCategoryId, page, limit, status, createdAt)
+      .getPostsForAdmin(
+        keyword,
+        selectedCategoryId,
+        page,
+        limit,
+        status,
+        createdAt,
+      )
       .subscribe({
         next: (response: any) => {
           this.posts = response.data.posts;
           this.totalPages = response.data.totalPages;
-          this.visiblePages = this.generateVisiblePageArray(
-            this.currentPage,
-            this.totalPages,
-          );
-          console.log('Posts:', this.posts);
+          // this.visiblePages = this.generateVisiblePageArray(
+          //   this.currentPage,
+          //   this.totalPages,
+          // );
         },
         error: (error: any) => {
           console.error('Error fetching posts:', error);
@@ -138,23 +153,23 @@ export class PostAdminComponent implements OnInit {
     }
   }
 
-  generateVisiblePageArray(currentPage: number, totalPages: number): number[] {
-    const maxVisiblePages = 5; // Số trang tối đa để hiển thị
-    const halfVisiblePages = Math.floor(maxVisiblePages / 2);
+  // generateVisiblePageArray(currentPage: number, totalPages: number): number[] {
+  //   const maxVisiblePages = 5; // Số trang tối đa để hiển thị
+  //   const halfVisiblePages = Math.floor(maxVisiblePages / 2);
 
-    let startPage = Math.max(currentPage - halfVisiblePages, 1);
-    let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+  //   let startPage = Math.max(currentPage - halfVisiblePages, 1);
+  //   let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
-    // Điều chỉnh khi có ít trang hơn maxVisiblePages
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(endPage - maxVisiblePages + 1, 1);
-    }
+  //   // Điều chỉnh khi có ít trang hơn maxVisiblePages
+  //   if (endPage - startPage + 1 < maxVisiblePages) {
+  //     startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+  //   }
 
-    // Chỉ trả về các trang trong khoảng hợp lệ
-    return new Array(endPage - startPage + 1)
-      .fill(0)
-      .map((_, index) => startPage + index);
-  }
+  //   // Chỉ trả về các trang trong khoảng hợp lệ
+  //   return new Array(endPage - startPage + 1)
+  //     .fill(0)
+  //     .map((_, index) => startPage + index);
+  // }
   onKeywordChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.keyword = target.value;
@@ -241,7 +256,55 @@ export class PostAdminComponent implements OnInit {
   }
 
   deletePost(postId: number) {
-    console.log('Deleting post:', postId);
+    this.postService.deletePost(postId).subscribe({
+      next: (response: any) => {
+        if (response.status === 'OK') {
+          this.toast.success(response.message);
+          this.getPosts(
+            this.keyword,
+            this.selectedCategoryId,
+            this.currentPage - 1,
+            this.itemsPerPage,
+            this.status,
+            this.createdAt ?? undefined,
+          );
+          this.getPostCounts();
+        } else {
+          this.toast.error(response.message);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.toast.error('Error deleting post');
+        console.error('Error deleting post:', error);
+      },
+    });
+  }
+  deleteSelectedPosts() {
+    const selectedPostIds = Array.from(this.selectedPosts);
+    this.postService.deletePosts(selectedPostIds).subscribe({
+      next: (response: any) => {
+        if (response.status === 'OK') {
+          this.toast.success(response.message);
+          this.getPosts(
+            this.keyword,
+            this.selectedCategoryId,
+            this.currentPage - 1,
+            this.itemsPerPage,
+            this.status,
+            this.createdAt ?? undefined,
+          );
+          this.getPostCounts();
+          this.selectedPosts.clear();
+          this.allPostsSelected = false;
+        } else {
+          this.toast.error(response.message);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.toast.error('Error deleting selected posts');
+        console.error('Error deleting selected posts:', error);
+      },
+    });
   }
   viewPost(postId: number) {
     console.log(postId);

@@ -1,5 +1,4 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TinymceEditorComponent } from '../../tinymce-editor/tinymce-editor.component';
 import {

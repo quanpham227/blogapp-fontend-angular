@@ -7,6 +7,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SidebarAdminService } from '../../../../services/sidebar.admin.service';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-header-admin',
@@ -23,6 +24,8 @@ export class HeaderAdminComponent implements OnInit {
   constructor(
     private userService: UserService,
     private sidebarService: SidebarAdminService,
+    private tokenService: TokenService,
+    private authService: AuthService,
 
     @Inject(DOCUMENT) private document: Document,
   ) {
@@ -34,7 +37,17 @@ export class HeaderAdminComponent implements OnInit {
     this.sidebarService.isSidebarVisible$.subscribe((isVisible) => {
       this.isSidebarVisible = isVisible;
     });
-    this.userResponse = this.userService.getFromLocalStorage();
+    this.checkUserStatus();
+  }
+
+  private checkUserStatus() {
+    const token = this.authService.getAccessToken();
+    if (token && this.authService.isTokenExpired(token)) {
+      this.authService.setUser(null);
+      this.userResponse = null;
+    } else {
+      this.userResponse = this.authService.getUser();
+    }
   }
 
   logout() {

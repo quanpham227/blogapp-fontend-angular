@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Post } from '../../models/post';
 import { PostService } from '../../services/post.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-recent-posts',
@@ -12,8 +13,9 @@ import { PostService } from '../../services/post.service';
   standalone: true,
   imports: [FormsModule, CommonModule],
 })
-export class RecentPostsComponent implements OnInit {
+export class RecentPostsComponent implements OnInit, OnDestroy {
   recentPosts: Post[] = [];
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private postService: PostService,
@@ -24,25 +26,27 @@ export class RecentPostsComponent implements OnInit {
     this.getRecentPosts(0, 4);
   }
 
-  getRecentPosts(page: number, limit: number) {
-    this.postService.getRecentPosts(page, limit).subscribe({
-      next: (response: any) => {
-        debugger;
-
-        this.recentPosts = response.data.posts;
-        console.log('recent post', response.data.posts);
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching recent posts:', error);
-      },
-    });
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
-  // Hàm xử lý sự kiện khi sản phẩm được bấm vào
+  getRecentPosts(page: number, limit: number) {
+    const recentPostsSubscription = this.postService
+      .getRecentPosts(page, limit)
+      .subscribe({
+        next: (response: any) => {
+          this.recentPosts = response.data.posts;
+        },
+        error: (error: any) => {
+          console.error('Error fetching recent posts:', error);
+          // Hiển thị thông báo lỗi cho người dùng nếu cần
+        },
+      });
+
+    this.subscriptions.add(recentPostsSubscription);
+  }
+
   onPostClick(slug: string) {
-    debugger;
-    // Điều hướng đến trang detail-blog với slug là tham số
     this.router.navigate(['/blog-detail', slug]);
   }
 }

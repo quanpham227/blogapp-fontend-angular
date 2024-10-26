@@ -1,5 +1,5 @@
 //------ Top Bar----------
-#topbar {
+.topbar {
   background: #ffffff;
   border-bottom: 2px solid #dad9d9;
   font-size: 14px;
@@ -13,67 +13,85 @@
     transform: translateY(-100%);
   }
 
-  .contact-info i {
-    font-style: normal;
-    color: #01b1d7;
+  &__container {
+    display: flex;
+    justify-content: center;
+    justify-content: space-between;
+  }
 
-    a,
-    span {
-      padding-left: 5px;
-      color: #444444;
-    }
+  &__contact-info {
+    display: flex;
+    align-items: center;
 
-    a {
-      line-height: 0;
-      transition: 0.3s;
+    & i {
+      font-style: normal;
+      color: #01b1d7;
 
-      &:hover {
-        color: #01b1d7;
+      & a,
+      & span {
+        padding-left: 5px;
+        color: #444444;
+      }
+
+      & a {
+        line-height: 0;
+        transition: 0.3s;
+
+        &:hover {
+          color: #01b1d7;
+        }
       }
     }
   }
 
-  .social-links a {
-    color: #62787d;
-    padding: 4px 12px;
-    display: inline-block;
-    line-height: 1px;
-    transition: 0.3s;
-    border-left: 1px solid #e9e9e9;
+  &__social-links {
+    display: none;
+    display: flex;
 
-    &:hover {
-      color: #01b1d7;
-    }
-
-    &:first-child {
-      border-left: 0;
-    }
-
-    i {
+    & a {
+      color: #62787d;
+      padding: 4px 12px;
+      display: inline-block;
+      line-height: 1px;
       transition: 0.3s;
+      border-left: 1px solid #e9e9e9;
+
+      &:hover {
+        color: #01b1d7;
+      }
+
+      &:first-child {
+        border-left: 0;
+      }
+
+      & i {
+        transition: 0.3s;
+      }
+    }
+
+    & .facebook i {
+      color: #3b5998;
+    }
+
+    & .youtube i {
+      color: #ff0000;
     }
   }
 
-  .facebook i {
-    color: #3b5998;
-  }
+  &__login {
+    cursor: pointer;
+    & .popover-item {
+      text-decoration: none;
 
-  .youtube i {
-    color: #ff0000;
-  }
-
-  // Add this section for popover items
-  .popover-item {
-    text-decoration: none; // Loại bỏ gạch chân
-
-    &:hover {
-      text-decoration: none; // Đảm bảo không có gạch chân khi hover
+      &:hover {
+        text-decoration: none;
+      }
     }
   }
 }
 
 //--------Header-----------
-#header {
+.header {
   height: 70px;
   z-index: 997;
   transition: all 0.5s;
@@ -86,121 +104,132 @@
     top: 0;
   }
 
-  .logo h1 {
-    font-size: 25px;
-    margin: 0;
-    line-height: 1;
-    font-weight: 650;
-    letter-spacing: 1px;
-
-    a,
-    a:hover {
-      color: #354144;
-      text-decoration: none;
-    }
-  }
-
-  .logo img {
-    padding: 0;
-    margin: 0;
-    max-height: 40px;
-  }
-}
-
-//---- Desktop Navigation----
-.navbar {
-  padding: 0;
-
-  ul {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    list-style: none;
-    align-items: center;
-  }
-
-  li {
-    position: relative;
-  }
-
-  a,
-  a:focus {
+  &__container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0 10px 30px;
-    font-family: "Raleway", sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: #404f52;
-    white-space: nowrap;
-    text-transform: uppercase;
-    transition: 0.3s;
+  }
 
-    &:hover,
-    &.active,
-    &.active:focus,
-    li:hover>& {
-      color: #01b1d7;
+  &__logo {
+    & h1 {
+      font-size: 25px;
+      margin: 0;
+      line-height: 1;
+      font-weight: 650;
+      letter-spacing: 1px;
+      cursor: pointer;
+
+      & a,
+      & a:hover {
+        color: #354144;
+        text-decoration: none;
+      }
+    }
+
+    & img {
+      padding: 0;
+      margin: 0;
+      max-height: 40px;
+      cursor: pointer;
     }
   }
 
-  .dropdown ul {
-    display: block;
-    position: absolute;
-    left: 30px;
-    top: calc(100% + 30px);
-    margin: 0;
-    padding: 10px 0;
-    z-index: 99;
-    opacity: 0;
-    visibility: hidden;
-    background: #fff;
-    box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
-    transition: 0.3s;
+  &__navbar {
+    padding: 0;
 
-    li {
-      min-width: 200px;
+    & ul {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      list-style: none;
+      align-items: center;
     }
 
-    a {
-      padding: 10px 20px;
+    & li {
+      position: relative;
+    }
+
+    & a,
+    & a:focus {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0 10px 30px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #404f52;
+      white-space: nowrap;
+      text-transform: uppercase;
+      transition: 0.3s;
+      cursor: pointer;
 
       &:hover,
-      .active:hover,
-      li:hover>& {
+      &.active,
+      &.active:focus,
+      li:hover > & {
         color: #01b1d7;
+      }
+    }
+
+    & .dropdown {
+      & ul {
+        display: block;
+        position: absolute;
+        left: 30px;
+        top: calc(100% + 30px);
+        margin: 0;
+        padding: 10px 0;
+        z-index: 99;
+        opacity: 0;
+        visibility: hidden;
+        background: #fff;
+        box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
+        transition: 0.3s;
+
+        & li {
+          min-width: 200px;
+        }
+
+        & a {
+          padding: 10px 20px;
+
+          &:hover,
+          .active:hover,
+          li:hover > & {
+            color: #01b1d7;
+          }
+        }
+      }
+
+      &:hover > ul {
+        opacity: 1;
+        top: 100%;
+        visibility: visible;
       }
     }
   }
 
-  .dropdown:hover>ul {
-    opacity: 1;
-    top: 100%;
-    visibility: visible;
-  }
-}
+  &__mobile-nav-toggle {
+    color: #354144;
+    font-size: 28px;
+    cursor: pointer;
+    display: none;
+    line-height: 0;
+    transition: 0.5s;
 
-// Mobile Navigation------
-.mobile-nav-toggle {
-  color: #354144;
-  font-size: 28px;
-  cursor: pointer;
-  display: none;
-  line-height: 0;
-  transition: 0.5s;
+    &.bi-x {
+      color: #fff;
+    }
 
-  &.bi-x {
-    color: #fff;
-  }
-
-  @media (max-width: 991px) {
-    display: block;
+    @media (max-width: 991px) {
+      display: block;
+    }
   }
 }
 
 @media (max-width: 991px) {
-  .navbar ul {
+  .header__navbar ul {
     display: none;
   }
 
@@ -241,7 +270,7 @@
 
         &:hover,
         &.active,
-        li:hover>& {
+        li:hover > & {
           color: #01b1d7;
         }
       }
@@ -266,7 +295,7 @@
 
           &:hover,
           .active:hover,
-          li:hover>& {
+          li:hover > & {
             color: #01b1d7;
           }
         }

@@ -6,17 +6,17 @@ import { environment } from '../../environments/environment';
 import { ApiResponse } from '../../app/models/response';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostRequest } from '../request/post.request';
-import { UpdatePostRequest } from '../request/update-post.request';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PostService {
-  private apiPost = `${environment.apiBaseUrl}/posts`;
+  private apiAdminPosts = `${environment.apiBaseUrl}/admin/posts`;
+  private apiUserPosts = `${environment.apiBaseUrl}/user/posts`;
 
   constructor(private http: HttpClient) {}
 
-  getPosts(
+  getPostsForAdmin(
     keyword: string,
     categoryId: number,
     page: number,
@@ -36,16 +36,31 @@ export class PostService {
     if (createdAt) {
       params = params.set('created_at', createdAt);
     }
-    return this.http.get<Post[]>(this.apiPost, { params });
+    return this.http.get<Post[]>(this.apiAdminPosts, { params });
   }
-  getDetailPost(slug: string): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(`${this.apiPost}/${slug}`);
+
+  getPostsForUser(
+    keyword: string,
+    categorySlug: string,
+    page: number,
+    limit: number,
+  ): Observable<ApiResponse<Post[]>> {
+    let params = new HttpParams()
+      .set('keyword', keyword)
+      .set('categorySlug', categorySlug)
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    return this.http.get<ApiResponse<Post[]>>(this.apiUserPosts, { params });
+  }
+
+  getPostBySlug(slug: string): Observable<ApiResponse<Post>> {
+    return this.http.get<ApiResponse<Post>>(`${this.apiUserPosts}/${slug}`);
   }
   getRecentPosts(page: number, limit: number): Observable<Post[]> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
-    return this.http.get<Post[]>(`${this.apiPost}/recent`, {
+    return this.http.get<Post[]>(`${this.apiUserPosts}/recent`, {
       params,
     });
   }
@@ -59,17 +74,30 @@ export class PostService {
       ApiResponse<{
         [key in PostStatus]: number;
       }>
-    >(`${this.apiPost}/counts`);
+    >(`${this.apiAdminPosts}/counts`);
   }
 
   insertPost(post: PostRequest): Observable<any> {
-    return this.http.post(this.apiPost, post);
+    return this.http.post(this.apiAdminPosts, post);
   }
   updatePost(id: number, post: PostRequest): Observable<ApiResponse<Post>> {
-    return this.http.put<ApiResponse<Post>>(`${this.apiPost}/${id}`, post);
+    return this.http.put<ApiResponse<Post>>(
+      `${this.apiAdminPosts}/${id}`,
+      post,
+    );
   }
 
   getPostById(id: number): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(`${this.apiPost}/details/${id}`);
+    return this.http.get<ApiResponse<Post>>(
+      `${this.apiAdminPosts}/details/${id}`,
+    );
+  }
+
+  deletePost(id: number): Observable<any> {
+    return this.http.delete(`${this.apiAdminPosts}/${id}`);
+  }
+
+  deletePosts(ids: number[]): Observable<any> {
+    return this.http.request('delete', this.apiAdminPosts, { body: ids });
   }
 }

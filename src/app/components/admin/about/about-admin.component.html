@@ -1,4 +1,4 @@
-<div class="about-container mt-2">
+<div class="about-container container mt-2">
   <h1 class="text-center mb-4">About Information</h1>
   <form [formGroup]="aboutForm" (ngSubmit)="onSubmit()">
     <div *ngFor="let field of fields" class="mb-3 row">
@@ -57,9 +57,7 @@
           </div>
           <div *ngIf="aboutForm.controls[field].errors?.['maxlength']">
             Độ dài tối đa của {{ fieldLabels[field] }} là
-            {{
-              aboutForm.controls[field].errors?.["maxlength"].requiredLength
-            }}
+            {{ aboutForm.controls[field].errors?.["maxlength"].requiredLength }}
             ký tự.
           </div>
           <div *ngIf="aboutForm.controls[field].errors?.['email']">

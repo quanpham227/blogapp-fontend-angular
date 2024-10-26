@@ -19,7 +19,7 @@
           <div class="meta">
             <a>
               <time [attr.datetime]="post.created_at">{{
-                post.created_at | date : 'MMM d, y'
+                post.created_at | date: 'MMM d, y'
               }}</time>
             </a>
             <span class="post-author"> / Julia Parker</span>
@@ -34,6 +34,9 @@
             ><span>Read More</span><i class="bi bi-arrow-right"></i
           ></a>
         </div>
+      </div>
+      <div *ngIf="recentPosts.length === 0" class="col-12">
+        <p>No recent posts available.</p>
       </div>
     </div>
   </div>

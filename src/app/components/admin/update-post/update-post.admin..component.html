@@ -1,15 +1,27 @@
 <form [formGroup]="postForm" (ngSubmit)="onSubmitPost()">
-  <div class="admin-update-post">
-    <div class="admin-update-post__loading loading-container" *ngIf="isLoading">
-      <div class="admin-update-post__loading-spinner loading-spinner">
+  <div class="admin-update-post container">
+    <div
+      class="admin-update-post__loading loading-container"
+      *ngIf="isLoading || isDeleting"
+    >
+      <div
+        class="admin-update-post__loading-spinner loading-spinner"
+        *ngIf="isLoading"
+      >
         <i class="fa fa-spinner fa-spin"></i> Đang lưu bài viết...
+      </div>
+      <div
+        class="admin-update-post__loading-spinner loading-spinner"
+        *ngIf="isDeleting"
+      >
+        <i class="fa fa-spinner fa-spin"></i> Đang xoá bài viết...
       </div>
     </div>
     <div class="admin-update-post__header">
       <h4 class="admin-update-post__header-title">Chỉnh sửa bài viết</h4>
     </div>
     <div class="row">
-      <div class="col-8-5 admin-update-post__main">
+      <div class="admin-update-post__main col-8-5">
         <div class="admin-update-post__content">
           <input
             class="admin-update-post__title"
@@ -19,12 +31,261 @@
           />
           <app-tinymce-editor
             class="admin-update-post__editor"
-            [editorConfig]="{ height: 1200 }"
+            [editorConfig]="{ height: 900 }"
             formControlName="content"
+            [helpText]="
+              'Chỉnh sửa lần cuối bởi: ' +
+              tinymceAuthorName +
+              ' vào ngày ' +
+              tinymceUpdatedAt
+            "
           ></app-tinymce-editor>
+          <div class="admin-update-post__comments">
+            <div
+              class="admin-update-post__comments-header d-flex justify-content-between align-items-center"
+              (click)="toggleCardCommentBody()"
+            >
+              <h5 class="admin-update-post__comments-title">Bình luận</h5>
+              <div class="admin-update-post__comments-controls">
+                <i class="fa-solid fa-chevron-up"></i>
+                <i class="fa-solid fa-chevron-down"></i>
+                <i
+                  class="fa-solid fa-caret-up"
+                  [ngClass]="{ 'fa-rotate-180': !cardVisibility['comment'] }"
+                ></i>
+              </div>
+            </div>
+            <div
+              class="admin-update-post__comments-body"
+              *ngIf="isCommentBodyCardVisible"
+            >
+              <div *ngIf="!showAddCommentForm">
+                <button
+                  class="admin-update-post__toggle-add-comment btn btn-primary"
+                  type="button"
+                  (click)="toggleCommentForm()"
+                >
+                  Thêm bình luận
+                </button>
+              </div>
+              <div
+                *ngIf="showAddCommentForm"
+                class="admin-update-post__add-comment-section"
+              >
+                <textarea
+                  class="admin-update-post__add-comment-textarea form-control"
+                  rows="3"
+                  placeholder="Nhập bình luận của bạn..."
+                  [formControl]="newCommentContentControl"
+                ></textarea>
+                <div class="admin-update-post__add-comment-actions mt-2">
+                  <button
+                    class="admin-update-post__add-comment-send btn btn-success mr-2"
+                    type="button"
+                    (click)="addComment()"
+                  >
+                    Thêm bình luận
+                  </button>
+                  <button
+                    class="admin-update-post__add-comment-cancel btn btn-secondary"
+                    type="button"
+                    (click)="toggleCommentForm()"
+                  >
+                    Hủy bỏ
+                  </button>
+                </div>
+              </div>
+              <div
+                *ngFor="let comment of rootComments; let i = index"
+                class="admin-update-post__root-comment mt-3"
+              >
+                <!-- Form chỉnh sửa duy nhất -->
+                <div
+                  *ngIf="editingComment && editingComment.id === comment.id"
+                  class="admin-update-post__edit-comment-section mt-2"
+                >
+                  <textarea
+                    class="admin-update-post__edit-comment-textarea form-control"
+                    rows="3"
+                    placeholder="Nhập bình luận của bạn..."
+                    [formControl]="editCommentContentControl"
+                  ></textarea>
+                  <div class="admin-update-post__edit-comment-actions mt-2">
+                    <button
+                      class="admin-update-post__edit-comment-save btn btn-success mr-2"
+                      type="button"
+                      (click)="updateComment()"
+                    >
+                      Lưu
+                    </button>
+                    <button
+                      class="admin-update-post__edit-comment-cancel btn btn-secondary"
+                      type="button"
+                      (click)="cancelEdit()"
+                    >
+                      Hủy bỏ
+                    </button>
+                  </div>
+                </div>
+                <div class="admin-update-post__root-comment-body mb-3">
+                  <div class="admin-update-post__root-comment-media d-flex">
+                    <img
+                      class="admin-update-post__root-comment-avatar mr-3 rounded-circle"
+                      [src]="
+                        comment.profile_image ||
+                        '/assets/images/no-image-available.jpg'
+                      "
+                      alt="User Avatar"
+                      style="width: 30px; height: 30px"
+                    />
+                    <div class="admin-update-post__root-comment-content">
+                      <h5 class="admin-update-post__root-comment-author mt-0">
+                        {{ comment.full_name }}
+                      </h5>
+                      <p class="admin-update-post__root-comment-text">
+                        {{ comment.content }}
+                      </p>
+                      <div class="admin-update-post__root-comment-actions">
+                        <a
+                          class="admin-update-post__root-comment-reply"
+                          (click)="toggleReplyForm(comment.id)"
+                          >Trả lời</a
+                        >
+                        <a
+                          class="admin-update-post__root-comment-edit"
+                          (click)="editComment(comment)"
+                          >Sửa nhanh</a
+                        >
+                        <a
+                          class="admin-update-post__root-comment-trash"
+                          (click)="deleteComment(comment.id)"
+                          >Thùng rác</a
+                        >
+                      </div>
+                      <div
+                        *ngIf="replyFormVisibility[comment.id]"
+                        class="admin-update-post__reply-section mt-2"
+                      >
+                        <textarea
+                          class="admin-update-post__reply-textarea form-control"
+                          rows="3"
+                          placeholder="Nhập phản hồi của bạn..."
+                          [formControl]="replyContentControls[comment.id]"
+                        ></textarea>
+                        <div class="admin-update-post__reply-actions mt-2">
+                          <button
+                            class="admin-update-post__reply-send btn btn-success mr-2"
+                            type="button"
+                            (click)="addReply(comment.id)"
+                          >
+                            Reply
+                          </button>
+                          <button
+                            class="admin-update-post__reply-cancel btn btn-secondary"
+                            type="button"
+                            (click)="toggleReplyForm(comment.id)"
+                          >
+                            Hủy bỏ
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        *ngIf="comment.replies && comment.replies.length > 0"
+                        class="admin-update-post__child-comments mt-3"
+                      >
+                        <div
+                          *ngFor="let reply of comment.replies; let j = index"
+                          class="admin-update-post__child-comment mb-3 ml-3"
+                        >
+                          <!-- Form chỉnh sửa duy nhất -->
+                          <div
+                            *ngIf="
+                              editingComment && editingComment.id === reply.id
+                            "
+                            class="admin-update-post__edit-comment-section mt-2"
+                          >
+                            <textarea
+                              class="admin-update-post__edit-comment-textarea form-control"
+                              rows="3"
+                              placeholder="Nhập bình luận của bạn..."
+                              [formControl]="editCommentContentControl"
+                            ></textarea>
+                            <div
+                              class="admin-update-post__edit-comment-actions mt-2"
+                            >
+                              <button
+                                class="admin-update-post__edit-comment-save btn btn-success mr-2"
+                                type="button"
+                                (click)="updateComment()"
+                              >
+                                Lưu
+                              </button>
+                              <button
+                                class="admin-update-post__edit-comment-cancel btn btn-secondary"
+                                type="button"
+                                (click)="cancelEdit()"
+                              >
+                                Hủy bỏ
+                              </button>
+                            </div>
+                          </div>
+                          <div class="admin-update-post__child-comment-body">
+                            <div
+                              class="admin-update-post__child-comment-media d-flex"
+                            >
+                              <img
+                                class="admin-update-post__child-comment-avatar mr-3 rounded-circle"
+                                [src]="
+                                  reply.profile_image ||
+                                  '/assets/images/no-image-available.jpg'
+                                "
+                                alt="User Avatar"
+                                style="width: 30px; height: 30px"
+                              />
+                              <div
+                                class="admin-update-post__child-comment-content"
+                              >
+                                <h6
+                                  class="admin-update-post__child-comment-author mt-0"
+                                >
+                                  {{ reply.full_name }}
+                                </h6>
+                                <p
+                                  class="admin-update-post__child-comment-text"
+                                >
+                                  <strong
+                                    >Trả lời {{ comment.full_name }}:</strong
+                                  >
+                                  {{ reply.content }}
+                                </p>
+                                <div
+                                  class="admin-update-post__child-comment-actions"
+                                >
+                                  <a
+                                    class="admin-update-post__child-comment-edit"
+                                    (click)="editComment(reply)"
+                                    >Sửa nhanh</a
+                                  >
+                                  <a
+                                    class="admin-update-post__child-comment-trash"
+                                    (click)="deleteComment(reply.id)"
+                                    >Thùng rác</a
+                                  >
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-3-5 admin-update-post__sidebar">
+      <div class="admin-update-post__sidebar col-3-5">
         <ng-container *ngFor="let card of cards; let i = index">
           <div [ngSwitch]="card">
             <div
@@ -289,12 +550,25 @@
                       >)
                     </span>
                   </div>
+                  <div class="admin-update-post__publish-vcount">
+                    <span>
+                      <i class="fa-brands fa-readme"></i>
+                      <!-- Icon cho Bản thảo -->
+                      <strong style="margin-right: 5px">Lượt xem:</strong
+                      >(<span>{{ viewCount }}</span
+                      >)
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div class="admin-update-post__publish-footer card-footer">
+              <div
+                class="admin-update-post__publish-footer card-footer"
+                *ngIf="post"
+              >
                 <button
                   type="button"
                   class="admin-update-post__button-remove btn btn-link d-block mb-2"
+                  (click)="deletePost(post.id)"
                 >
                   Bỏ vào thùng rác
                 </button>

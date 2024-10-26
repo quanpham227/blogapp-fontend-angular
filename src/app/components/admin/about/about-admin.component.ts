@@ -85,7 +85,6 @@ export class AboutAdminComponent implements OnInit {
         if (response.status === 'OK' || response.status === 'ok') {
           this.about = response.data;
           this.aboutForm.patchValue(this.about);
-          console.log('About information loaded:', this.about);
         } else {
           console.error('Failed to load about information:', response.message);
         }

@@ -1,11 +1,18 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { provideRouter, RouterModule } from '@angular/router';
-import { HttpClientModule, provideHttpClient } from '@angular/common/http';
-import { withFetch } from '@angular/common/http';
+import {
+  ApplicationConfig,
+  importProvidersFrom,
+  Provider,
+  APP_INITIALIZER,
+} from '@angular/core';
+import { provideRouter, withHashLocation } from '@angular/router';
+import {
+  HttpClientModule,
+  provideHttpClient,
+  HTTP_INTERCEPTORS,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
 import { routes } from './app.routes';
-import { provideClientHydration } from '@angular/platform-browser';
-import { Provider } from '@angular/core';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { provideToastr } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -17,12 +24,23 @@ import {
   NgbDateParserFormatter,
 } from '@ng-bootstrap/ng-bootstrap';
 import { MonthYearFormatter } from '../app/components/admin/shared/month-year-formatter';
+import { AuthService } from './services/auth.service';
+import { TokenService } from './services/token.service';
+import { initializeApp } from './app.initializer';
+import { LoadingInterceptor } from './interceptors/loading.interceptor';
+
+import { progressInterceptor } from 'ngx-progressbar/http';
+
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
   useClass: TokenInterceptor,
   multi: true,
 };
-
+const loadingInterceptorProvider: Provider = {
+  provide: HTTP_INTERCEPTORS,
+  useClass: LoadingInterceptor,
+  multi: true,
+};
 const ngbDatepickerConfigProvider: Provider = {
   provide: NgbDatepickerConfig,
   useFactory: () => {
@@ -40,10 +58,9 @@ const ngbDatepickerConfigProvider: Provider = {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    // importProvidersFrom(RouterModule.forChild(adminRoutes)),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([progressInterceptor])),
     tokenInterceptorProvider,
-    provideClientHydration(),
+    loadingInterceptorProvider,
     importProvidersFrom(HttpClientModule),
     importProvidersFrom(BrowserAnimationsModule),
     provideHttpClient(),
@@ -61,8 +78,15 @@ export const appConfig: ApplicationConfig = {
       progressAnimation: 'increasing',
     }),
     provideAnimationsAsync(),
-    provideAnimationsAsync(),
     { provide: NgbDateParserFormatter, useClass: MonthYearFormatter },
     ngbDatepickerConfigProvider,
+    AuthService,
+    TokenService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeApp,
+      deps: [TokenService, AuthService],
+      multi: true,
+    },
   ],
 };

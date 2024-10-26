@@ -7,4 +7,5 @@ export interface Meta {
   og_image: string;
   created_at: string;
   updated_at: string;
+  slug: string;
 }

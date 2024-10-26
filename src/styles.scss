@@ -7,7 +7,7 @@
   }
 
   body {
-    font-family: "Open Sans", sans-serif;
+    font-family: 'Open Sans', sans-serif;
     color: #444444;
   }
 
@@ -27,11 +27,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Raleway", sans-serif;
-  }
-  .content {
-    flex: 1; /* Phần nội dung sẽ chiếm không gian còn lại giữa header và footer */
-    padding-top: 114px;
+    font-family: 'Raleway', sans-serif;
   }
 
   /*--------------Sections General---------*/
@@ -94,7 +90,7 @@
 
 .admin-layout {
   font-size: 14px;
-  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif;
   background: #f0f0f0;
   scroll-behavior: smooth;
 
@@ -112,7 +108,7 @@
   h4,
   h5,
   h6 {
-    font-family: "roboto, sans-serif";
+    font-family: 'roboto, sans-serif';
   }
 }
 // /* Tùy chỉnh CSS cho ngx-toastr */
@@ -200,7 +196,46 @@
   border: 0;
   border-radius: 0;
 }
-#tinymce-editor {
-  border: 1px solid #dbdbdb; /* Thay đổi màu sắc và độ dày của border theo ý muốn */
-  border-radius: 0px; /* Tùy chọn: Thêm border-radius nếu muốn */
+.blog-detail__body img {
+  max-width: 100% !important; /* Đảm bảo hình ảnh không vượt quá chiều rộng của container */
+  height: auto !important; /* Đảm bảo hình ảnh giữ nguyên tỉ lệ */
+  display: block;
+  margin: 0 auto;
+}
+
+/* Màn hình từ 1200px trở lên (desktop lớn) */
+@media (min-width: 1200px) {
+  .blog-detail__body img {
+    max-width: 70%; /* Ảnh sẽ chiếm tối đa 70% chiều rộng khung chứa */
+    margin: 0 auto; /* Canh giữa ảnh */
+  }
+}
+/* Màn hình từ 992px đến 1199px (desktop và laptop) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .blog-detail__body img {
+    max-width: 80%; /* Ảnh chiếm tối đa 80% chiều rộng khung chứa */
+    margin: 0 auto; /* Canh giữa ảnh */
+  }
+}
+/* Màn hình từ 768px đến 991px (tablet) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .blog-detail__body img {
+    max-width: 90%; /* Ảnh chiếm tối đa 90% chiều rộng khung chứa */
+    margin: 0 auto; /* Canh giữa ảnh */
+  }
+}
+/* Màn hình từ 576px đến 767px (tablet nhỏ hoặc điện thoại lớn) */
+@media (min-width: 576px) and (max-width: 767px) {
+  .blog-detail__body img {
+    max-width: 100%; /* Ảnh chiếm toàn bộ chiều rộng khung chứa */
+    margin: 0 auto;
+  }
+}
+/* Màn hình nhỏ hơn 576px (điện thoại) */
+@media (max-width: 575px) {
+  .blog-detail__body img {
+    max-width: 90%; /* Ảnh chiếm 90% chiều rộng khung chứa */
+    margin: 0 auto; /* Canh giữa ảnh */
+    display: block; /* Giúp căn giữa ảnh tốt hơn */
+  }
 }

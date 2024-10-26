@@ -1,25 +1,28 @@
-/*--------------------------------------------------------------
-# Blog Details Page
---------------------------------------------------------------*/
-#blog {
-  padding-top: 150px;
+.blog-detail {
+  padding-top: 30px;
+  background: linear-gradient(rgba(56, 97, 142, 0.5), rgba(56, 97, 142, 0.5)),
+    url('../../../assets/images/blog-detail-bkg.jpg');
+  background-size: cover; /* Đảm bảo hình ảnh bao phủ toàn bộ phần tử */
+  background-position: center; /* Đặt vị trí của hình ảnh ở giữa phần tử */
+  background-repeat: no-repeat; /* Không lặp lại hình ảnh */
+  background-attachment: fixed; /* Giữ hình ảnh cố định khi cuộn trang */
+}
+.blog-detail__main {
+  padding: 0;
 }
 
-.blog .blog-details {
+.blog-detail__content {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 30px;
+  border: 1px solid rgba(27, 47, 69, 0.15);
+  background-color: #ffffff;
 }
 
-.blog .blog-details .post-img {
-  margin: -30px -30px 20px -30px;
+.blog-detail__image {
   overflow: hidden;
-  display: flex;
-  margin-top: 5px;
-  justify-content: center;
-  align-items: center;
 }
 
-.blog .blog-details .title {
+.blog-detail__title {
   font-size: 28px;
   font-weight: 700;
   padding: 0;
@@ -27,17 +30,20 @@
   color: var(--color-secondary);
 }
 
-.blog .blog-details .content {
-  margin-top: 20px;
+.blog-detail__body {
+  margin-top: 5px;
+  box-sizing: border-box;
+  max-width: 100%; /* Hoặc chiều rộng cụ thể, nếu cần */
+  overflow: hidden; /* Tránh tràn */
 }
 
-.blog .blog-details .content h3 {
+.blog-detail__body h3 {
   font-size: 22px;
   margin-top: 30px;
   font-weight: bold;
 }
 
-.blog .blog-details .content blockquote {
+.blog-detail__body blockquote {
   overflow: hidden;
   background-color: rgba(27, 47, 69, 0.06);
   padding: 60px;
@@ -46,7 +52,7 @@
   margin: 20px 0;
 }
 
-.blog .blog-details .content blockquote p {
+.blog-detail__body blockquote p {
   color: var(--color-default);
   line-height: 1.6;
   margin-bottom: 0;
@@ -55,8 +61,8 @@
   font-size: 22px;
 }
 
-.blog .blog-details .content blockquote:after {
-  content: "";
+.blog-detail__body blockquote:after {
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
@@ -67,12 +73,12 @@
   margin-bottom: 20px;
 }
 
-.blog .blog-details .meta-top {
+.blog-detail__meta-top {
   margin-top: 20px;
   color: var(--color-gray);
 }
 
-.blog .blog-details .meta-top ul {
+.blog-detail__meta-list {
   display: flex;
   flex-wrap: wrap;
   list-style: none;
@@ -81,91 +87,91 @@
   margin: 0;
 }
 
-.blog .blog-details .meta-top ul li + li {
+.blog-detail__meta-item + .blog-detail__meta-item {
   padding-left: 20px;
 }
 
-.blog .blog-details .meta-top i {
+.blog-detail__meta-top i {
   font-size: 16px;
   margin-right: 8px;
   line-height: 0;
   color: rgba(86, 184, 230, 0.8);
 }
 
-.blog .blog-details .meta-top a {
+.blog-detail__meta-top a {
   color: var(--color-gray);
   font-size: 14px;
   display: inline-block;
   line-height: 1;
 }
 
-.blog .blog-details .meta-bottom {
+.blog-detail__meta-bottom {
   padding-top: 10px;
   border-top: 1px solid rgba(27, 47, 69, 0.15);
 }
 
-.blog .blog-details .meta-bottom i {
+.blog-detail__meta-bottom i {
   color: #38618e;
   display: inline;
 }
 
-.blog .blog-details .meta-bottom a {
+.blog-detail__meta-bottom a {
   color: rgba(27, 47, 69, 0.8);
   transition: 0.3s;
 }
 
-.blog .blog-details .meta-bottom a:hover {
+.blog-detail__meta-bottom a:hover {
   color: var(--color-primary);
 }
 
-.blog .blog-details .meta-bottom .cats {
+.blog-detail__meta-bottom .cats {
   list-style: none;
   display: inline;
   padding: 0 20px 0 0;
   font-size: 14px;
 }
 
-.blog .blog-details .meta-bottom .cats li {
+.blog-detail__meta-bottom .cats li {
   display: inline-block;
 }
 
-.blog .blog-details .meta-bottom .tags {
+.blog-detail__tags {
   list-style: none;
   display: inline;
   padding: 0;
   font-size: 14px;
 }
 
-.blog .blog-details .meta-bottom .tags li {
+.blog-detail__tag-item {
   display: inline-block;
 }
 
-.blog .blog-details .meta-bottom .tags li + li::before {
+.blog-detail__tag-item + .blog-detail__tag-item::before {
   padding-right: 6px;
   color: var(--color-default);
-  content: ",";
+  content: ',';
 }
 
-.blog .blog-details .meta-bottom .share {
+.blog-detail__meta-bottom .share {
   font-size: 16px;
 }
 
-.blog .blog-details .meta-bottom .share i {
+.blog-detail__meta-bottom .share i {
   padding-left: 5px;
 }
 
-.blog .post-author {
+.blog-detail__post-author {
   padding: 20px;
   margin-top: 30px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.blog .post-author img {
+.blog-detail__post-author img {
   max-width: 120px;
   margin-right: 20px;
 }
 
-.blog .post-author h4 {
+.blog-detail__post-author h4 {
   font-weight: 600;
   font-size: 22px;
   margin-bottom: 0px;
@@ -173,128 +179,131 @@
   color: var(--color-secondary);
 }
 
-.blog .post-author .social-links {
+.blog-detail__post-author .social-links {
   margin: 0 10px 10px 0;
 }
 
-.blog .post-author .social-links a {
+.blog-detail__post-author .social-links a {
   color: rgba(27, 47, 69, 0.5);
   margin-right: 5px;
 }
 
-.blog .post-author p {
+.blog-detail__post-author p {
   font-style: italic;
   color: rgba(var(--color-gray-rgb), 0.8);
   margin-bottom: 0;
 }
 
-/*--------------------------------------------------------------
-# Blog Comments
---------------------------------------------------------------*/
-.blog .comments {
+.blog-detail__comments {
   margin-top: 30px;
+  margin-bottom: 30px;
+  background-color: #ffffff;
+
+  padding: 30px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(27, 47, 69, 0.15);
 }
 
-.blog .comments .comments-count {
+.blog-detail__comments-count {
   font-weight: bold;
 }
 
-.blog .comments .comment {
+.blog-detail__comment {
   margin-top: 30px;
   position: relative;
 }
 
-.blog .comments .comment .comment-img {
+.blog-detail__comment-img {
   margin-right: 14px;
 }
 
-.blog .comments .comment .comment-img img {
+.blog-detail__comment-img img {
   width: 60px;
 }
 
-.blog .comments .comment h5 {
+.blog-detail__comment h5 {
   font-size: 16px;
   margin-bottom: 2px;
 }
 
-.blog .comments .comment h5 a {
+.blog-detail__comment h5 a {
   font-weight: bold;
   color: var(--color-default);
   transition: 0.3s;
 }
 
-.blog .comments .comment h5 a:hover {
+.blog-detail__comment h5 a:hover {
   color: var(--color-primary);
 }
 
-.blog .comments .comment h5 .reply {
+.blog-detail__reply {
   padding-left: 10px;
   color: var(--color-secondary);
 }
 
-.blog .comments .comment h5 .reply i {
+.blog-detail__reply i {
   font-size: 20px;
 }
 
-.blog .comments .comment time {
+.blog-detail__comment time {
   display: block;
   font-size: 14px;
   color: rgba(27, 47, 69, 0.8);
   margin-bottom: 5px;
 }
 
-.blog .comments .comment.comment-reply {
+.blog-detail__comment-reply {
   padding-left: 40px;
 }
 
-.blog .comments .reply-form {
+.blog-detail__reply-form {
   margin-top: 30px;
   padding: 30px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.blog .comments .reply-form h4 {
+.blog-detail__reply-form h4 {
   font-weight: bold;
   font-size: 22px;
 }
 
-.blog .comments .reply-form p {
+.blog-detail__reply-form p {
   font-size: 14px;
 }
 
-.blog .comments .reply-form input {
+.blog-detail__reply-form input {
   border-radius: 4px;
   padding: 10px 10px;
   font-size: 14px;
 }
 
-.blog .comments .reply-form input:focus {
+.blog-detail__reply-form input:focus {
   box-shadow: none;
   border-color: rgba(86, 184, 230, 0.8);
 }
 
-.blog .comments .reply-form textarea {
+.blog-detail__reply-form textarea {
   border-radius: 4px;
   padding: 10px 10px;
   font-size: 14px;
 }
 
-.blog .comments .reply-form textarea:focus {
+.blog-detail__reply-form textarea:focus {
   box-shadow: none;
   border-color: rgba(86, 184, 230, 0.8);
 }
 
-.blog .comments .reply-form .form-group {
+.blog-detail__reply-form .form-group {
   margin-bottom: 25px;
 }
 
-.blog .comments .reply-form .btn-primary {
+.blog-detail__reply-form .btn-primary {
   border-radius: 4px;
   padding: 10px 20px;
   border: 0;
   background-color: var(--color-secondary);
 }
 
-.blog .comments .reply-form .btn-primary:hover {
+.blog-detail__reply-form .btn-primary:hover {
   background-color: rgba(27, 47, 69, 0.8);
 }

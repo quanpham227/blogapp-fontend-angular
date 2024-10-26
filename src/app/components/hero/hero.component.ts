@@ -57,6 +57,10 @@ export class HeroComponent implements OnInit, AfterViewInit {
     this.slideService.getSlides().subscribe({
       next: (response: any) => {
         this.slides = response.data;
+        // Re-initialize Swiper after slides are loaded
+        setTimeout(() => {
+          this.initSwiperSlides();
+        }, 0);
       },
       complete: () => {},
       error: (error: any) => {

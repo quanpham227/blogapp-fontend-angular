@@ -1,10 +1,11 @@
 import { UserService } from './../../services/user.service';
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegisterDTO } from '../../dtos/user/register.dto';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -13,7 +14,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [FormsModule, CommonModule],
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnDestroy {
   @ViewChild('registerForm') registerForm!: NgForm;
   // khai báo các biến tương ứng với các trường trong form đăng ký
   fullName: string;
@@ -22,10 +23,11 @@ export class RegisterComponent {
   password: string;
   retypePassword: string;
   isAccepted: boolean;
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private router: Router,
-    private useService: UserService,
+    private userService: UserService,
   ) {
     this.fullName = '';
     this.phone_number = '';
@@ -33,8 +35,12 @@ export class RegisterComponent {
     this.password = '';
     this.retypePassword = '';
     this.isAccepted = false;
-    //jnject HttpClient và Router vào constructor
   }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
   onEmailChange() {
     console.log('Email:', this.email);
   }
@@ -49,19 +55,18 @@ export class RegisterComponent {
       google_account_id: '',
       role_id: 2,
     };
-    this.useService.register(registerDTO).subscribe({
+    const registerSub = this.userService.register(registerDTO).subscribe({
       next: (response: any) => {
         debugger;
         this.router.navigate(['/login']);
       },
-      complete: () => {
-        debugger;
-      },
+
       error: (error) => {
         debugger;
         alert(`Can't register, error: ${error.error.message}`);
       },
     });
+    this.subscriptions.add(registerSub);
   }
 
   //how to check if the password and retype password are the same
@@ -73,5 +78,8 @@ export class RegisterComponent {
     } else {
       this.registerForm.controls['retypePassword'].setErrors(null);
     }
+  }
+  navigateToLogin() {
+    this.router.navigate(['/login']);
   }
 }

@@ -10,7 +10,6 @@
   max-width: 500px;
   align-items: center;
   justify-content: center;
-
 }
 
 .register-header {
@@ -18,7 +17,6 @@
   /*      color: rgb(233, 66, 178);*/
   color: rgb(0, 0, 0);
   margin-bottom: 20px;
-
 }
 
 .label-text {
@@ -29,7 +27,7 @@
   background-color: transparent;
   border: 1px solid rgb(191, 190, 190);
   color: rgb(80, 78, 78);
-  padding-left: 10px
+  padding-left: 10px;
 }
 
 .form-control:focus {
@@ -37,7 +35,6 @@
   background-color: transparent;
   outline: none;
   border-color: transparent;
-
 }
 
 .password-field {
@@ -62,7 +59,7 @@
 }
 
 /* Màu checkbox khi được chọn */
-.checkbox-text input[type="checkbox"]:checked {
+.checkbox-text input[type='checkbox']:checked {
   border-color: white;
   background-color: rgb(83, 66, 233);
 }
@@ -74,6 +71,7 @@
 .register-link {
   color: rgb(71, 73, 221);
   text-decoration: none;
+  cursor: pointer;
 }
 
 .register-button {

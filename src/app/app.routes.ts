@@ -1,6 +1,5 @@
-import { AdminGuardFn } from './guards/admin.guard';
-import { AuthGuardFn } from './guards/auth.guard';
-import { Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
 import { BlogComponent } from './components/blog/blog.component';
 import { BlogDetailComponent } from './components/blog-detail/blog-detail.component';
@@ -27,6 +26,9 @@ import { AboutAdminComponent } from './components/admin/about/about-admin.compon
 import { InsertPostAdminComponent } from './components/admin/insert-post/insert-post.admin.component';
 import { UpdatePostAdminComponent } from './components/admin/update-post/update-post.admin..component';
 import { PostPreviewAdminComponent } from './components/post-preview/post-preview.admin.component';
+import { AdminGuardFn } from './guards/admin.guard';
+import { AuthGuardFn } from './guards/auth.guard';
+import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 
 export const routes: Routes = [
   {
@@ -35,17 +37,27 @@ export const routes: Routes = [
     children: [
       { path: '', component: HomeComponent },
       { path: 'blog', component: BlogComponent },
-      { path: 'blog-detail/:slug', component: BlogDetailComponent },
+      { path: 'blog/category/:categorySlug', component: BlogComponent },
+      {
+        path: 'blog/category/:categorySlug/page/:page',
+        component: BlogComponent,
+        runGuardsAndResolvers: 'paramsChange',
+      },
+      { path: 'blog/search/:keyword', component: BlogComponent },
+      {
+        path: 'blog/search/:keyword/page/:page',
+        component: BlogComponent,
+        runGuardsAndResolvers: 'paramsChange',
+      },
+
+      { path: 'blog/:slug', component: BlogDetailComponent },
+      { path: 'post-preview', component: PostPreviewAdminComponent },
+
       {
         path: 'user-profile',
         component: UserProfileComponent,
         canActivate: [AuthGuardFn],
       },
-      {
-        path: 'post-preview',
-        component: PostPreviewAdminComponent,
-      },
-      // other routes that should use the MainLayout
     ],
   },
   {
@@ -56,104 +68,45 @@ export const routes: Routes = [
       { path: 'register', component: RegisterComponent },
     ],
   },
-  // other routes...
   {
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [AdminGuardFn],
     children: [
-      {
-        path: 'dashboard',
-        component: DashboardAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'clients',
-        component: ClientAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'about',
-        component: AboutAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-
-      {
-        path: 'categories',
-        component: CategoryAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'posts',
-        component: PostAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'add-post',
-        component: InsertPostAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'post-edit/:id',
-        component: UpdatePostAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-
-      {
-        path: 'slides',
-        component: SlideAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'media',
-        component: MediaAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'emails',
-        component: EmailAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'profile',
-        component: ProfileAdminComponent,
-        canActivate: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'contact',
-        component: ContactAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: '404',
-        component: NotfoundAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'category-add',
-        component: CategoryAddOrUpdateAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
+      { path: 'dashboard', component: DashboardAdminComponent },
+      { path: 'clients', component: ClientAdminComponent },
+      { path: 'about', component: AboutAdminComponent },
+      { path: 'categories', component: CategoryAdminComponent },
+      { path: 'posts', component: PostAdminComponent },
+      { path: 'add-post', component: InsertPostAdminComponent },
+      { path: 'post-edit/:id', component: UpdatePostAdminComponent },
+      { path: 'slides', component: SlideAdminComponent },
+      { path: 'media', component: MediaAdminComponent },
+      { path: 'emails', component: EmailAdminComponent },
+      { path: 'profile', component: ProfileAdminComponent },
+      { path: 'contact', component: ContactAdminComponent },
+      { path: '404', component: NotfoundAdminComponent },
+      { path: 'category-add', component: CategoryAddOrUpdateAdminComponent },
       {
         path: 'category-edit/:id',
         component: CategoryAddOrUpdateAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
       },
-      {
-        path: 'client-add',
-        component: ClientAddOrUpdateAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'client-edit/:id',
-        component: ClientAddOrUpdateAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
-      {
-        path: 'comments',
-        component: CommentAdminComponent,
-        canActivateChild: [AdminGuardFn], // Bảo vệ route con
-      },
+      { path: 'client-add', component: ClientAddOrUpdateAdminComponent },
+      { path: 'client-edit/:id', component: ClientAddOrUpdateAdminComponent },
+      { path: 'comments', component: CommentAdminComponent },
+      { path: '**', component: NotfoundAdminComponent },
     ],
   },
+  { path: '**', redirectTo: '', pathMatch: 'full' },
 ];
+
+@NgModule({
+  imports: [
+    RouterModule.forRoot(routes, {
+      onSameUrlNavigation: 'reload',
+    }),
+  ],
+  providers: [{ provide: LocationStrategy, useClass: PathLocationStrategy }],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}

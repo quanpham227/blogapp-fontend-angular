@@ -1,12 +1,17 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  HostListener,
+  ViewEncapsulation,
+} from '@angular/core';
 import { NgbPopover, NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 import { UserResponse } from '../../responses/user/user.response';
-import { TokenService } from '../../services/token.service';
 import { UserService } from '../../services/user.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -23,27 +28,39 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private popoverConfig: NgbPopoverConfig,
-    private tokenService: TokenService,
     private router: Router,
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
-    this.userResponse = this.userService.getFromLocalStorage();
+    this.checkUserStatus();
+    this.authService.user$.subscribe((user) => {
+      this.userResponse = user;
+    });
+  }
+
+  private checkUserStatus() {
+    const token = this.authService.getAccessToken();
+    if (token && this.authService.isTokenExpired(token)) {
+      this.authService.setUser(null);
+      this.userResponse = null;
+    } else {
+      this.userResponse = this.authService.getUser();
+    }
   }
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
-    const topbar = document.getElementById('topbar');
+    const topBar = document.getElementById('topbar');
     const header = document.getElementById('header');
-    const st = window.pageYOffset || document.documentElement.scrollTop;
+    const st = window.scrollY || document.documentElement.scrollTop;
     if (st > this.lastScrollTop) {
       // Cuộn xuống
-      topbar?.classList.add('topbar-hidden');
+      topBar?.classList.add('topbar-hidden');
       header?.classList.add('topbar-hidden');
     } else {
       // Cuộn lên
-      topbar?.classList.remove('topbar-hidden');
+      topBar?.classList.remove('topbar-hidden');
       header?.classList.remove('topbar-hidden');
     }
     this.lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling

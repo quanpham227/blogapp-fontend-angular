@@ -177,6 +177,12 @@
                   font-weight: bold;
                   color: rgb(18, 94, 150);
                   cursor: pointer;
+                  .admin-posts__title-status {
+                    font-size: 14px;
+                    font-weight: normal;
+                    color: #2f2f30;
+                    margin-left: 5px;
+                  }
                 }
 
                 .admin-posts__row-actions {

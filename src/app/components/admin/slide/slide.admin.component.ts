@@ -1,30 +1,18 @@
-import {
-  Component,
-  HostListener,
-  Inject,
-  OnInit,
-  PLATFORM_ID,
-  TemplateRef,
-  ViewChild,
-} from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Component, HostListener, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { Client } from '../../../models/client';
-import { ClientService } from '../../../services/client.service';
-import { Subscription } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { NavigationState } from '../../../models/navigation-state';
 import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { InsertClientAdminComponent } from '../insert-client/insert-client.admin.component';
-import { UpdateClientAdminComponent } from '../update-client/update-client.admin.component';
 import { Slide } from '../../../models/slide';
 import { SlideService } from '../../../services/slide.service';
 import { SlideRequest } from '../../../request/slide.request';
 import { InsertSlideAdminComponent } from '../insert-slide/insert-slide.admin.component';
 import { UpdateSlideAdminComponent } from '../update-slide/update-slide.component';
+import { NavigationEnd, Router } from '@angular/router';
+import { MessageService } from '../../../services/message.service';
 
 @Component({
   selector: 'app-slide',
@@ -46,16 +34,12 @@ export class SlideAdminComponent {
     private slideService: SlideService,
     private toastr: ToastrService,
     private modalService: NgbModal,
+    private router: Router,
+    private messageService: MessageService,
   ) {}
 
   ngOnInit() {
     this.getSlides();
-  }
-
-  ngOnDestroy(): void {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
   }
 
   getSlides() {

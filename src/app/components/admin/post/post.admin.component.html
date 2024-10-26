@@ -108,6 +108,14 @@
           {{ category.name }}
         </option>
       </select>
+      <button
+        class="btn btn btn-danger me-2"
+        (click)="deleteSelectedPosts()"
+        type="button"
+        *ngIf="selectedPosts.size > 0"
+      >
+        <i class="fa-regular fa-trash-can"></i>
+      </button>
     </div>
 
     <!-- Pagination -->
@@ -245,6 +253,11 @@
             <div class="admin-posts__title-actions">
               <p class="admin-posts__title">
                 <a>{{ post.title }}</a>
+                <span
+                  *ngIf="post.status !== 'PUBLISHED'"
+                  class="admin-posts__title-status"
+                  >- {{ post.status }}</span
+                >
               </p>
               <div class="admin-posts__row-actions">
                 <span class="admin-posts__action admin-posts__action--edit">
@@ -323,7 +336,7 @@
         </td>
         <td class="admin-posts__table-cell admin-posts__table-cell--date">
           <span>Đã xuất bản:</span><br />
-          <time>{{ post.created_at | date: "dd MMMM yyyy" }}</time>
+          <time>{{ post.created_at | date: 'dd MMMM yyyy' }}</time>
         </td>
       </tr>
     </tbody>

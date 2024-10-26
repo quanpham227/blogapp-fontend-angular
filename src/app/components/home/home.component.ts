@@ -1,4 +1,4 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   Component,
   HostListener,
@@ -34,43 +34,35 @@ import aos from 'aos';
   ],
 })
 export class HomeComponent implements OnInit {
-  backtotop: HTMLElement | null = null;
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  backToTopButton: HTMLElement | null = null;
+  constructor() {}
 
   ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.backtotop = document.querySelector('.back-to-top');
-      window.addEventListener('scroll', this.toggleBacktotop.bind(this));
+    this.backToTopButton = document.querySelector('.back-to-top');
+    window.addEventListener('scroll', this.toggleBackToTop.bind(this));
 
-      // AOS
-      aos.init({
-        duration: 1000,
-        easing: 'ease-in-out',
-        once: true,
-        mirror: false,
-      });
-    }
+    // AOS
+    aos.init({
+      duration: 1000,
+      easing: 'ease-in-out',
+      once: true,
+      mirror: false,
+    });
   }
   @HostListener('window:scroll', [])
   onWindowScroll() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.toggleBacktotop();
-    }
+    this.toggleBackToTop();
   }
 
-  toggleBacktotop() {
-    if (isPlatformBrowser(this.platformId)) {
-      if (window.scrollY > 100) {
-        this.backtotop?.classList.add('active');
-      } else {
-        this.backtotop?.classList.remove('active');
-      }
+  toggleBackToTop() {
+    if (window.scrollY > 100) {
+      this.backToTopButton?.classList.add('active');
+    } else {
+      this.backToTopButton?.classList.remove('active');
     }
   }
 
   scrollToTop() {
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

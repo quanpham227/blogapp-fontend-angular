@@ -10,12 +10,14 @@ export interface Post {
   excerpt: string;
   status: string;
   thumbnail_url: string;
+  public_id: string;
   category: Category;
   created_at: string;
   updated_at: string;
   comment_count: number;
   author_name: string;
   profile_image: string;
+  email: string;
   ratings_count: number;
   view_count: number;
   visibility: string;

@@ -1,1 +1,20 @@
+<!-- <ngx-spinner type="ball-climbing-dot">
+  <p class="text-white">Loading...</p>
+</ngx-spinner> -->
 <router-outlet></router-outlet>
+<div class="progressbar-container">
+  <ng-progress
+    ngProgressRouter
+    [min]="options.min ?? 0"
+    [max]="options.max ?? 100"
+    [speed]="options.speed ?? 200"
+    [trickleSpeed]="options.trickleSpeed ?? 300"
+    [debounceTime]="options.debounceTime ?? 0"
+    [spinnerPosition]="options.spinnerPosition ?? 'right'"
+    [direction]="options.direction ?? 'ltr+'"
+    [relative]="options.relative ?? false"
+    [flat]="options.flat ?? false"
+    [spinner]="options.spinner ?? true"
+    class="root-progress-bar"
+  ></ng-progress>
+</div>

@@ -37,7 +37,7 @@ export class TinymceEditorComponent
 {
   @Input() content: string = '';
   @Input() editorConfig: any = {}; // Nhận cấu hình tùy chỉnh từ component cha
-  @Input() helpText: string = 'Your custom help text here'; // Nhận dòng chữ tùy chỉnh từ component cha
+  @Input() helpText: string = ''; // Nhận dòng chữ tùy chỉnh từ component cha
   @Output() contentChange = new EventEmitter<string>();
 
   private onChange: (value: string) => void = () => {};
@@ -94,9 +94,10 @@ export class TinymceEditorComponent
     ],
 
     content_style: `
-      body { font-family:Helvetica,Arial,sans-serif; font-size:14px }
-      .tox-statusbar__branding, .tox-statusbar__upgrade, .tox-promotion { display: none; }
-    `,
+    body { font-family:Helvetica,Arial,sans-serif; font-size:14px }
+    .tox-statusbar__branding, .tox-statusbar__upgrade, .tox-promotion { display: none; }
+    img { max-width: 100%; height: auto; } 
+  `,
 
     setup: (editor: any) => {
       // Ghi đè hành động mặc định của nút "Insert Image"
@@ -129,14 +130,31 @@ export class TinymceEditorComponent
           upgradeElement.style.display = 'none';
         }
 
+        // Loại bỏ phần tử "tox-statusbar__path"
+        const pathElement = document.querySelector(
+          '.tox-statusbar__path',
+        ) as HTMLElement;
+        if (pathElement) {
+          pathElement.style.display = 'none';
+        }
         // Thay đổi hoặc loại bỏ dòng chữ "Press ⌥0 for help"
         const helpTextElement = document.querySelector(
           '.tox-statusbar__help-text',
         ) as HTMLElement;
         if (helpTextElement) {
           helpTextElement.innerHTML = this.helpText; // Thay đổi dòng chữ
-          // helpTextElement.style.display = 'none'; // Hoặc ẩn dòng chữ
+          helpTextElement.style.flex = '1'; // Chiếm toàn bộ chiều rộng còn lại
         }
+        // Di chuyển phần tử "tox-statusbar__resize-handle" sang góc phải
+        const resizeHandleElement = document.querySelector(
+          '.tox-statusbar__resize-handle',
+        ) as HTMLElement;
+        if (resizeHandleElement) {
+          resizeHandleElement.style.position = 'absolute';
+          resizeHandleElement.style.right = '0';
+          resizeHandleElement.style.bottom = '0';
+        }
+        console.log(this.helpText);
       });
 
       editor.on('Change', () => {
@@ -194,6 +212,7 @@ export class TinymceEditorComponent
           this.isEditorReady = true; // Đánh dấu editor đã khởi tạo
           this.writeValue(this.content); // Thiết lập nội dung sau khi khởi tạo
         });
+
         editor.on('change', () => {
           const newContent = editor.getContent(); // Lấy nội dung mới
           this.contentChange.emit(newContent); // Phát sự kiện nội dung thay đổi

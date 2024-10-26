@@ -1,25 +1,38 @@
-import {
-  Component,
-  HostListener,
-  OnInit,
-  Inject,
-  PLATFORM_ID,
-} from '@angular/core';
-import * as AOS from 'aos';
-import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { NgProgressbar, NgProgressOptions } from 'ngx-progressbar';
+import { NgProgressRouter } from 'ngx-progressbar/router';
+import { NgProgressHttp } from 'ngx-progressbar/http';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { CommonModule } from '@angular/common';
 
 @Component({
+  standalone: true,
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  standalone: true,
-  imports: [RouterModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    NgxSpinnerModule,
+    NgProgressbar,
+    NgProgressHttp,
+    NgProgressRouter,
+  ],
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   title = 'blogapp-fontend';
-
-  constructor() {}
-
-  ngOnInit() {}
+  options: NgProgressOptions = {
+    min: 8,
+    max: 100,
+    speed: 500,
+    trickleSpeed: 1000,
+    debounceTime: 0,
+    spinnerPosition: 'right',
+    direction: 'ltr+',
+    relative: false,
+    flat: false,
+    spinner: true,
+  };
 }

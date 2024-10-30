@@ -11,6 +11,9 @@ import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { LoginDTO } from '../dtos/user/login.dto';
 import { AuthService } from './auth.service';
+import { LoggingService } from './logging.service';
+import { SuccessHandlerService } from './success-handler.service';
+import { ApiResponse } from '../models/response';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +39,8 @@ export class UserService {
     private http: HttpClient,
     private router: Router,
     private authService: AuthService,
-
+    private loggingService: LoggingService,
+    private successHandlerService: SuccessHandlerService,
     @Inject(DOCUMENT) private document: Document,
   ) {
     this.localStorage = this.document.defaultView?.localStorage;
@@ -53,87 +57,52 @@ export class UserService {
   register(registerDTO: RegisterDTO): Observable<any> {
     return this.http.post(this.apiRegister, registerDTO, this.apiConfig);
   }
-
   login(loginDTO: LoginDTO): Observable<any> {
-    return this.http
-      .post(this.apiLogin, loginDTO, {
-        ...this.apiConfig,
-        withCredentials: true, // Thêm withCredentials ở đây
-      })
-      .pipe(
-        tap((response: any) => {
-          const { token, refresh_token } = response.data;
-          console.log('Token after login:', token);
-          console.log('Refresh Token after login:', refresh_token);
-          if (token && refresh_token) {
-            // Lưu access_token trong In-Memory Storage
-            // Kiểm tra giá trị của document.cookie
-            console.log('Document Cookie after login:', this.document.cookie);
-          }
-        }),
-      );
+    return this.http.post(this.apiLogin, loginDTO, {
+      ...this.apiConfig,
+      withCredentials: true,
+    });
   }
 
   getUserDetail(token: string): Observable<UserResponse> {
-    this.checkTokenValidity(); // Kiểm tra token trước khi thực hiện yêu cầu API
+    this.checkTokenValidity();
 
-    return this.http
-      .post<UserResponse>(
-        this.apiUserDetail,
-        {},
-        {
-          headers: new HttpHeaders({
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          }),
-        },
-      )
-      .pipe(
-        catchError((error) => {
-          if (error.status === 401) {
-            this.logout();
-          }
-          return throwError(() => new Error(error));
-        }),
-      );
-  }
-  updateUserDetail(
-    token: string,
-    updateUserDTO: UpdateUserDTO,
-  ): Observable<any> {
-    this.checkTokenValidity(); // Kiểm tra token trước khi thực hiện yêu cầu API
-
-    const userResponse = this.authService.getUser();
-
-    return this.http
-      .put(`${this.apiUserDetail}/${userResponse?.id}`, updateUserDTO, {
+    return this.http.post<UserResponse>(
+      this.apiUserDetail,
+      {},
+      {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         }),
-      })
-      .pipe(
-        catchError((error) => {
-          if (error.status === 401) {
-            this.logout();
-          }
-          return throwError(() => new Error(error));
-        }),
-      );
+      },
+    );
+  }
+  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<any> {
+    this.checkTokenValidity();
+
+    const userResponse = this.authService.getUser();
+
+    return this.http.put(`${this.apiUserDetail}/${userResponse?.id}`, updateUserDTO, {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      }),
+    });
   }
 
   logout() {
-    this.http.post(this.apiLogout, {}, { withCredentials: true }).subscribe({
-      next: () => {
+    this.http.post<ApiResponse<void>>(this.apiLogout, {}, { withCredentials: true }).subscribe({
+      next: (response: ApiResponse<void>) => {
         const user = this.authService.getUser();
         const isAdmin = user?.role.name === 'ADMIN';
         this.authService.logout(); // Gọi phương thức logout từ AuthService
         this.router.navigate([isAdmin ? '/login' : '/']).then(() => {
-          console.log('User has been logged out.');
+          this.successHandlerService.handleApiResponse(response, 'Logged out successfully');
         });
       },
       error: (error) => {
-        console.error('Error logging out:', error);
+        this.loggingService.logError('Error logging out:', error);
       },
     });
   }

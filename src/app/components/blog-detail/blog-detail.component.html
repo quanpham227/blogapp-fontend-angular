@@ -1,24 +1,31 @@
 <!-- blog-detail.component.html -->
 <div class="blog-detail">
-  <div class="container">
+  <div class="container" *ngIf="post">
     <div class="row g-5">
-      <div class="col-lg-8 mx-auto blog-detail__main" *ngIf="post">
+      <div class="col-lg-8 mx-auto blog-detail__main">
+        <nav aria-label="breadcrumb">
+          <ol class="blog-detail_breadcrumb breadcrumb">
+            <li class="breadcrumb-item">
+              <i class="fa-solid fa-house"></i>
+              <a routerLink="/">Trang chủ</a>
+            </li>
+            <li class="breadcrumb-item"><a routerLink="/blog">Tin Tức</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ post.title }}</li>
+          </ol>
+        </nav>
         <div class="blog-detail__content">
-          <div class="blog-detail__image">
-            <img [src]="post.thumbnail_url" alt="" class="img-fluid" />
-          </div>
           <h2 class="blog-detail__title">{{ post.title }}</h2>
           <div class="blog-detail__meta-top">
             <ul class="blog-detail__meta-list">
               <li class="blog-detail__meta-item d-flex align-items-center">
                 <i class="bi bi-person"></i>
-                <a>{{ post.author_name }}</a>
+                <a>Viết bởi: {{ post.author_name }}</a>
               </li>
               <li class="blog-detail__meta-item d-flex align-items-center">
                 <i class="bi bi-clock"></i>
-                <a
-                  ><time datetime="2020-01-01">{{ post.created_at }}</time></a
-                >
+                <a>
+                  <time>{{ getFormattedDate(post.created_at) }}</time>
+                </a>
               </li>
               <li class="blog-detail__meta-item d-flex align-items-center">
                 <i class="bi bi-chat-dots"></i>
@@ -27,8 +34,7 @@
             </ul>
           </div>
           <!-- End meta top -->
-          <div class="blog-detail__body" [innerHTML]="post.content"></div>
-
+          <div class="blog-detail__body" [innerHTML]="getSanitizedContent(post.content)"></div>
           <div class="blog-detail__meta-bottom">
             <i class="bi bi-tags"></i>
             <ul class="blog-detail__tags">
@@ -41,234 +47,45 @@
         </div>
         <!-- End blog post -->
         <div class="blog-detail__comments">
-          <h4 class="blog-detail__comments-count">
-            {{ post.comment_count }} Comments
-          </h4>
-          <div class="">
+          <h4 class="blog-detail__comments-count">{{ post.comment_count }} Comments</h4>
+          <div class="blog-detail__comment">
+            <app-comment
+              *ngFor="let comment of rootComments$ | async; trackBy: trackByCommentId"
+              [comment]="comment"
+              [replyForms]="replyForms"
+              [replyFormVisibility]="replyFormVisibility"
+              [editingComment]="editingComment"
+              [editCommentForm]="editCommentForm"
+              (toggleReplyForm)="toggleReplyForm($event)"
+              (editComment)="editComment($event)"
+              (deleteComment)="deleteComment($event)"
+              (addReply)="addReply($event)"
+              (updateComment)="updateComment()"
+              (cancelEdit)="cancelEdit()"
+            ></app-comment>
             <div *ngIf="!showAddCommentForm">
-              <button
-                class="blog-detail__toggle-add-comment btn btn-primary"
-                type="button"
-                (click)="toggleCommentForm()"
-              >
-                Thêm bình luận
-              </button>
-            </div>
-            <div
-              *ngIf="showAddCommentForm"
-              class="blog-detail__add-comment-section"
-            >
-              <form [formGroup]="newCommentForm" (ngSubmit)="addComment()">
-                <textarea
-                  class="blog-detail__add-comment-textarea form-control"
-                  rows="3"
-                  placeholder="Nhập bình luận của bạn..."
-                  formControlName="content"
-                ></textarea>
-                <div class="blog-detail__add-comment-actions mt-2">
-                  <button
-                    class="blog-detail__add-comment-send btn btn-success mr-2"
-                    type="submit"
-                  >
-                    Thêm bình luận
-                  </button>
-                  <button
-                    class="blog-detail__add-comment-cancel btn btn-secondary"
-                    type="button"
-                    (click)="toggleCommentForm()"
-                  >
-                    Hủy bỏ
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div
-              *ngFor="let comment of rootComments; let i = index"
-              class="blog-detail__root-comment mt-3"
-            >
-              <!-- Form chỉnh sửa duy nhất -->
-              <div
-                *ngIf="editingComment && editingComment.id === comment.id"
-                class="blog-detail__edit-comment-section mt-2"
-              >
-                <form
-                  [formGroup]="editCommentForm"
-                  (ngSubmit)="updateComment()"
+              <ng-container *ngIf="authService.isLoggedIn(); else loginLink">
+                <button
+                  class="blog-detail__comment-toggle"
+                  type="button"
+                  (click)="toggleCommentForm()"
+                  aria-controls="addCommentForm"
                 >
-                  <textarea
-                    class="blog-detail__edit-comment-textarea form-control"
-                    rows="3"
-                    placeholder="Nhập bình luận của bạn..."
-                    formControlName="content"
-                  ></textarea>
-                  <div class="blog-detail__edit-comment-actions mt-2">
-                    <button
-                      class="blog-detail__edit-comment-save btn btn-success mr-2"
-                      type="submit"
-                    >
-                      Lưu
-                    </button>
-                    <button
-                      class="blog-detail__edit-comment-cancel btn btn-secondary"
-                      type="button"
-                      (click)="cancelEdit()"
-                    >
-                      Hủy bỏ
-                    </button>
-                  </div>
-                </form>
-              </div>
-              <div class="blog-detail__root-comment-body mb-3">
-                <div class="blog-detail__root-comment-media d-flex">
-                  <img
-                    class="blog-detail__root-comment-avatar mr-3 rounded-circle"
-                    [src]="
-                      comment.profile_image ||
-                      '/assets/images/no-image-available.jpg'
-                    "
-                    alt="User Avatar"
-                    style="width: 30px; height: 30px"
-                  />
-                  <div class="blog-detail__root-comment-content">
-                    <h5 class="blog-detail__root-comment-author mt-0">
-                      {{ comment.full_name }}
-                    </h5>
-                    <p class="blog-detail__root-comment-text">
-                      {{ comment.content }}
-                    </p>
-                    <div class="blog-detail__root-comment-actions">
-                      <a
-                        class="blog-detail__root-comment-reply"
-                        (click)="toggleReplyForm(comment.id)"
-                        >Trả lời</a
-                      >
-                      <a
-                        class="blog-detail__root-comment-edit"
-                        (click)="editComment(comment)"
-                        >Sửa nhanh</a
-                      >
-                      <a
-                        class="blog-detail__root-comment-trash"
-                        (click)="deleteComment(comment.id)"
-                        >Thùng rác</a
-                      >
-                    </div>
-                    <div
-                      *ngIf="replyFormVisibility[comment.id]"
-                      class="blog-detail__reply-section mt-2"
-                    >
-                      <form
-                        [formGroup]="replyForms[comment.id]"
-                        (ngSubmit)="addReply(comment.id)"
-                      >
-                        <textarea
-                          class="blog-detail__reply-textarea form-control"
-                          rows="3"
-                          placeholder="Nhập phản hồi của bạn..."
-                          formControlName="content"
-                        ></textarea>
-                        <div class="blog-detail__reply-actions mt-2">
-                          <button
-                            class="blog-detail__reply-send btn btn-success mr-2"
-                            type="submit"
-                          >
-                            Reply
-                          </button>
-                          <button
-                            class="blog-detail__reply-cancel btn btn-secondary"
-                            type="button"
-                            (click)="toggleReplyForm(comment.id)"
-                          >
-                            Hủy bỏ
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                    <div
-                      *ngIf="comment.replies && comment.replies.length > 0"
-                      class="blog-detail__child-comments mt-3"
-                    >
-                      <div
-                        *ngFor="let reply of comment.replies; let j = index"
-                        class="blog-detail__child-comment mb-3 ml-3"
-                      >
-                        <!-- Form chỉnh sửa duy nhất -->
-                        <div
-                          *ngIf="
-                            editingComment && editingComment.id === reply.id
-                          "
-                          class="blog-detail__edit-comment-section mt-2"
-                        >
-                          <form
-                            [formGroup]="editCommentForm"
-                            (ngSubmit)="updateComment()"
-                          >
-                            <textarea
-                              class="blog-detail__edit-comment-textarea form-control"
-                              rows="3"
-                              placeholder="Nhập bình luận của bạn..."
-                              formControlName="content"
-                            ></textarea>
-                            <div class="blog-detail__edit-comment-actions mt-2">
-                              <button
-                                class="blog-detail__edit-comment-save btn btn-success mr-2"
-                                type="submit"
-                              >
-                                Lưu
-                              </button>
-                              <button
-                                class="blog-detail__edit-comment-cancel btn btn-secondary"
-                                type="button"
-                                (click)="cancelEdit()"
-                              >
-                                Hủy bỏ
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                        <div class="blog-detail__child-comment-body">
-                          <div class="blog-detail__child-comment-media d-flex">
-                            <img
-                              class="blog-detail__child-comment-avatar mr-3 rounded-circle"
-                              [src]="
-                                reply.profile_image ||
-                                '/assets/images/no-image-available.jpg'
-                              "
-                              alt="User Avatar"
-                              style="width: 30px; height: 30px"
-                            />
-                            <div class="blog-detail__child-comment-content">
-                              <h6
-                                class="blog-detail__child-comment-author mt-0"
-                              >
-                                {{ reply.full_name }}
-                              </h6>
-                              <p class="blog-detail__child-comment-text">
-                                <strong
-                                  >Trả lời {{ comment.full_name }}:</strong
-                                >
-                                {{ reply.content }}
-                              </p>
-                              <div class="blog-detail__child-comment-actions">
-                                <a
-                                  class="blog-detail__child-comment-edit"
-                                  (click)="editComment(reply)"
-                                  >Sửa nhanh</a
-                                >
-                                <a
-                                  class="blog-detail__child-comment-trash"
-                                  (click)="deleteComment(reply.id)"
-                                  >Thùng rác</a
-                                >
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  Thêm bình luận
+                </button>
+              </ng-container>
+              <ng-template #loginLink>
+                <a routerLink="/login" class="blog-detail__login-link">Đăng nhập để thêm bình luận</a>
+              </ng-template>
+            </div>
+            <div *ngIf="showAddCommentForm" class="blog-detail__comment-form">
+              <app-comment-form
+                [formGroup]="newCommentForm"
+                placeholder="Nhập bình luận của bạn..."
+                submitLabel="Thêm bình luận"
+                (submitForm)="addComment()"
+                (cancelForm)="toggleCommentForm()"
+              ></app-comment-form>
             </div>
           </div>
         </div>

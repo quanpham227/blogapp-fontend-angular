@@ -1,17 +1,11 @@
-import {
-  Component,
-  ViewChild,
-  ElementRef,
-  Renderer2,
-  OnInit,
-} from '@angular/core';
+import { Component, ViewChild, ElementRef, Renderer2, OnInit } from '@angular/core';
 import { Image } from '../../../models/image';
 import { ImageService } from '../../../services/image.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
+import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { checkFile, FileValidationResult } from '../../../utils/file-validator';
 import { firstValueFrom } from 'rxjs';
 import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
@@ -86,11 +80,7 @@ export class MediaAdminComponent implements OnInit {
     this.isSearchActive = !this.isSearchActive;
     if (this.isSearchActive) {
       // Hiển thị ô tìm kiếm
-      this.renderer.setStyle(
-        this.searchInput.nativeElement,
-        'display',
-        'block',
-      );
+      this.renderer.setStyle(this.searchInput.nativeElement, 'display', 'block');
 
       // Focus vào ô tìm kiếm
       setTimeout(() => {
@@ -117,10 +107,7 @@ export class MediaAdminComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      const validationResult: FileValidationResult = checkFile(
-        file,
-        this.uploadType,
-      );
+      const validationResult: FileValidationResult = checkFile(file, this.uploadType);
       if (!validationResult.isValid) {
         alert(validationResult.message);
         input.value = '';
@@ -239,9 +226,7 @@ export class MediaAdminComponent implements OnInit {
       const selectedImageId = this.selectedImages[0].id;
       if (selectedImageId !== null) {
         try {
-          const response = await firstValueFrom(
-            this.imageService.getImageById(selectedImageId),
-          );
+          const response = await firstValueFrom(this.imageService.getImageById(selectedImageId));
           if (response && response.status === 'OK') {
             this.selectedImage = response.data;
             this.modalService.open(content, {
@@ -275,8 +260,7 @@ export class MediaAdminComponent implements OnInit {
   openConfirmModal(): void {
     const modalRef = this.modalService.open(ConfirmModalComponent);
     modalRef.componentInstance.title = 'Xác nhận xóa';
-    modalRef.componentInstance.message =
-      'Bạn có chắc chắn muốn xóa các hình ảnh đã chọn không?';
+    modalRef.componentInstance.message = 'Bạn có chắc chắn muốn xóa các hình ảnh đã chọn không?';
     modalRef.componentInstance.confirmText = 'Xóa';
     modalRef.componentInstance.cancelText = 'Hủy';
 

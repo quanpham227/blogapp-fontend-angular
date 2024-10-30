@@ -2,7 +2,7 @@ import { Component, HostListener, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { filter, Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
+import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -76,9 +76,7 @@ export class SlideAdminComponent {
         },
         error: (error: any) => {
           // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-          const errorMessage =
-            error.error?.message ||
-            'An unexpected error occurred. Please try again.';
+          const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
           this.toastr.error(errorMessage);
           console.error('Error:', error);
         },
@@ -91,8 +89,7 @@ export class SlideAdminComponent {
       this.slideIdToDelete = id;
       this.modalRef = this.modalService.open(ConfirmModalComponent);
       this.modalRef.componentInstance.title = 'Confirm Delete';
-      this.modalRef.componentInstance.message =
-        'Do you want to delete this slide?';
+      this.modalRef.componentInstance.message = 'Do you want to delete this slide?';
       this.modalRef.componentInstance.confirmText = 'Delete';
       this.modalRef.componentInstance.cancelText = 'Cancel';
 
@@ -111,9 +108,7 @@ export class SlideAdminComponent {
       this.slideService.deleteSlide(this.slideIdToDelete).subscribe({
         next: (response: ApiResponse<any>) => {
           if (response.status === 'OK') {
-            this.toastr.success(
-              response.message || 'Slide deleted successfully!',
-            );
+            this.toastr.success(response.message || 'Slide deleted successfully!');
             this.getSlides();
           } else {
             this.toastr.error(response.message || 'Failed to delete slide.');
@@ -144,29 +139,25 @@ export class SlideAdminComponent {
         backdropClass: 'admin-modal-backdrop', // Thêm lớp custom cho backdrop
       });
       modalRef.componentInstance.slideId = id; // Truyền ID vào modal
-      modalRef.componentInstance.updateSlide.subscribe(
-        (slide: SlideRequest) => {
-          this.slideService.updateSlide(id, slide).subscribe({
-            next: (response: ApiResponse<Slide>) => {
-              if (response.status === 'OK') {
-                this.toastr.success(response.message);
-                this.getSlides();
-              } else {
-                // Xử lý lỗi server trả về
-                this.toastr.error(response.message);
-              }
-            },
-            error: (error: any) => {
-              // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-              const errorMessage =
-                error.error?.message ||
-                'An unexpected error occurred. Please try again.';
-              this.toastr.error(errorMessage);
-              console.error('Error:', error);
-            },
-          });
-        },
-      );
+      modalRef.componentInstance.updateSlide.subscribe((slide: SlideRequest) => {
+        this.slideService.updateSlide(id, slide).subscribe({
+          next: (response: ApiResponse<Slide>) => {
+            if (response.status === 'OK') {
+              this.toastr.success(response.message);
+              this.getSlides();
+            } else {
+              // Xử lý lỗi server trả về
+              this.toastr.error(response.message);
+            }
+          },
+          error: (error: any) => {
+            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+            const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
+            this.toastr.error(errorMessage);
+            console.error('Error:', error);
+          },
+        });
+      });
     } else {
       console.error('Category ID is null');
     }

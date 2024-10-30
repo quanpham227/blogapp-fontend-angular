@@ -1,13 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './components/home/home.component';
-import { BlogComponent } from './components/blog/blog.component';
-import { BlogDetailComponent } from './components/blog-detail/blog-detail.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { WebLayoutComponent } from './components/layouts/web-layout/web-layout.component';
 import { AuthLayoutComponent } from './components/layouts/auth-layout/auth-layout.component';
-import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { AdminLayoutComponent } from './components/layouts/admin-layout/admin-layout.component';
 import { DashboardAdminComponent } from './components/admin/dashboard/dashboard.admin.component';
 import { ClientAdminComponent } from './components/admin/client/client.admin.component';
@@ -25,7 +21,6 @@ import { CommentAdminComponent } from './components/admin/comment/comment.admin.
 import { AboutAdminComponent } from './components/admin/about/about-admin.component';
 import { InsertPostAdminComponent } from './components/admin/insert-post/insert-post.admin.component';
 import { UpdatePostAdminComponent } from './components/admin/update-post/update-post.admin..component';
-import { PostPreviewAdminComponent } from './components/post-preview/post-preview.admin.component';
 import { AdminGuardFn } from './guards/admin.guard';
 import { AuthGuardFn } from './guards/auth.guard';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
@@ -35,27 +30,46 @@ export const routes: Routes = [
     path: '',
     component: WebLayoutComponent,
     children: [
-      { path: '', component: HomeComponent },
-      { path: 'blog', component: BlogComponent },
-      { path: 'blog/category/:categorySlug', component: BlogComponent },
+      {
+        path: '',
+        loadComponent: () => import('./components/home/home.component').then((m) => m.HomeComponent),
+      },
+      {
+        path: 'blog',
+        loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+      },
+      {
+        path: 'blog/category/:categorySlug',
+        loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+      },
       {
         path: 'blog/category/:categorySlug/page/:page',
-        component: BlogComponent,
+        loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
         runGuardsAndResolvers: 'paramsChange',
       },
-      { path: 'blog/search/:keyword', component: BlogComponent },
+      {
+        path: 'blog/search/:keyword',
+        loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+      },
       {
         path: 'blog/search/:keyword/page/:page',
-        component: BlogComponent,
+        loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
         runGuardsAndResolvers: 'paramsChange',
       },
-
-      { path: 'blog/:slug', component: BlogDetailComponent },
-      { path: 'post-preview', component: PostPreviewAdminComponent },
-
+      {
+        path: 'blog/:slug',
+        loadComponent: () =>
+          import('./components/blog-detail/blog-detail.component').then((m) => m.BlogDetailComponent),
+      },
+      {
+        path: 'post-preview',
+        loadComponent: () =>
+          import('./components/post-preview/post-preview.admin.component').then((m) => m.PostPreviewAdminComponent),
+      },
       {
         path: 'user-profile',
-        component: UserProfileComponent,
+        loadComponent: () =>
+          import('./components/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
         canActivate: [AuthGuardFn],
       },
     ],

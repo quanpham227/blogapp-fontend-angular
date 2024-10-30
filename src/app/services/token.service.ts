@@ -1,11 +1,12 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
-import { DOCUMENT } from '@angular/common';
 import { UserDetailService } from './user.details';
+import { Router } from '@angular/router';
+import { LoggingService } from './logging.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,11 +18,15 @@ export class TokenService {
     private http: HttpClient,
     private authService: AuthService,
     private userDetailService: UserDetailService,
-    @Inject(DOCUMENT) private document: Document,
+    private router: Router,
+    private loggingService: LoggingService,
   ) {}
 
   refreshToken(): Observable<any> {
-    console.log('Attempting to refresh token');
+    if (!this.authService.hasRefreshToken()) {
+      console.log('No refresh token found');
+      return of(null);
+    }
     return this.http
       .post(
         this.apiRefreshToken,
@@ -30,27 +35,26 @@ export class TokenService {
       )
       .pipe(
         tap((response: any) => {
-          const { token, refresh_token } = response.data;
+          const { token } = response.data;
           this.authService.setAccessToken(token);
+          this.authService.setRefreshTokenFlag();
           this.userDetailService.getUserDetail(token).subscribe({
             next: (response: any) => {
               this.authService.setUser(response.data ?? null);
-              console.log('User details updated after token refresh');
             },
             error: (error: any) => {
+              this.loggingService.logError('Error when getting user detail', error);
               this.authService.logout();
-              console.error(
-                'Error getting user details after token refresh:',
-                error,
-              );
+              this.handleNavigation();
             },
           });
         }),
-        catchError((error) => {
-          this.authService.logout();
-          console.error('Error refreshing token:', error);
-          return of(null);
-        }),
       );
+  }
+  private handleNavigation() {
+    const currentUrl = this.router.url;
+    if (currentUrl.startsWith('/admin')) {
+      this.router.navigate(['/login']);
+    }
   }
 }

@@ -6,6 +6,8 @@ import { RegisterDTO } from '../../dtos/user/register.dto';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { LoggingService } from '../../services/logging.service';
+import { SuccessHandlerService } from '../../services/success-handler.service';
 
 @Component({
   selector: 'app-register',
@@ -28,6 +30,8 @@ export class RegisterComponent implements OnDestroy {
   constructor(
     private router: Router,
     private userService: UserService,
+    private loggingService: LoggingService,
+    private successHandlerService: SuccessHandlerService,
   ) {
     this.fullName = '';
     this.phone_number = '';
@@ -57,13 +61,12 @@ export class RegisterComponent implements OnDestroy {
     };
     const registerSub = this.userService.register(registerDTO).subscribe({
       next: (response: any) => {
-        debugger;
+        this.successHandlerService.handleApiResponse(response, 'Register success');
         this.router.navigate(['/login']);
       },
 
       error: (error) => {
-        debugger;
-        alert(`Can't register, error: ${error.error.message}`);
+        this.loggingService.logError('Register error', error);
       },
     });
     this.subscriptions.add(registerSub);

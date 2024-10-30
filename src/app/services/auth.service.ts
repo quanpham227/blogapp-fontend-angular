@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
+  private readonly refreshTokenKey = 'hasRefreshToken';
   private userSubject: BehaviorSubject<UserResponse | null>;
   public user$: Observable<UserResponse | null>;
   private jwtHelperService = new JwtHelperService();
@@ -30,9 +31,11 @@ export class AuthService {
     return this.userSubject.value;
   }
 
+  getUserId(): number {
+    return this.getUser()?.id ?? 0;
+  }
   setAccessToken(token: string) {
     sessionStorage.setItem('token', token);
-    console.log('Access token saved to sessionStorage:', token);
   }
 
   getAccessToken(): string | null {
@@ -54,11 +57,16 @@ export class AuthService {
     return isExpired; // Trả về true nếu token hết hạn
   }
 
+  isLoggedIn(): boolean {
+    const token = this.getAccessToken();
+    return token !== null && !this.isTokenExpired(token);
+  }
+
   clearAuthData() {
     this.userSubject.next(null);
     sessionStorage.removeItem('token');
-    document.cookie =
-      'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    this.clearRefreshTokenFlag();
+    document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   }
 
   logout() {
@@ -72,13 +80,22 @@ export class AuthService {
 
   async setUserFromToken(token: string): Promise<void> {
     try {
-      const response = await firstValueFrom(
-        this.userDetailService.getUserDetail(token),
-      );
+      const response = await firstValueFrom(this.userDetailService.getUserDetail(token));
       this.setUser(response.data ?? null);
     } catch (error) {
       console.error('Error getting user details:', error);
       this.logout();
     }
+  }
+  setRefreshTokenFlag() {
+    localStorage.setItem(this.refreshTokenKey, 'true');
+  }
+
+  clearRefreshTokenFlag() {
+    localStorage.removeItem(this.refreshTokenKey);
+  }
+
+  hasRefreshToken(): boolean {
+    return localStorage.getItem(this.refreshTokenKey) === 'true';
   }
 }

@@ -1,17 +1,6 @@
-import {
-  ApplicationConfig,
-  importProvidersFrom,
-  Provider,
-  APP_INITIALIZER,
-} from '@angular/core';
-import { provideRouter, withHashLocation } from '@angular/router';
-import {
-  HttpClientModule,
-  provideHttpClient,
-  HTTP_INTERCEPTORS,
-  withFetch,
-  withInterceptors,
-} from '@angular/common/http';
+import { ApplicationConfig, importProvidersFrom, Provider, APP_INITIALIZER } from '@angular/core';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
+import { HttpClientModule, provideHttpClient, HTTP_INTERCEPTORS, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { provideToastr } from 'ngx-toastr';
@@ -19,17 +8,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { LazyLoadDirective } from './directives/lazy-load.directive';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import {
-  NgbDatepickerConfig,
-  NgbDateParserFormatter,
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbDatepickerConfig, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { MonthYearFormatter } from '../app/components/admin/shared/month-year-formatter';
 import { AuthService } from './services/auth.service';
 import { TokenService } from './services/token.service';
 import { initializeApp } from './app.initializer';
 import { LoadingInterceptor } from './interceptors/loading.interceptor';
-
-import { progressInterceptor } from 'ngx-progressbar/http';
+import { HttpStatusInterceptor } from './interceptors/http-status.interceptor';
+import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
+import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { ApiResponseInterceptor } from './interceptors/api-response.interceptor';
 
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -39,6 +27,11 @@ const tokenInterceptorProvider: Provider = {
 const loadingInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
   useClass: LoadingInterceptor,
+  multi: true,
+};
+const apiResponseInterceptorProvider: Provider = {
+  provide: HTTP_INTERCEPTORS,
+  useClass: ApiResponseInterceptor,
   multi: true,
 };
 const ngbDatepickerConfigProvider: Provider = {
@@ -57,10 +50,12 @@ const ngbDatepickerConfigProvider: Provider = {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([progressInterceptor])),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideHttpClient(withFetch()),
     tokenInterceptorProvider,
     loadingInterceptorProvider,
+    apiResponseInterceptorProvider,
+    HttpStatusInterceptor,
     importProvidersFrom(HttpClientModule),
     importProvidersFrom(BrowserAnimationsModule),
     provideHttpClient(),
@@ -88,5 +83,8 @@ export const appConfig: ApplicationConfig = {
       deps: [TokenService, AuthService],
       multi: true,
     },
+    importProvidersFrom(LoadingBarHttpClientModule),
+    importProvidersFrom(LoadingBarRouterModule),
+    // provideLoadingBar({ latencyThreshold: 100 }),
   ],
 };

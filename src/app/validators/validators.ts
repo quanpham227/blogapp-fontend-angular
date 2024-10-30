@@ -1,4 +1,3 @@
-// src/app/validators/validators.ts
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 /**
@@ -18,6 +17,7 @@ export function contentLengthValidator(
     return null;
   };
 }
+
 /**
  * Validator tùy chỉnh để kiểm tra số lượng thẻ
  * @param max Số lượng thẻ tối đa
@@ -36,5 +36,16 @@ export function nonEmptyTagsValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const tags = control.value;
     return tags && tags.length === 0 ? { nonEmptyTags: true } : null;
+  };
+}
+
+/**
+ * Validator tùy chỉnh để kiểm tra không có khoảng trắng
+ */
+export function noWhitespaceValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const isWhitespace = (control.value || '').trim().length === 0;
+    const isValid = !isWhitespace;
+    return isValid ? null : { whitespace: true };
   };
 }

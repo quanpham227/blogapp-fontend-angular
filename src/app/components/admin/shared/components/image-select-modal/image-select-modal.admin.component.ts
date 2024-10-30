@@ -1,24 +1,12 @@
-import {
-  Component,
-  ViewChild,
-  ElementRef,
-  Renderer2,
-  Input,
-  HostListener,
-  AfterViewInit,
-  OnInit,
-} from '@angular/core';
+import { Component, ViewChild, ElementRef, Renderer2, Input, HostListener, AfterViewInit, OnInit } from '@angular/core';
 import { Image } from '../../../../../models/image';
 import { ImageService } from '../../../../../services/image.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
-import {
-  checkFile,
-  FileValidationResult,
-} from '../../../../../utils/file-validator';
+import { ConfirmModalComponent } from '../../../../common/confirm-modal/confirm-modal.component';
+import { checkFile, FileValidationResult } from '../../../../../utils/file-validator';
 import { firstValueFrom } from 'rxjs';
 import { LazyLoadDirective } from '../../../../../directives/lazy-load.directive';
 import { ChangeDetectorRef } from '@angular/core';
@@ -67,12 +55,7 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
   async loadImages(append: boolean = true) {
     try {
       const response = await firstValueFrom(
-        this.imageService.getImages(
-          this.keyword,
-          this.selectedObjectType,
-          this.currentPage,
-          this.itemsPerPage,
-        ),
+        this.imageService.getImages(this.keyword, this.selectedObjectType, this.currentPage, this.itemsPerPage),
       );
       if (response) {
         if (append) {
@@ -124,10 +107,7 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      const validationResult: FileValidationResult = checkFile(
-        file,
-        this.uploadType,
-      );
+      const validationResult: FileValidationResult = checkFile(file, this.uploadType);
       if (!validationResult.isValid) {
         alert(validationResult.message);
         input.value = '';
@@ -267,8 +247,7 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
   openConfirmModal(): void {
     const modalRef = this.modalService.open(ConfirmModalComponent);
     modalRef.componentInstance.title = 'Xác nhận xóa';
-    modalRef.componentInstance.message =
-      'Bạn có chắc chắn muốn xóa các hình ảnh đã chọn không?';
+    modalRef.componentInstance.message = 'Bạn có chắc chắn muốn xóa các hình ảnh đã chọn không?';
     modalRef.componentInstance.confirmText = 'Xóa';
     modalRef.componentInstance.cancelText = 'Hủy';
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
 import { CategoryService } from '../../../services/category.service';
 import { ApiResponse } from '../../../models/response';
 import { Category } from '../../../models/category';
@@ -6,13 +6,14 @@ import { Router, NavigationStart } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { NavigationState } from '../../../models/navigation-state';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
+import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InsertCategoryAdminComponent } from '../insert-category/insert-category.admin.component';
 import { CategoryRequest } from '../../../request/category.request';
 import { UpdateCategoryAdminComponent } from '../update-category/update-category.admin.component';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-category-admin',
@@ -62,31 +63,27 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
 
   addCategory(): void {
     const modalRef = this.modalService.open(InsertCategoryAdminComponent);
-    modalRef.componentInstance.addCategory.subscribe(
-      (category: CategoryRequest) => {
-        // Gọi phương thức insertCategory từ CategoryService để thêm chuyên mục mới
-        this.categoryService.insertCategory(category).subscribe({
-          next: (response: ApiResponse<Category>) => {
-            if (response.status === 'OK') {
-              this.toastr.success(response.message);
-              this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
-            } else {
-              // Xử lý lỗi server trả về
-              this.toastr.error(response.message);
-            }
-          },
-          complete: () => {},
-          error: (error: any) => {
-            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-            const errorMessage =
-              error.error?.message ||
-              'An unexpected error occurred. Please try again.';
-            this.toastr.error(errorMessage);
-            console.error('Error:', error);
-          },
-        });
-      },
-    );
+    modalRef.componentInstance.addCategory.subscribe((category: CategoryRequest) => {
+      // Gọi phương thức insertCategory từ CategoryService để thêm chuyên mục mới
+      this.categoryService.insertCategory(category).subscribe({
+        next: (response: ApiResponse<Category>) => {
+          if (response.status === 'OK') {
+            this.toastr.success(response.message);
+            this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
+          } else {
+            // Xử lý lỗi server trả về
+            this.toastr.error(response.message);
+          }
+        },
+        complete: () => {},
+        error: (error: any) => {
+          // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+          const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
+          this.toastr.error(errorMessage);
+          console.error('Error:', error);
+        },
+      });
+    });
   }
 
   openDeleteModal(id: number | null): void {
@@ -95,8 +92,7 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
 
       this.modalRef = this.modalService.open(ConfirmModalComponent);
       this.modalRef.componentInstance.title = 'Confirm Delete';
-      this.modalRef.componentInstance.message =
-        'Do you want to delete this category?';
+      this.modalRef.componentInstance.message = 'Do you want to delete this category?';
       this.modalRef.componentInstance.confirmText = 'Delete';
       this.modalRef.componentInstance.cancelText = 'Cancel';
 
@@ -113,9 +109,7 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
       this.categoryService.deleteCategory(this.categoryIdToDelete).subscribe({
         next: (response: ApiResponse<any>) => {
           if (response.status === 'OK') {
-            this.toastr.success(
-              response.message || 'Category deleted successfully!',
-            );
+            this.toastr.success(response.message || 'Category deleted successfully!');
             this.getCategories();
           } else {
             this.toastr.error(response.message || 'Failed to delete category.');
@@ -139,30 +133,26 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
     if (id !== null) {
       const modalRef = this.modalService.open(UpdateCategoryAdminComponent);
       modalRef.componentInstance.categoryId = id; // Truyền ID vào modal
-      modalRef.componentInstance.updateCategory.subscribe(
-        (category: CategoryRequest) => {
-          // Gọi phương thức updateCategory từ CategoryService để cập nhật chuyên mục
-          this.categoryService.updateCategory(id, category).subscribe({
-            next: (response: ApiResponse<Category>) => {
-              if (response.status === 'OK') {
-                this.toastr.success(response.message);
-                this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
-              } else {
-                // Xử lý lỗi server trả về
-                this.toastr.error(response.message);
-              }
-            },
-            error: (error: any) => {
-              // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-              const errorMessage =
-                error.error?.message ||
-                'An unexpected error occurred. Please try again.';
-              this.toastr.error(errorMessage);
-              console.error('Error:', error);
-            },
-          });
-        },
-      );
+      modalRef.componentInstance.updateCategory.subscribe((category: CategoryRequest) => {
+        // Gọi phương thức updateCategory từ CategoryService để cập nhật chuyên mục
+        this.categoryService.updateCategory(id, category).subscribe({
+          next: (response: ApiResponse<Category>) => {
+            if (response.status === 'OK') {
+              this.toastr.success(response.message);
+              this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
+            } else {
+              // Xử lý lỗi server trả về
+              this.toastr.error(response.message);
+            }
+          },
+          error: (error: any) => {
+            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+            const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
+            this.toastr.error(errorMessage);
+            console.error('Error:', error);
+          },
+        });
+      });
     } else {
       console.error('Category ID is null');
     }

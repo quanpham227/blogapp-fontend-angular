@@ -5,10 +5,7 @@
     <div class="row g-5">
       <div class="col-lg-8 blog__main">
         <div class="row gy-5 blog__posts-list">
-          <div
-            class="col-lg-6 blog__post-item"
-            *ngFor="let post of posts; trackBy: trackByFn"
-          >
+          <div class="col-lg-6 blog__post-item" *ngFor="let post of posts; trackBy: trackByFn">
             <article class="d-flex flex-column blog__post">
               <div class="blog__post-img">
                 <img [src]="post.thumbnail_url" alt="" class="img-fluid" />
@@ -25,9 +22,9 @@
                   <li class="d-flex align-items-center blog__post-meta-item">
                     <i class="bi bi-clock"></i>
                     <a>
-                      <time [attr.datetime]="post.created_at">{{
-                        post.created_at | date: 'MMM d, y'
-                      }}</time>
+                      <time [attr.datetime]="post.created_at">
+                        {{ post.created_at | date: 'MMM d, y' }}
+                      </time>
                     </a>
                   </li>
                   <li class="d-flex align-items-center blog__post-meta-item">
@@ -41,9 +38,10 @@
               </div>
 
               <div class="blog__post-read-more mt-auto align-self-end">
-                <a (click)="onPostClick(post.slug)"
-                  >Read More <i class="bi bi-arrow-right"></i
-                ></a>
+                <a (click)="onPostClick(post.slug)">
+                  Read More
+                  <i class="bi bi-arrow-right"></i>
+                </a>
               </div>
             </article>
           </div>
@@ -77,22 +75,10 @@
                 />
               </div>
               <div class="col-md-3">
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  (click)="searchPosts()"
-                >
-                  Tìm kiếm
-                </button>
+                <button type="button" class="btn btn-primary" (click)="searchPosts()">Tìm kiếm</button>
               </div>
               <div class="col-md-2">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  (click)="resetSearch()"
-                >
-                  Xóa
-                </button>
+                <button type="button" class="btn btn-secondary" (click)="resetSearch()">Xóa</button>
               </div>
             </div>
           </div>
@@ -101,12 +87,10 @@
           <div class="blog__sidebar-item blog__sidebar-item--categories">
             <h3 class="blog__sidebar-title">Categories</h3>
             <ul class="mt-3">
-              <li
-                *ngFor="let category of categories"
-                [class.active]="selectedCategorySlug === category.code"
-              >
+              <li *ngFor="let category of categories" [class.active]="selectedCategorySlug === category.code">
                 <a (click)="onCategorySelect(category.code)">
-                  {{ category.name }} <span>({{ category.postCount }})</span>
+                  {{ category.name }}
+                  <span>({{ category.postCount }})</span>
                 </a>
               </li>
             </ul>
@@ -117,15 +101,8 @@
             <h3 class="blog__sidebar-title">Recent Posts</h3>
 
             <div class="mt-3">
-              <div
-                class="blog__recent-post-item mt-3"
-                *ngFor="let post of recentPosts"
-              >
-                <img
-                  [src]="post.thumbnail_url"
-                  class="flex-shrink-0"
-                  height="50px"
-                />
+              <div class="blog__recent-post-item mt-3" *ngFor="let post of recentPosts">
+                <img [src]="post.thumbnail_url" class="flex-shrink-0" height="50px" />
                 <div>
                   <p>
                     <a (click)="onPostClick(post.slug)">{{ post.title }}</a>
@@ -139,13 +116,9 @@
             </div>
           </div>
           <!-- End sidebar recent posts -->
-
-          <!-- End sidebar tags -->
         </div>
       </div>
     </div>
   </div>
 </div>
 <!-- End Blog Section -->
-
-<!-- Loading Spinner -->

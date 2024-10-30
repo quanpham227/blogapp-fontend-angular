@@ -4,7 +4,6 @@ import {
   ChangeDetectorRef,
   Component,
   DoCheck,
-  inject,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -16,18 +15,14 @@ import { Post } from '../../models/post';
 import { ApiResponse } from '../../models/response';
 import { CategoryService } from '../../services/category.service';
 import { PostService } from '../../services/post.service';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { BlogStateService } from '../../services/blog-state.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpStatusService } from '../../services/http-status.service';
+import { LoggingService } from '../../services/logging.service';
 
 @Component({
   selector: 'app-blog',
@@ -35,18 +30,9 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./blog.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    FormsModule,
-    CommonModule,
-    NgbPaginationModule,
-    ReactiveFormsModule,
-    NgbModule,
-  ],
+  imports: [FormsModule, CommonModule, NgbPaginationModule, ReactiveFormsModule, NgbModule],
 })
-export class BlogComponent
-  implements OnInit, OnChanges, AfterViewInit, DoCheck, OnDestroy
-{
-  private readonly http: HttpClient = inject(HttpClient);
+export class BlogComponent implements OnInit, OnDestroy {
   posts: Post[] = [];
   recentPosts: Post[] = [];
   categories: Category[] = [];
@@ -67,17 +53,17 @@ export class BlogComponent
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private blogStateService: BlogStateService,
+    private httpStatusService: HttpStatusService,
+    private loggingService: LoggingService,
   ) {
     this.searchForm = this.fb.group({
       keyword: [''],
       categorySlug: [''],
       page: [1],
     });
-    console.log('BlogComponent constructor called');
   }
 
   ngOnInit() {
-    console.log('ngOnInit called');
     this.restoreState();
     this.subscribeToRouteParamsAndQueryParams();
     this.getCategories();
@@ -85,32 +71,9 @@ export class BlogComponent
   }
 
   ngOnDestroy() {
-    console.log('ngOnDestroy called');
     this.saveState();
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    console.log('ngOnChanges called', changes);
-    if (changes['posts'] || changes['categories']) {
-      this.cdr.markForCheck();
-    }
-  }
-
-  ngAfterViewInit() {
-    console.log('ngAfterViewInit called');
-  }
-
-  ngDoCheck() {
-    this.renderCount++;
-    if (this.renderCount % 10 === 0) {
-      console.log(`Render count: ${this.renderCount}`);
-    }
-    // Chỉ trigger lại khi dữ liệu thay đổi
-    if (this.posts.length > 0 && this.totalPages > 0) {
-      this.cdr.markForCheck();
-    }
   }
 
   private subscribeToRouteParamsAndQueryParams() {
@@ -126,8 +89,7 @@ export class BlogComponent
       params['keyword'] || queryParams['keyword']
         ? (params['keyword'] || queryParams['keyword']).replace(/-/g, ' ')
         : '';
-    const categorySlug =
-      params['categorySlug'] || queryParams['categorySlug'] || '';
+    const categorySlug = params['categorySlug'] || queryParams['categorySlug'] || '';
     const page = params['page'] || queryParams['page'] || 1;
 
     this.updateFormAndSlug(keyword, categorySlug);
@@ -153,37 +115,22 @@ export class BlogComponent
   getPosts() {
     console.log('getPosts called');
     const keyword = this.searchForm.get('keyword')?.value || '';
-    this.getPostsForUser(
-      keyword,
-      this.selectedCategorySlug,
-      this.currentPage,
-      this.itemsPerPage,
-    );
+    this.getPostsForUser(keyword, this.selectedCategorySlug, this.currentPage, this.itemsPerPage);
   }
 
-  getPostsForUser(
-    keyword: string,
-    categorySlug: string,
-    page: number,
-    limit: number,
-  ) {
-    console.log('getPostsForUser called');
-
-    this.postService
-      .getPostsForUser(keyword, categorySlug, page - 1, limit)
-      .subscribe({
-        next: (response: any) => {
-          const data = response.data;
-          console.log('Data:', data);
-          this.posts = response.data.posts;
-          this.totalPages = response.data.totalPages;
-          this.cdr.markForCheck();
-        },
-        error: (error: any) => {
-          console.error('Error fetching posts:', error);
-          alert('Có lỗi xảy ra khi lấy bài viết. Vui lòng thử lại sau.');
-        },
-      });
+  getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number) {
+    this.postService.getPostsForUser(keyword, categorySlug, page - 1, limit).subscribe({
+      next: (response: any) => {
+        const data = response.data;
+        console.log('Data:', data);
+        this.posts = response.data.posts;
+        this.totalPages = response.data.totalPages;
+        this.cdr.markForCheck();
+      },
+      error: (error: any) => {
+        this.loggingService.logError('Error fetching posts for user:', error);
+      },
+    });
   }
   getCategories() {
     this.categoryService.getCategories().subscribe({
@@ -194,8 +141,7 @@ export class BlogComponent
         }
       },
       error: (error: any) => {
-        console.error('Error fetching categories:', error);
-        alert('Có lỗi xảy ra khi lấy danh mục. Vui lòng thử lại sau.');
+        this.loggingService.logError('Error fetching categories:', error);
       },
     });
   }
@@ -203,12 +149,14 @@ export class BlogComponent
   getRecentPosts(page: number, limit: number) {
     this.postService.getRecentPosts(page, limit).subscribe({
       next: (response: any) => {
-        this.recentPosts = response.data.posts;
-        this.cdr.markForCheck();
+        if (response.data.posts !== this.recentPosts) {
+          this.recentPosts = response.data.posts;
+          this.cdr.markForCheck();
+        }
       },
       error: (error: any) => {
-        console.error('Error fetching recent posts:', error);
-        alert('Có lỗi xảy ra khi lấy bài viết gần đây. Vui lòng thử lại sau.');
+        this.loggingService.logError('Error fetching recent posts:', error);
+        // Không cần hiển thị thông báo lỗi vì đã được xử lý bởi HttpInterceptor
       },
     });
   }
@@ -230,14 +178,35 @@ export class BlogComponent
   }
 
   onPostClick(slug: string) {
+    // Kiểm tra tính hợp lệ của slug
+    if (!slug || typeof slug !== 'string' || slug.trim() === '') {
+      console.error('Invalid slug');
+      alert('Slug không hợp lệ. Vui lòng thử lại.');
+      return;
+    }
+
+    // Kiểm tra trạng thái của ứng dụng (ví dụ: không có yêu cầu HTTP đang chờ xử lý)
+    if (this.isRequestPending()) {
+      console.error('Request pending');
+      alert('Vui lòng đợi yêu cầu hiện tại hoàn thành.');
+      return;
+    }
+
+    // Nếu tất cả các điều kiện đều thỏa mãn, thực hiện điều hướng
     this.router.navigate([`/blog/${slug}`]);
+  }
+
+  isRequestPending(): boolean {
+    let isPending = false;
+    this.httpStatusService.pendingRequests$.subscribe((status) => {
+      isPending = status;
+    });
+    return isPending;
   }
 
   updateQueryParams(): void {
     let url = '/blog';
-    const keyword = this.formatKeyword(
-      this.searchForm.get('keyword')?.value || '',
-    );
+    const keyword = this.formatKeyword(this.searchForm.get('keyword')?.value || '');
     const categorySlug = this.selectedCategorySlug;
 
     url = this.buildUrl(url, keyword, categorySlug);
@@ -276,11 +245,7 @@ export class BlogComponent
     return keyword.trim().replace(/\s+/g, '-');
   }
 
-  private buildUrl(
-    baseUrl: string,
-    keyword: string,
-    categorySlug: string,
-  ): string {
+  private buildUrl(baseUrl: string, keyword: string, categorySlug: string): string {
     if (keyword) {
       baseUrl += `/search/${keyword}`;
     } else if (categorySlug) {
@@ -296,9 +261,7 @@ export class BlogComponent
 
   private saveState() {
     this.blogStateService.setCurrentCategory(this.selectedCategorySlug);
-    this.blogStateService.setCurrentKeyword(
-      this.searchForm.get('keyword')?.value || '',
-    );
+    this.blogStateService.setCurrentKeyword(this.searchForm.get('keyword')?.value || '');
     this.blogStateService.setCurrentPage(this.currentPage);
   }
 

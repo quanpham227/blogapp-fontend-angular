@@ -1,13 +1,8 @@
-import {
-  Component,
-  OnInit,
-  HostListener,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { NgbPopover, NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 import { UserResponse } from '../../responses/user/user.response';
 import { UserService } from '../../services/user.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';

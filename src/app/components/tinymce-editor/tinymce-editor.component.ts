@@ -249,7 +249,9 @@ export class TinymceEditorComponent
       modalRef.result.then(
         (result: { url: string; publicId: string }) => {
           if (result) {
-            editor.insertContent(`<img src="${result.url}" alt="Image" />`);
+            editor.insertContent(
+              `<img class="content-image" src="${result.url}" alt="Image" loading="lazy" />`,
+            );
           }
         },
         (reason) => {

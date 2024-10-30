@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ApiResponse } from '../../../models/response';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
+import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { checkFile, FileValidationResult } from '../../../utils/file-validator';
 import { firstValueFrom } from 'rxjs';
 import { LazyLoadDirective } from '../../../directives/lazy-load.directive';

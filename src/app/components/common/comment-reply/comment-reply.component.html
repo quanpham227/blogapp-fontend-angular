@@ -1,0 +1,38 @@
+<div class="reply-comment">
+  <!-- Form chỉnh sửa phản hồi -->
+  <div *ngIf="editingComment && editingComment.id === reply.id" class="reply-comment__edit-form">
+    <app-comment-form
+      [formGroup]="editCommentForm"
+      placeholder="Nhập bình luận của bạn..."
+      submitLabel="Lưu"
+      (submitForm)="updateComment.emit()"
+      (cancelForm)="cancelEdit.emit()"
+    ></app-comment-form>
+  </div>
+
+  <div class="reply-comment__content">
+    <div class="reply-comment__media d-flex">
+      <img
+        class="reply-comment__avatar mr-3 rounded-circle"
+        [src]="reply.profile_image || '/assets/images/no-image-available.jpg'"
+        alt="User Avatar"
+        style="width: 30px; height: 30px"
+      />
+      <div class="reply-comment__details">
+        <h5 class="reply-comment__author">
+          {{ reply.full_name }}
+          <span class="reply-comment__timestamp">{{ getRelativeTime(reply.created_at) }}</span>
+        </h5>
+        <p class="reply-comment__text">
+          <strong>Trả lời</strong>
+          {{ reply.content }}
+        </p>
+
+        <div class="reply-comment__actions">
+          <a class="reply-comment__edit-button" (click)="editComment.emit(reply)">Sửa nhanh</a>
+          <a class="reply-comment__delete-button" (click)="deleteComment.emit(reply.id)">Thùng rác</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

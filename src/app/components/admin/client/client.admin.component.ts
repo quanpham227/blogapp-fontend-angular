@@ -1,25 +1,18 @@
-import {
-  Component,
-  HostListener,
-  Inject,
-  OnInit,
-  PLATFORM_ID,
-} from '@angular/core';
+import { Component, HostListener, inject, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Client } from '../../../models/client';
 import { ClientService } from '../../../services/client.service';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { NavigationState } from '../../../models/navigation-state';
-import { ConfirmModalComponent } from '../shared/components/confirm-modal/confirm-modal.component';
+import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { ApiResponse } from '../../../models/response';
-import { stripHtml } from '../../../utils/strip-html'; // Import hàm stripHtml
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InsertClientAdminComponent } from '../insert-client/insert-client.admin.component';
 import { ClientRequest } from '../../../request/client.request';
 import { UpdateClientAdminComponent } from '../update-client/update-client.admin.component';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-client-admin',
@@ -87,9 +80,7 @@ export class ClientAdminComponent implements OnInit {
         complete() {},
         error: (error: any) => {
           // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-          const errorMessage =
-            error.error?.message ||
-            'An unexpected error occurred. Please try again.';
+          const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
           this.toastr.error(errorMessage);
           console.error('Error:', error);
         },
@@ -103,8 +94,7 @@ export class ClientAdminComponent implements OnInit {
 
       this.modalRef = this.modalService.open(ConfirmModalComponent);
       this.modalRef.componentInstance.title = 'Confirm Delete';
-      this.modalRef.componentInstance.message =
-        'Do you want to delete this client?';
+      this.modalRef.componentInstance.message = 'Do you want to delete this client?';
       this.modalRef.componentInstance.confirmText = 'Delete';
       this.modalRef.componentInstance.cancelText = 'Cancel';
 
@@ -121,9 +111,7 @@ export class ClientAdminComponent implements OnInit {
       this.clientService.deleteClient(this.clientIdToDelete).subscribe({
         next: (response: ApiResponse<any>) => {
           if (response.status === 'OK') {
-            this.toastr.success(
-              response.message || 'Category deleted successfully!',
-            );
+            this.toastr.success(response.message || 'Category deleted successfully!');
             this.getClients();
           } else {
             this.toastr.error(response.message || 'Failed to delete category.');
@@ -153,29 +141,25 @@ export class ClientAdminComponent implements OnInit {
         size: 'md',
       });
       modalRef.componentInstance.clientId = id; // Truyền ID vào modal
-      modalRef.componentInstance.updateClient.subscribe(
-        (client: ClientRequest) => {
-          this.clientService.updateClient(id, client).subscribe({
-            next: (response: ApiResponse<Client>) => {
-              if (response.status === 'OK') {
-                this.toastr.success(response.message);
-                this.getClients();
-              } else {
-                // Xử lý lỗi server trả về
-                this.toastr.error(response.message);
-              }
-            },
-            error: (error: any) => {
-              // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-              const errorMessage =
-                error.error?.message ||
-                'An unexpected error occurred. Please try again.';
-              this.toastr.error(errorMessage);
-              console.error('Error:', error);
-            },
-          });
-        },
-      );
+      modalRef.componentInstance.updateClient.subscribe((client: ClientRequest) => {
+        this.clientService.updateClient(id, client).subscribe({
+          next: (response: ApiResponse<Client>) => {
+            if (response.status === 'OK') {
+              this.toastr.success(response.message);
+              this.getClients();
+            } else {
+              // Xử lý lỗi server trả về
+              this.toastr.error(response.message);
+            }
+          },
+          error: (error: any) => {
+            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
+            const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
+            this.toastr.error(errorMessage);
+            console.error('Error:', error);
+          },
+        });
+      });
     } else {
       console.error('Category ID is null');
     }

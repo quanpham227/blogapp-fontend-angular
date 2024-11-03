@@ -4,12 +4,14 @@ import { ImageService } from '../../../../../services/image.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
 import { ConfirmModalComponent } from '../../../../common/confirm-modal/confirm-modal.component';
 import { checkFile, FileValidationResult } from '../../../../../utils/file-validator';
 import { firstValueFrom } from 'rxjs';
 import { LazyLoadDirective } from '../../../../../directives/lazy-load.directive';
 import { ChangeDetectorRef } from '@angular/core';
+import { ToasterService } from '../../../../../services/toaster.service';
+import { LoggingService } from '../../../../../services/logging.service';
+import { SuccessHandlerService } from '../../../../../services/success-handler.service';
 
 @Component({
   selector: 'app-image-select-modal-admin',
@@ -41,9 +43,11 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
     private renderer: Renderer2,
     private imageService: ImageService,
     private modalService: NgbModal,
-    private toastr: ToastrService,
+    private toastr: ToasterService,
     private activeModal: NgbActiveModal,
     private cdRef: ChangeDetectorRef,
+    private loggingService: LoggingService,
+    private successHandlerService: SuccessHandlerService,
   ) {}
 
   ngOnInit(): void {
@@ -71,10 +75,7 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
         }
         this.cdRef.detectChanges();
       }
-    } catch (error) {
-      console.error('Error fetching images:', error);
-      this.toastr.error('Lỗi khi tải hình ảnh');
-    }
+    } catch (error) {}
   }
 
   // Hàm để chuyển đổi hiển thị của ô tìm kiếm
@@ -140,8 +141,7 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
 
     this.imageService.uploadImage(file, this.uploadType).subscribe({
       next: (event: any) => {
-        if (event.status === 'CREATED') {
-          this.toastr.success(event.message);
+        if (event.status === 'CREATED' || event.status === 'OK') {
           // Cập nhật hình ảnh tạm thời với dữ liệu từ server
           const index = this.images.findIndex((img) => img.id === 0);
           if (index !== -1) {
@@ -195,8 +195,7 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
     this.isDeleting = true;
     const idsToDelete = this.selectedImages.map((image) => image.id);
     try {
-      await firstValueFrom(this.imageService.deleteImages(idsToDelete));
-      this.toastr.success('Đã xóa các hình ảnh thành công');
+      const response = await firstValueFrom(this.imageService.deleteImages(idsToDelete));
       this.selectedImages.forEach((image) => {
         const index = this.images.indexOf(image);
         if (index !== -1) {
@@ -205,10 +204,8 @@ export class ImageSelectModalAdminComponent implements OnInit, AfterViewInit {
       });
       this.selectedImages = [];
       this.currentPage = 0;
-      this.loadImages(false); // Gọi hàm loadImages với append là false
+      this.loadImages(false);
     } catch (error) {
-      console.error('Error deleting images:', error);
-      this.toastr.error('Lỗi khi xóa hình ảnh');
     } finally {
       this.isDeleting = false;
     }

@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ToasterService } from '../../../services/toaster.service';
 
 @Component({
   selector: 'app-dashboard-admin',
@@ -13,18 +14,18 @@ export class DashboardAdminComponent {
   newTask: string = '';
   tasks: { name: string; completed: boolean }[] = [];
 
-  addTask() {
-    if (this.newTask.trim()) {
-      this.tasks.push({ name: this.newTask, completed: false });
-      this.newTask = '';
-    }
-  }
+  private toasterService = inject(ToasterService);
 
-  toggleTaskCompletion(index: number) {
-    this.tasks[index].completed = !this.tasks[index].completed;
+  showSuccess() {
+    this.toasterService.success('Task added successfully');
   }
-
-  removeTask(index: number) {
-    this.tasks.splice(index, 1);
+  showError() {
+    this.toasterService.error('Task could not be added');
+  }
+  showWarning() {
+    this.toasterService.warning('Task is not completed');
+  }
+  showInfo() {
+    this.toasterService.info('Task is completed');
   }
 }

@@ -97,13 +97,10 @@ export class UserService {
         const user = this.authService.getUser();
         const isAdmin = user?.role.name === 'ADMIN';
         this.authService.logout(); // Gọi phương thức logout từ AuthService
-        this.router.navigate([isAdmin ? '/login' : '/']).then(() => {
-          this.successHandlerService.handleApiResponse(response, 'Logged out successfully');
-        });
+        this.router.navigate([isAdmin ? '/login' : '/']).then(() => {});
+        this.successHandlerService.handleApiResponse(response);
       },
-      error: (error) => {
-        this.loggingService.logError('Error logging out:', error);
-      },
+      error: (error) => {},
     });
   }
 }

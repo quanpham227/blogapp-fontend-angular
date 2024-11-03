@@ -43,7 +43,6 @@ export class AuthService {
     if (token) {
       return token;
     }
-    console.log('No access token found in sessionStorage');
     return null;
   }
 

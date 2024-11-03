@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { NgbPopover, NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 import { UserResponse } from '../../responses/user/user.response';
 import { UserService } from '../../services/user.service';
@@ -7,13 +7,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { throttle } from 'lodash';
 
+@UntilDestroy()
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   standalone: true,
   imports: [FormsModule, CommonModule, NgbPopover, RouterModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit {
   activeNavItem: number = 0;
@@ -29,8 +33,13 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.checkUserStatus();
-    this.authService.user$.subscribe((user) => {
-      this.userResponse = user;
+    this.authService.user$.pipe(untilDestroyed(this)).subscribe({
+      next: (user) => {
+        this.userResponse = user;
+      },
+      error: (err) => {
+        console.error('Error fetching user data', err);
+      },
     });
   }
 
@@ -45,7 +54,7 @@ export class HeaderComponent implements OnInit {
   }
 
   @HostListener('window:scroll', [])
-  onWindowScroll() {
+  onWindowScroll = throttle(() => {
     const topBar = document.getElementById('topbar');
     const header = document.getElementById('header');
     const st = window.scrollY || document.documentElement.scrollTop;
@@ -59,7 +68,7 @@ export class HeaderComponent implements OnInit {
       header?.classList.remove('topbar-hidden');
     }
     this.lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
-  }
+  }, 200);
 
   scrollToSection(id: string, index: number) {
     if (this.router.url !== '/') {
@@ -77,8 +86,7 @@ export class HeaderComponent implements OnInit {
     const element = document.getElementById(id);
     if (element) {
       const headerOffset = 90; // You can adjust this value to get the desired result
-      const elementPosition =
-        element.getBoundingClientRect().top + window.scrollY;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
       const offsetPosition = elementPosition - headerOffset;
 
       window.scrollTo({

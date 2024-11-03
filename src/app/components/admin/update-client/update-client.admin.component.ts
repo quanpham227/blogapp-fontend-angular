@@ -1,20 +1,14 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ClientRequest } from '../../../request/client.request';
 import { ImageSelectModalAdminComponent } from '../shared/components/image-select-modal/image-select-modal.admin.component';
 import { ClientService } from '../../../services/client.service';
-import { ToastrService } from 'ngx-toastr';
 import { ApiResponse } from '../../../models/response';
 import { Client } from '../../../models/client';
-import e from 'express';
+import { ToasterService } from '../../../services/toaster.service';
+import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-update-client-admin',
@@ -36,25 +30,12 @@ export class UpdateClientAdminComponent {
     private modalService: NgbModal,
     private fb: FormBuilder,
     private clientService: ClientService,
-    private toastr: ToastrService,
+    private toast: ToasterService,
+    private successHandlerService: SuccessHandlerService,
   ) {
     this.clientForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
-      description: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(255),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
       logo: ['', Validators.required],
       public_id: [''],
     });
@@ -68,28 +49,20 @@ export class UpdateClientAdminComponent {
     if (this.clientId !== null) {
       this.clientService.getClientById(this.clientId).subscribe({
         next: (response: ApiResponse<Client>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' && response.data) {
             this.clientForm.patchValue(response.data);
             this.selectedLogoUrl = response.data.logo;
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        error: (error: any) => {
-          console.error('Error loading client:', error);
-          this.toastr.error('An error occurred while loading the client.');
         },
       });
     }
   }
   onSubmit() {
     if (this.clientForm.valid) {
-      console.log('Form is valid, submitting:', this.clientForm.value);
-
       this.updateClient.emit(this.clientForm.value);
       this.activeModal.close();
     } else {
-      console.log('Form is invalid, cannot submit:', this.clientForm.value);
+      this.toast.warning('Form is invalid, cannot submit:');
     }
   }
 

@@ -1,53 +1,83 @@
 import { Injectable } from '@angular/core';
-import { NotificationService } from './toastr.service';
+import { ToasterService } from './toaster.service';
+import { Observable, throwError } from 'rxjs';
+
+// Enum định nghĩa các mã trạng thái HTTP dưới dạng chuỗi
+export enum HttpStatus {
+  BadRequest = 'BAD_REQUEST',
+  Unauthorized = 'UNAUTHORIZED',
+  PaymentRequired = 'PAYMENT_REQUIRED',
+  Forbidden = 'FORBIDDEN',
+  NotFound = 'NOT_FOUND',
+  RequestTimeout = 'REQUEST_TIMEOUT',
+  Conflict = 'CONFLICT',
+  TooManyRequests = 'TOO_MANY_REQUESTS',
+  InternalServerError = 'INTERNAL_SERVER_ERROR',
+  ServiceUnavailable = 'SERVICE_UNAVAILABLE',
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class GlobalErrorHandler {
-  constructor(private notificationService: NotificationService) {}
+  constructor(private toasterService: ToasterService) {}
 
-  handleError(error: any): void {
-    console.error('Logged error:', error);
+  handleError(error: any): Observable<never> {
+    // Kiểm tra kết nối internet
+    if (error.status === 0 || !navigator.onLine) {
+      this.toasterService.error('Không có kết nối internet. Vui lòng kiểm tra lại.');
+      return throwError(() => new Error('Không có kết nối internet.'));
+    }
 
     // Ưu tiên hiển thị thông báo lỗi từ server, nếu không có thì hiển thị thông báo mặc định
     const errorMessage =
       error?.error?.message || error?.message || 'Đã xảy ra lỗi không mong muốn, vui lòng thử lại sau.';
 
-    switch (error.status) {
-      case 400:
-        this.notificationService.showWarning(errorMessage || 'Yêu cầu không hợp lệ.');
+    // Xử lý theo chuỗi mã trạng thái HTTP
+    switch (error.error?.status) {
+      case HttpStatus.BadRequest:
+        this.toasterService.error(errorMessage || 'Yêu cầu không hợp lệ.');
         break;
-      case 401:
-        this.notificationService.showWarning(errorMessage || 'Vui lòng đăng nhập lại.');
+      case HttpStatus.Unauthorized:
+        this.toasterService.error(errorMessage || 'Vui lòng đăng nhập lại.');
         break;
-      case 402:
-        this.notificationService.showWarning(errorMessage || 'Yêu cầu thanh toán.');
+      case HttpStatus.PaymentRequired:
+        this.toasterService.error(errorMessage || 'Yêu cầu thanh toán.');
         break;
-      case 403:
-        this.notificationService.showWarning(errorMessage || 'Bạn không có quyền truy cập vào tài nguyên này.');
+      case HttpStatus.Forbidden:
+        this.toasterService.error(errorMessage || 'Bạn không có quyền truy cập vào tài nguyên này.');
         break;
-      case 404:
-        this.notificationService.showWarning(errorMessage || 'Tài nguyên không tồn tại.');
+      case HttpStatus.NotFound:
+        this.toasterService.error(errorMessage || 'Tài nguyên không tồn tại.');
         break;
-      case 408:
-        this.notificationService.showWarning(errorMessage || 'Yêu cầu hết thời gian chờ.');
+      case HttpStatus.RequestTimeout:
+        this.toasterService.error(errorMessage || 'Yêu cầu hết thời gian chờ.');
         break;
-      case 429:
-        this.notificationService.showWarning(errorMessage || 'Quá nhiều yêu cầu trong một khoảng thời gian ngắn.');
+      case HttpStatus.TooManyRequests:
+        this.toasterService.error(errorMessage || 'Quá nhiều yêu cầu trong một khoảng thời gian ngắn.');
         break;
-      case 409:
-        this.notificationService.showWarning(errorMessage || 'Xung đột dữ liệu.');
+      case HttpStatus.Conflict:
+        this.toasterService.error(errorMessage || 'Xung đột dữ liệu.');
         break;
-      case 500:
-        this.notificationService.showError(errorMessage || 'Đã xảy ra lỗi trên server. Vui lòng thử lại sau.');
+      case HttpStatus.InternalServerError:
+        this.toasterService.error(errorMessage || 'Đã xảy ra lỗi trên server. Vui lòng thử lại sau.');
         break;
-      case 503:
-        this.notificationService.showError(errorMessage || 'Dịch vụ không khả dụng. Vui lòng thử lại sau.');
+      case HttpStatus.ServiceUnavailable:
+        this.toasterService.error(errorMessage || 'Dịch vụ không khả dụng. Vui lòng thử lại sau.');
         break;
       default:
-        this.notificationService.showError(errorMessage);
+        this.toasterService.error(errorMessage);
         break;
     }
+
+    // Trả về Observable lỗi để các component khác có thể xử lý tiếp
+    return throwError(() => new Error(errorMessage));
+  }
+  handleWarning(message: string): void {
+    this.toasterService.warning(message || 'Có một cảnh báo cần chú ý.');
+  }
+
+  handleInfo(message: string): void {
+    this.toasterService.info(message || 'Thông tin cập nhật.');
   }
 }

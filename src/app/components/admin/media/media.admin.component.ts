@@ -4,11 +4,13 @@ import { ImageService } from '../../../services/image.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
 import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { checkFile, FileValidationResult } from '../../../utils/file-validator';
 import { firstValueFrom } from 'rxjs';
 import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
+import { ToasterService } from '../../../services/toaster.service';
+import { LoggingService } from '../../../services/logging.service';
+import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-media',
@@ -39,7 +41,8 @@ export class MediaAdminComponent implements OnInit {
     private renderer: Renderer2,
     private imageService: ImageService,
     private modalService: NgbModal,
-    private toastr: ToastrService,
+    private toast: ToasterService,
+    private successHandlerService: SuccessHandlerService,
   ) {}
 
   ngOnInit(): void {
@@ -47,31 +50,26 @@ export class MediaAdminComponent implements OnInit {
   }
 
   async loadImages(append: boolean = true) {
-    try {
-      const response = await firstValueFrom(
-        this.imageService.getImages(
-          this.keyword,
-          this.selectedObjectType, // Truyền objectType rỗng nếu usage là 0
-          this.currentPage,
-          this.itemsPerPage,
-        ),
-      );
-      if (response) {
-        if (append) {
-          this.images = [...this.images, ...response.images];
-        } else {
-          this.images = response.images;
-        }
-        this.totalPages = response.totalPages;
-        this.totalFileSize = response.totalFileSizes;
-        this.currentPage++;
-        if (this.currentPage >= this.totalPages) {
-          this.allImagesLoaded = true;
-        }
+    const response = await firstValueFrom(
+      this.imageService.getImages(
+        this.keyword,
+        this.selectedObjectType, // Truyền objectType rỗng nếu usage là 0
+        this.currentPage,
+        this.itemsPerPage,
+      ),
+    );
+    if (response) {
+      if (append) {
+        this.images = [...this.images, ...response.images];
+      } else {
+        this.images = response.images;
       }
-    } catch (error) {
-      console.error('Error fetching images:', error);
-      this.toastr.error('Lỗi khi tải hình ảnh');
+      this.totalPages = response.totalPages;
+      this.totalFileSize = response.totalFileSizes;
+      this.currentPage++;
+      if (this.currentPage >= this.totalPages) {
+        this.allImagesLoaded = true;
+      }
     }
   }
 
@@ -140,8 +138,7 @@ export class MediaAdminComponent implements OnInit {
 
     this.imageService.uploadImage(file, this.uploadType).subscribe({
       next: (event: any) => {
-        if (event.status === 'CREATED') {
-          this.toastr.success(event.message);
+        if (event.status === 'CREATED' || event.status === 'OK') {
           // Cập nhật hình ảnh tạm thời với dữ liệu từ server
           const index = this.images.findIndex((img) => img.id === 0);
           if (index !== -1) {
@@ -153,15 +150,13 @@ export class MediaAdminComponent implements OnInit {
           }
           // Gọi lại hàm loadImages để cập nhật danh sách hình ảnh từ server
           this.loadImages(true);
-        } else if (event.status === 'error') {
-          this.toastr.error(event.message);
+          this.successHandlerService.handleApiResponse(event);
+        } else {
           // Xóa hình ảnh tạm thời nếu tải lên thất bại
           this.images = this.images.filter((img) => img.id !== 0);
         }
       },
-      error: (error: any) => {
-        console.error('Lỗi khi tải lên hình ảnh:', error);
-        this.toastr.error('Lỗi khi tải lên hình ảnh');
+      error: () => {
         // Xóa hình ảnh tạm thời nếu tải lên thất bại
         this.images = this.images.filter((img) => img.id !== 0);
       },
@@ -196,20 +191,19 @@ export class MediaAdminComponent implements OnInit {
     this.isDeleting = true;
     const idsToDelete = this.selectedImages.map((image) => image.id);
     try {
-      await firstValueFrom(this.imageService.deleteImages(idsToDelete));
-      this.toastr.success('Đã xóa các hình ảnh thành công');
-      this.selectedImages.forEach((image) => {
-        const index = this.images.indexOf(image);
-        if (index !== -1) {
-          this.images.splice(index, 1);
-        }
-      });
-      this.selectedImages = [];
-      this.currentPage = 0;
-      this.loadImages(false); // Gọi hàm loadImages với append là false
+      const response = await firstValueFrom(this.imageService.deleteImages(idsToDelete));
+      if (response && response.status === 'OK') {
+        this.selectedImages.forEach((image) => {
+          const index = this.images.indexOf(image);
+          if (index !== -1) {
+            this.images.splice(index, 1);
+          }
+        });
+        this.selectedImages = [];
+        this.currentPage = 0;
+        this.loadImages(false);
+      }
     } catch (error) {
-      console.error('Error deleting images:', error);
-      this.toastr.error('Lỗi khi xóa hình ảnh');
     } finally {
       this.isDeleting = false;
     }
@@ -217,28 +211,23 @@ export class MediaAdminComponent implements OnInit {
 
   async viewSelectedImages(content: any): Promise<void> {
     if (this.selectedImages.length === 0) {
-      alert('Vui lòng chọn ít nhất một hình ảnh để chỉnh sửa');
+      this.toast.error('Vui lòng chọn ít nhất một hình ảnh');
       return;
     } else if (this.selectedImages.length > 1) {
-      alert('Chỉ có thể chỉnh sửa một hình ảnh mỗi lần');
+      this.toast.error('Chỉ có thể xem một hình ảnh tại một thời điểm');
       return;
     } else {
       const selectedImageId = this.selectedImages[0].id;
       if (selectedImageId !== null) {
         try {
           const response = await firstValueFrom(this.imageService.getImageById(selectedImageId));
-          if (response && response.status === 'OK') {
+          if (response && response.status === 'OK' && response.data) {
             this.selectedImage = response.data;
             this.modalService.open(content, {
               ariaLabelledBy: 'imageModalLabel',
             });
-          } else if (response) {
-            this.toastr.error(response.message);
           }
-        } catch (error) {
-          console.error('Error loading image:', error);
-          this.toastr.error('An error occurred while loading the image.');
-        }
+        } catch (error) {}
       }
     }
   }
@@ -248,10 +237,10 @@ export class MediaAdminComponent implements OnInit {
     if (url) {
       navigator.clipboard.writeText(url).then(
         () => {
-          this.toastr.success('Đã sao chép URL');
+          this.toast.success('Đã sao chép URL');
         },
         (err) => {
-          console.error('Không thể sao chép URL: ', err);
+          this.toast.error('Lỗi khi sao chép URL');
         },
       );
     }

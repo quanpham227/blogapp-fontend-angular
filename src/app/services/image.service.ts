@@ -1,15 +1,12 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpClient,
-  HttpParams,
-  HttpRequest,
-  HttpEventType,
-} from '@angular/common/http';
+import { HttpClient, HttpParams, HttpRequest, HttpEventType } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { Image } from '../models/image';
 import { map } from 'rxjs/operators';
 import { ApiResponse } from '../models/response';
+import { SuccessHandlerService } from './success-handler.service';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +14,10 @@ import { ApiResponse } from '../models/response';
 export class ImageService {
   private imageAPI = `${environment.apiBaseUrl}/images`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private successHandlerService: SuccessHandlerService,
+  ) {}
 
   getImages(
     keyword: string,
@@ -49,14 +49,9 @@ export class ImageService {
     formData.append('file', file);
     formData.append('object_type', objectType);
 
-    const req = new HttpRequest(
-      'POST',
-      `${this.imageAPI}/upload/single`,
-      formData,
-      {
-        reportProgress: true, // Báo cáo tiến trình
-      },
-    );
+    const req = new HttpRequest('POST', `${this.imageAPI}/upload/single`, formData, {
+      reportProgress: true, // Báo cáo tiến trình
+    });
 
     return this.http.request(req).pipe(
       map((event) => {
@@ -65,9 +60,7 @@ export class ImageService {
             const progress = Math.round((100 * event.loaded) / event.total!);
             return { status: 'progress', message: progress };
           case HttpEventType.Response:
-            return (
-              event.body ?? { status: 'error', message: 'No response body' }
-            );
+            return event.body ?? { status: 'error', message: 'No response body' };
           default:
             return `Unhandled event: ${event.type}`;
         }
@@ -75,7 +68,9 @@ export class ImageService {
     );
   }
 
-  deleteImages(ids: number[]): Observable<any> {
-    return this.http.request('DELETE', this.imageAPI, { body: ids });
+  deleteImages(ids: number[]): Observable<ApiResponse<any>> {
+    return this.http
+      .request<ApiResponse<any>>('delete', this.imageAPI, { body: ids })
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

@@ -111,61 +111,6 @@
     font-family: 'roboto, sans-serif';
   }
 }
-// /* Tùy chỉnh CSS cho ngx-toastr */
-// .toast {
-//   background-color: #ffffff !important; /* Màu nền trắng */
-//   color: #000000 !important; /* Màu chữ đen */
-//   padding: 10px 20px; /* Điều chỉnh padding */
-//   white-space: nowrap; /* Không cho phép nội dung xuống dòng */
-//   overflow: hidden; /* Ẩn phần nội dung vượt ra ngoài */
-//   text-overflow: ellipsis; /* Hiển thị dấu "..." khi nội dung quá dài */
-//   height: 50px; /* Giới hạn chiều cao */
-//   max-width: 300px; /* Điều chỉnh độ rộng của toastr */
-//   line-height: 50px; /* Chiều cao dòng để căn giữa nội dung */
-//   display: flex;
-//   align-items: center; /* Đảm bảo nội dung nằm giữa theo chiều dọc */
-// }
-
-// /* Đảm bảo màu sắc của chữ trong các thông báo toastr */
-// .toast-message {
-//   white-space: nowrap; /* Không xuống dòng */
-//   overflow: hidden; /* Ẩn phần dư */
-//   text-overflow: ellipsis; /* Hiển thị dấu "..." khi nội dung quá dài */
-//   flex-grow: 1; /* Đảm bảo phần text chiếm đủ không gian */
-//   text-align: center; /* Căn giữa text */
-// }
-
-// /* Giới hạn chiều cao của toastr */
-// .toast-success,
-// .toast-error {
-//   height: 50px; /* Giới hạn chiều cao tối đa */
-//   max-height: 50px;
-// }
-
-// /* Đặt màu sắc cho icon và chữ cho các loại toastr */
-// .toast-success {
-//   color: #000000 !important; /* Màu chữ đen */
-//   background-color: #dbdada !important; /* Màu nền trắng */
-//   border-left: 10px solid #28a745 !important; /* Viền trái màu xanh lá cho thông báo thành công */
-//   border-bottom: 3px solid #52c66d !important;
-// }
-
-// .toast-error {
-//   color: #000000 !important; /* Màu chữ đen */
-//   background-color: #dfdbdb !important; /* Màu nền trắng */
-//   border-left: 10px solid #dc3545 !important; /* Viền trái màu đỏ cho thông báo lỗi */
-//   border-bottom: 3px solid #f0a9b0 !important;
-// }
-
-// /* Đặt màu sắc cho icon theo loại thông báo */
-// .toast-success .toast-icon {
-//   color: #28a745 !important; /* Màu icon cho thông báo thành công */
-//   background-color: #52c66d !important; /* Màu nền icon cho thông báo thành công */
-// }
-
-// .toast-error .toast-icon {
-//   color: #dc3545 !important; /* Màu icon cho thông báo lỗi */
-// }
 
 /* Tùy chỉnh CSS cho modal */
 

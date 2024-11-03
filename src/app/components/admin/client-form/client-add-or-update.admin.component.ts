@@ -1,13 +1,7 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TinymceEditorComponent } from '../../tinymce-editor/tinymce-editor.component';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ApiResponse } from '../../../models/response';
 import { Client } from '../../../models/client';
 import { ClientService } from '../../../services/client.service';
@@ -17,18 +11,14 @@ import { ImageSelectModalAdminComponent } from '../shared/components/image-selec
 import { SanitizeService } from '../../../services/sanitize.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToasterService } from '../../../services/toaster.service';
 
 @Component({
   selector: 'app-client-form-admin',
   templateUrl: './client-add-or-update.admin.component.html',
   styleUrls: ['./client-add-or-update.admin.component.scss'],
   standalone: true,
-  imports: [
-    FormsModule,
-    CommonModule,
-    ReactiveFormsModule,
-    TinymceEditorComponent,
-  ],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, TinymceEditorComponent],
 })
 export class ClientAddOrUpdateAdminComponent implements OnInit {
   clientForm: FormGroup;
@@ -49,24 +39,13 @@ export class ClientAddOrUpdateAdminComponent implements OnInit {
     private clientService: ClientService,
     private route: ActivatedRoute,
     private router: Router,
-    private toastr: ToastrService,
     private modalService: NgbModal,
     private sanitizeService: SanitizeService,
-    @Inject(PLATFORM_ID) private platformId: Object,
+    private toast: ToasterService,
   ) {
     this.clientForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
-      description: [
-        '',
-        [Validators.required, contentLengthValidator(5, 10000)],
-      ],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      description: ['', [Validators.required, contentLengthValidator(5, 10000)]],
       logo: ['', Validators.required],
     });
   }
@@ -85,16 +64,10 @@ export class ClientAddOrUpdateAdminComponent implements OnInit {
     if (this.clientId !== null) {
       this.clientService.getClientById(this.clientId).subscribe({
         next: (response: ApiResponse<Client>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' && response.data) {
             this.clientForm.patchValue(response.data);
             this.selectedLogoUrl = response.data.logo;
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        error: (error: any) => {
-          console.error('Error loading client:', error);
-          this.toastr.error('An error occurred while loading the client.');
         },
       });
     }
@@ -109,20 +82,18 @@ export class ClientAddOrUpdateAdminComponent implements OnInit {
         this.clientForm.patchValue({ logo: result });
       },
       (reason) => {
-        console.log('Modal dismissed: ' + reason);
+        this.toast.info('No image selected.');
       },
     );
   }
 
   saveClient(): void {
     if (this.clientForm.invalid) {
-      this.toastr.error('All fields are required and must be valid!');
+      this.toast.error('All fields are required and must be valid!');
       return;
     }
 
-    const sanitizedDescription = this.sanitizeService.sanitizeHtml(
-      this.clientForm.value.description,
-    );
+    const sanitizedDescription = this.sanitizeService.sanitizeHtml(this.clientForm.value.description);
     const formData = {
       ...this.clientForm.value,
       description: sanitizedDescription,
@@ -138,21 +109,11 @@ export class ClientAddOrUpdateAdminComponent implements OnInit {
   addClient(formData: any): void {
     this.clientService.insertClient(formData).subscribe({
       next: (response: ApiResponse<Client>) => {
-        if (response.status === 'OK') {
-          this.toastr.success(response.message);
+        if (response.status === 'OK' || response.status === 'CREATED') {
           this.router.navigate(['/admin/clients'], {
             state: { message: response.message },
           });
-        } else {
-          this.toastr.error(response.message);
         }
-      },
-      error: (error: any) => {
-        const errorMessage =
-          error.error?.message ||
-          'An unexpected error occurred. Please try again.';
-        this.toastr.error(errorMessage);
-        console.error('Error:', error);
       },
     });
   }
@@ -161,21 +122,11 @@ export class ClientAddOrUpdateAdminComponent implements OnInit {
     if (this.clientId !== null) {
       this.clientService.updateClient(this.clientId, formData).subscribe({
         next: (response: ApiResponse<Client>) => {
-          if (response.status === 'OK') {
-            this.toastr.success(response.message);
+          if (response.status === 'OK' || response.status === 'UPDATED') {
             this.router.navigate(['/admin/clients'], {
               state: { message: response.message },
             });
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        error: (error: any) => {
-          const errorMessage =
-            error.error?.message ||
-            'An unexpected error occurred while updating the client. Please try again.';
-          this.toastr.error(errorMessage);
-          console.error('Error:', error);
         },
       });
     }

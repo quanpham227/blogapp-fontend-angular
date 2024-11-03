@@ -1,17 +1,28 @@
 import { Injectable } from '@angular/core';
-import { NotificationService } from './toastr.service';
 import { ApiResponse } from '../models/response';
+import { ToasterService } from './toaster.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SuccessHandlerService {
-  constructor(private notificationService: NotificationService) {}
+  constructor(private toasterService: ToasterService) {}
 
-  handleApiResponse(response: ApiResponse<any>, successMessage: string) {
-    const successStatuses = ['OK', 'Created', 'Accepted', 'No Content'];
+  handleApiResponse(response: ApiResponse<any>) {
+    const successStatuses = [
+      'OK',
+      'Created',
+      'Accepted',
+      'No Content',
+      'Non-Authoritative Information',
+      'Reset Content',
+      'Partial Content',
+    ];
     if (successStatuses.includes(response.status)) {
-      this.notificationService.showSuccess(successMessage);
+      const successMessage = response.message || 'Success';
+      this.toasterService.success(successMessage);
+    } else {
+      console.warn(`Received unexpected status: ${response.status}`);
     }
   }
 }

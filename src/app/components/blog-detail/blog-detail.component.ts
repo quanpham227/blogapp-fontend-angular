@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { takeUntil, map, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { Post } from '../../models/post';
 import { PostService } from '../../services/post.service';
 
@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
 import { Title, Meta, DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CommentService } from '../../services/comment.service';
 import { CommentResponse } from '../../models/comment';
-import { NotificationService } from '../../services/toastr.service';
 import { ApiResponse } from '../../models/response';
 import { AuthService } from '../../services/auth.service';
 
@@ -22,7 +21,10 @@ import { noWhitespaceValidator } from '../../validators/validators'; // Adjust t
 import { LoggingService } from '../../services/logging.service';
 import { SuccessHandlerService } from '../../services/success-handler.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { ToasterService } from '../../services/toaster.service';
 
+@UntilDestroy()
 @Component({
   selector: 'app-blog-detail',
   templateUrl: './blog-detail.component.html',
@@ -39,12 +41,9 @@ import { ConfirmDialogService } from '../../services/confirm-dialog.service';
     CommentFormComponent,
   ],
 })
-export class BlogDetailComponent implements OnInit, OnDestroy {
+export class BlogDetailComponent implements OnInit {
   post: Post | null = null;
   postId: number = 0;
-  errorMessage: string | null = null;
-  private destroy$ = new Subject<void>();
-
   comments: CommentResponse[] = [];
   comments$: BehaviorSubject<CommentResponse[]> = new BehaviorSubject<CommentResponse[]>([]);
   rootComments$: Observable<CommentResponse[]> | undefined;
@@ -62,36 +61,30 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     private titleService: Title,
     private metaService: Meta,
     private commentService: CommentService,
-    private notificationService: NotificationService,
     public authService: AuthService,
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef,
     private loggingService: LoggingService,
     private successHandlerService: SuccessHandlerService,
     private confirmDialogService: ConfirmDialogService,
+    private toast: ToasterService,
   ) {
-    this.newCommentForm = new FormGroup({
-      content: new FormControl('', [Validators.required, Validators.minLength(5), noWhitespaceValidator()]),
-    });
-
-    this.editCommentForm = new FormGroup({
-      content: new FormControl('', [Validators.required, Validators.minLength(5), noWhitespaceValidator()]),
-    });
+    this.newCommentForm = this.createCommentForm();
+    this.editCommentForm = this.createCommentForm();
   }
 
   ngOnInit() {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+    this.route.paramMap.pipe(untilDestroyed(this)).subscribe((params) => {
       const slug = params.get('slug');
-      console.log('Nhận slug:', slug);
       if (slug) {
         this.initializeData(slug);
       }
     });
   }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  private createCommentForm(): FormGroup {
+    return new FormGroup({
+      content: new FormControl('', [Validators.required, Validators.minLength(5), noWhitespaceValidator()]),
+    });
   }
 
   private initializeData(slug: string) {
@@ -104,7 +97,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
       .getCommentsByPostId(this.postId)
       .pipe(
         map((response: ApiResponse<CommentResponse[]>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' && response.data) {
             this.comments = response.data;
             this.comments$.next(response.data); // Emit the new value
             return response.data;
@@ -116,12 +109,9 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
           this.initializeReplyForms(comments);
           this.cdr.markForCheck(); // Ensure Angular checks and updates the view
         }),
+        untilDestroyed(this),
       )
-      .subscribe({
-        error: (error) => {
-          this.loggingService.logError('Error initializing comments:', error);
-        },
-      });
+      .subscribe({});
 
     this.rootComments$ = this.comments$.pipe(
       map((comments: CommentResponse[]) => comments.filter((comment) => !comment.parent_comment_id)),
@@ -129,18 +119,13 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   }
 
   async getPostBySlug(slug: string) {
-    try {
-      const response = await firstValueFrom(this.postService.getPostBySlug(slug));
-      if (response && response.data) {
-        this.post = response.data;
-        this.postId = this.post.id;
-        console.log('Post details:', this.post);
-        this.updateMetaTags(this.post);
-        this.initializeComments(); // Gọi hàm để khởi tạo comments
-        this.cdr.markForCheck();
-      }
-    } catch (error) {
-      this.loggingService.logError('Error fetching post by slug:', error);
+    const response = await firstValueFrom(this.postService.getPostBySlug(slug));
+    if (response.status === 'OK' && response.data) {
+      this.post = response.data;
+      this.postId = this.post.id;
+      this.updateMetaTags(this.post);
+      this.initializeComments(); // Gọi hàm để khởi tạo comments
+      this.cdr.markForCheck();
     }
   }
 
@@ -230,53 +215,14 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     const userId = this.authService.getUserId();
     const content = this.newCommentForm.get('content')?.value;
     const postId = this.postId;
-    console.log('Adding comment:', { userId, postId, content });
-    this.commentService.addComment(this.postId, userId, content).subscribe({
-      next: (response: ApiResponse<CommentResponse>) => {
-        if (response.status === 'OK' && response.data) {
-          // Update the comments array immutably
-          this.comments = [...this.comments, response.data];
-          // Emit the new value
-          this.comments$.next(this.comments);
-          // Update the comment count
-          if (this.post) {
-            this.post.comment_count++;
-          }
-          // Trigger change detection manually
-          this.cdr.markForCheck();
-        }
-        // Gọi phương thức để hiển thị thông báo thành công
-        this.successHandlerService.handleApiResponse(response, 'Comment added successfully.');
-        // Reset the form and toggle the comment form
-        this.newCommentForm.reset();
-        this.showAddCommentForm = false;
-      },
-      error: (error: any) => {
-        this.loggingService.logError('Error adding comment:', error);
-      },
-    });
-  }
-  addReply(commentId: number): void {
-    if (!this.checkLoggedIn()) return;
-    const replyContent = this.replyForms[commentId].get('content')?.value;
-    const userId = this.authService.getUserId();
-    const parentCommentId = commentId;
-    this.commentService.replyComment(commentId, userId, replyContent, parentCommentId).subscribe({
-      next: (response: ApiResponse<CommentResponse>) => {
-        if (response.status === 'OK' && response.data) {
-          const parentCommentIndex = this.comments.findIndex((comment) => comment.id === commentId);
-          if (parentCommentIndex !== -1) {
-            const parentComment = this.comments[parentCommentIndex];
-            const updatedReplies = [...(parentComment.replies || []), response.data];
-            const updatedComment = {
-              ...parentComment,
-              replies: updatedReplies,
-            };
-            this.comments = [
-              ...this.comments.slice(0, parentCommentIndex),
-              updatedComment,
-              ...this.comments.slice(parentCommentIndex + 1),
-            ];
+    this.commentService
+      .addComment(this.postId, userId, content)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<CommentResponse>) => {
+          if (response.status === 'OK' || response.status === 'CREATED') {
+            // Update the comments array immutably
+            this.comments = [...this.comments, response.data];
             // Emit the new value
             this.comments$.next(this.comments);
             // Update the comment count
@@ -286,14 +232,50 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
             // Trigger change detection manually
             this.cdr.markForCheck();
           }
-          this.successHandlerService.handleApiResponse(response, 'Reply added successfully.');
-        }
-        this.toggleReplyForm(commentId);
-      },
-      error: (error: any) => {
-        this.loggingService.logError('Error adding reply:', error);
-      },
-    });
+
+          // Reset the form and toggle the comment form
+          this.newCommentForm.reset();
+          this.showAddCommentForm = false;
+        },
+      });
+  }
+  addReply(commentId: number): void {
+    if (!this.checkLoggedIn()) return;
+    const replyContent = this.replyForms[commentId].get('content')?.value;
+    const userId = this.authService.getUserId();
+    const parentCommentId = commentId;
+    this.commentService
+      .replyComment(commentId, userId, replyContent, parentCommentId)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<CommentResponse>) => {
+          if (response.status === 'OK' || response.status === 'CREATED') {
+            const parentCommentIndex = this.comments.findIndex((comment) => comment.id === commentId);
+            if (parentCommentIndex !== -1) {
+              const parentComment = this.comments[parentCommentIndex];
+              const updatedReplies = [...(parentComment.replies || []), response.data];
+              const updatedComment = {
+                ...parentComment,
+                replies: updatedReplies,
+              };
+              this.comments = [
+                ...this.comments.slice(0, parentCommentIndex),
+                updatedComment,
+                ...this.comments.slice(parentCommentIndex + 1),
+              ];
+              // Emit the new value
+              this.comments$.next(this.comments);
+              // Update the comment count
+              if (this.post) {
+                this.post.comment_count++;
+              }
+              // Trigger change detection manually
+              this.cdr.markForCheck();
+            }
+          }
+          this.toggleReplyForm(commentId);
+        },
+      });
   }
 
   editComment(comment: CommentResponse): void {
@@ -307,9 +289,10 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
       const userId = this.authService.getUserId();
       this.commentService
         .editComment(this.editingComment.id, userId, this.editCommentForm.get('content')?.value)
+        .pipe(untilDestroyed(this))
         .subscribe({
           next: (response: ApiResponse<CommentResponse>) => {
-            if (response.status === 'OK' && response.data) {
+            if (response.status === 'OK' || response.status === 'CREATED') {
               const index = this.comments.findIndex((comment) => comment.id === this.editingComment!.id);
               if (index !== -1) {
                 // Update the root comment immutably
@@ -336,11 +319,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
               // Trigger change detection manually
               this.cdr.markForCheck();
             }
-            this.successHandlerService.handleApiResponse(response, 'Comment updated successfully.');
             this.cancelEdit();
-          },
-          error: (error: any) => {
-            this.loggingService.logError('Error updating comment:', error);
           },
         });
     }
@@ -350,44 +329,43 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
     if (!this.checkLoggedIn()) return;
     this.confirmDialogService.confirm('Xác nhận', 'Bạn có chắc chắn muốn xóa bình luận này?').subscribe((result) => {
       if (!result) {
-        this.commentService.deleteComment(commentId).subscribe({
-          next: (response: ApiResponse<void>) => {
-            if (response.status === 'OK') {
-              // Check if the comment to be deleted is a root comment
-              const index = this.comments.findIndex((comment) => comment.id === commentId);
-              if (index !== -1) {
-                // Update the root comments array immutably
-                this.comments = this.comments.filter((comment) => comment.id !== commentId);
-              } else {
-                // Update the reply comments immutably
-                this.comments = this.comments.map((comment) => {
-                  if (comment.replies) {
-                    const replyIndex = comment.replies.findIndex((reply) => reply.id === commentId);
-                    if (replyIndex !== -1) {
-                      const updatedReplies = comment.replies.filter((reply) => reply.id !== commentId);
-                      return { ...comment, replies: updatedReplies };
+        this.commentService
+          .deleteComment(commentId)
+          .pipe(untilDestroyed(this))
+          .subscribe({
+            next: (response: ApiResponse<void>) => {
+              if (response.status === 'OK') {
+                // Check if the comment to be deleted is a root comment
+                const index = this.comments.findIndex((comment) => comment.id === commentId);
+                if (index !== -1) {
+                  // Update the root comments array immutably
+                  this.comments = this.comments.filter((comment) => comment.id !== commentId);
+                } else {
+                  // Update the reply comments immutably
+                  this.comments = this.comments.map((comment) => {
+                    if (comment.replies) {
+                      const replyIndex = comment.replies.findIndex((reply) => reply.id === commentId);
+                      if (replyIndex !== -1) {
+                        const updatedReplies = comment.replies.filter((reply) => reply.id !== commentId);
+                        return { ...comment, replies: updatedReplies };
+                      }
                     }
-                  }
-                  return comment;
-                });
-              }
-              // Emit the new value
-              this.comments$.next(this.comments);
-              // Update the comment count
-              if (this.post) {
-                if (this.post.comment_count > 0) {
-                  this.post.comment_count--;
+                    return comment;
+                  });
                 }
+                // Emit the new value
+                this.comments$.next(this.comments);
+                // Update the comment count
+                if (this.post) {
+                  if (this.post.comment_count > 0) {
+                    this.post.comment_count--;
+                  }
+                }
+                // Trigger change detection manually
+                this.cdr.markForCheck();
               }
-              // Trigger change detection manually
-              this.cdr.markForCheck();
-            }
-            this.successHandlerService.handleApiResponse(response, 'Comment deleted successfully.');
-          },
-          error: (error: any) => {
-            this.loggingService.logError('Error deleting comment:', error);
-          },
-        });
+            },
+          });
       }
     });
   }
@@ -413,7 +391,7 @@ export class BlogDetailComponent implements OnInit, OnDestroy {
   }
   private checkLoggedIn(): boolean {
     if (!this.authService.isLoggedIn()) {
-      this.notificationService.showWarning('Bạn cần đăng nhập để thực hiện hành động này.');
+      this.toast.warning('Bạn cần đăng nhập để thực hiện hành động này.');
       return false;
     }
     return true;

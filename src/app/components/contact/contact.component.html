@@ -22,72 +22,62 @@
         <div class="col-lg-4 info">
           <i class="ri-map-pin-line"></i>
           <h4>Địa chỉ:</h4>
-          <p>
-            Lô P2, Đường số 6, Khu công nghiệp Hòa Khánh, Hòa Khánh Bắc, Quận
-          </p>
+          <p>{{ about.address }}</p>
         </div>
 
         <div class="col-lg-4 info mt-4 mt-lg-0">
           <i class="ri-mail-line"></i>
           <h4>Email:</h4>
-          <p>quan&#64;poongin.co.kr<br />pidn-hr&#64;poongin.co.kr</p>
+          <p [innerHTML]="getSanitizedContent(about.email | newline)"></p>
         </div>
 
         <div class="col-lg-4 info mt-4 mt-lg-0">
           <i class="ri-phone-line"></i>
           <h4>Điện thoại:</h4>
-          <p>(+84) 236 796 756<br />(+84) 236 796 757</p>
+          <p [innerHTML]="getSanitizedContent(about.phone_number | newline)"></p>
         </div>
       </div>
     </div>
-    <form role="form" class="php-email-form">
-      <div class="row">
-        <div class="col-md-6 form-group">
-          <input
-            type="text"
-            name="name"
-            class="form-control"
-            id="name"
-            placeholder="Your Name"
-            required
-          />
-        </div>
-        <div class="col-md-6 form-group mt-3 mt-md-0">
-          <input
-            type="email"
-            class="form-control"
-            name="email"
-            id="email"
-            placeholder="Your Email"
-            required
-          />
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="email-form">
+      <div class="form-group mt-3">
+        <input type="text" formControlName="name" class="form-control" placeholder="Nhập tên của bạn" required />
+        <div *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" class="text-danger small">
+          Tên bắt buộc
         </div>
       </div>
       <div class="form-group mt-3">
-        <input
-          type="text"
-          class="form-control"
-          name="subject"
-          id="subject"
-          placeholder="Subject"
-          required
-        />
+        <input type="email" formControlName="email" class="form-control" placeholder="Email của bạn" required />
+        <div *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" class="text-danger small">
+          Cần phải có email hợp lệ.
+        </div>
+      </div>
+      <div class="form-group mt-3">
+        <input type="text" formControlName="subject" class="form-control" placeholder="Subject" required />
+        <div
+          *ngIf="contactForm.get('subject')?.invalid && contactForm.get('subject')?.touched"
+          class="text-danger small"
+        >
+          Chủ đề bắt buộc.
+        </div>
       </div>
       <div class="form-group mt-3">
         <textarea
+          formControlName="message"
           class="form-control"
-          name="message"
-          rows="5"
-          placeholder="Message"
+          rows="3"
+          placeholder="Để lại lời nhắn cho chúng tôi"
           required
         ></textarea>
+        <div
+          *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
+          class="text-danger small"
+        >
+          Nội dung là bắt buộc.
+        </div>
       </div>
-      <div class="my-3">
-        <div class="loading">Loading</div>
-        <div class="error-message"></div>
-        <div class="sent-message">Your message has been sent. Thank you!</div>
+      <div class="text-center mt-3">
+        <button class="btn btn-primary" type="submit" [disabled]="contactForm.invalid">Gửi Tin nhắn</button>
       </div>
-      <div class="text-center"><button type="submit">Send Message</button></div>
     </form>
   </div>
 </section>

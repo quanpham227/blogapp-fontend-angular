@@ -24,6 +24,7 @@ import { UpdatePostAdminComponent } from './components/admin/update-post/update-
 import { AdminGuardFn } from './guards/admin.guard';
 import { AuthGuardFn } from './guards/auth.guard';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { AchievementAdminComponent } from './components/admin/achievement/admin-achievement.component';
 
 export const routes: Routes = [
   {
@@ -108,6 +109,11 @@ export const routes: Routes = [
       { path: 'client-add', component: ClientAddOrUpdateAdminComponent },
       { path: 'client-edit/:id', component: ClientAddOrUpdateAdminComponent },
       { path: 'comments', component: CommentAdminComponent },
+      {
+        path: 'achievements',
+        loadComponent: () =>
+          import('./components/admin/achievement/admin-achievement.component').then((m) => m.AchievementAdminComponent),
+      },
       { path: '**', component: NotfoundAdminComponent },
     ],
   },
@@ -115,11 +121,7 @@ export const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes, {
-      onSameUrlNavigation: 'reload',
-    }),
-  ],
+  imports: [RouterModule.forRoot(routes)],
   providers: [{ provide: LocationStrategy, useClass: PathLocationStrategy }],
   exports: [RouterModule],
 })

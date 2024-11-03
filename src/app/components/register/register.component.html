@@ -1,172 +1,184 @@
-<div class="container">
-  <form #registerForm="ngForm">
-    <div class="row">
-      <div class="col-md-6 offset-md-3 shadow-lg mt-5">
-        <div class="register-form">
-          <h2 class="register-header">Đăng ký</h2>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              class="form-control"
-              [(ngModel)]="email"
-              name="email"
-              id="email"
-              #emailInput="ngModel"
-              required
-              email
-            />
-            <div class="divider-nospace"></div>
-            <p
-              class="text-danger"
-              *ngIf="emailInput.invalid && emailInput.touched"
-            >
-              <!-- Display a message if the email field is empty -->
-              <span *ngIf="emailInput.errors?.['required']">
-                Email là bắt buộc
-              </span>
-              <!-- Display a message if the email format is incorrect -->
-              <span *ngIf="emailInput.errors?.['email']">
-                Email không hợp lệ
-              </span>
-            </p>
-          </div>
-          <div class="mt-3"></div>
-          <div class="form-group password-field">
-            <label for="password">Mật khẩu</label>
-            <input
-              type="password"
-              [(ngModel)]="password"
-              placeholder="Ít nhất 3 ký tự"
-              class="form-control"
-              name="password"
-              required
-            />
-            <i class="password-toggle fas fa-eye-slash"></i>
-            <div class="divider-nospace"></div>
-            <p
-              class="text-danger"
-              *ngIf="password.length < 3 && registerForm.form.touched"
-            >
-              password phải có ít nhất 3 ký tự
-            </p>
-          </div>
-          <div class="mt-3"></div>
-          <div class="form-group password-field">
-            <label for="confirm-password">Gõ lại mật khẩu</label>
-            <input
-              type="password"
-              [(ngModel)]="retypePassword"
-              placeholder="Ít nhất 3 ký tự"
-              class="form-control"
-              name="retypePassword"
-              (input)="registerForm.form.markAsTouched(); checkPasswordsMatch()"
-              required
-            />
-            <i class="password-toggle fas fa-eye-slash"></i>
-            <div class="divider-nospace"></div>
-            <p
-              class="text-danger"
-              *ngIf="retypePassword.length < 3 && registerForm.form.touched"
-            >
-              password phải có ít nhất 3 ký tự
-            </p>
-            <p
-              class="text-danger"
-              *ngIf="
-                registerForm?.controls?.['retypePassword']?.hasError(
-                  'passwordMismatch'
-                ) && registerForm.form.touched
-              "
-            >
-              Mật khẩu không khớp
-            </p>
-          </div>
-          <div class="mt-3"></div>
-          <div class="form-group">
-            <label for="full-name">Họ và tên</label>
-            <input
-              type="text"
-              [(ngModel)]="fullName"
-              class="form-control"
-              name="fullName"
-              #fullNameInput="ngModel"
-              required
-            />
-            <div class="divider-nospace"></div>
-            <p
-              class="text-danger"
-              *ngIf="fullNameInput.invalid && fullNameInput.touched"
-            >
-              <!-- Display a message if the email field is empty -->
-              <span *ngIf="fullNameInput.errors?.['required']">
-                Họ tên là bắt buộc
-              </span>
-            </p>
-          </div>
-          <div class="mt-3"></div>
-          <div class="form-group">
-            <label for="phone_number">Số điện thoại</label>
-            <input
-              type="text"
-              class="form-control"
-              name="phone_number"
-              [(ngModel)]="phone_number"
-              #phoneNumberInput="ngModel"
-              required
-              pattern="^\d{10}$"
-            />
-            <div class="divider-nospace"></div>
-            <p
-              class="text-danger"
-              *ngIf="phoneNumberInput.invalid && phoneNumberInput.touched"
-            >
-              <!-- Display a message if the email field is empty -->
-              <span *ngIf="phoneNumberInput.errors?.['required']">
-                Phone là bắt buộc
-              </span>
-              <!-- Display a message if the email format is incorrect -->
-              <span *ngIf="phoneNumberInput.errors?.['pattern']">
-                Số điện thoại phải có đúng 10 số
-              </span>
-            </p>
-          </div>
-          <div class="mt-3"></div>
-          <div class="form-group">
-            <div class="form-check checkbox-text">
-              <span style="display: flex">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="isAccepted"
-                  class="form-check-input"
-                  name="isAccepted"
-                  required
-                />
-                <label class="form-check-label text-start" for="agree">
-                  Tôi đồng ý với các điều khoản và điều kiện</label
-                >
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            (click)="register()"
-            class="register-button"
-            [disabled]="registerForm.invalid || !isAccepted"
-          >
-            Đăng ký
-          </button>
-          <div class="divider"></div>
-          <p class="text-center">
-            Bạn đã có tài khoản?
-            <span>
-              <a (click)="navigateToLogin()" class="register-link"
-                >Đăng nhập</a
-              ></span
-            >
-          </p>
+<div class="register register--container">
+  <div class="register__box">
+    <h2 class="register__header">Create Account</h2>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <div class="register__form-group">
+        <input
+          type="text"
+          id="fullName"
+          formControlName="fullName"
+          placeholder="Enter your full name"
+          aria-describedby="fullNameError"
+          class="register__input"
+        />
+        <div
+          *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.invalid"
+          class="register__error-message"
+          id="fullNameError"
+          role="alert"
+        >
+          <span *ngIf="registerForm.get('fullName')?.errors?.['required']">Full name is required</span>
         </div>
       </div>
-    </div>
-  </form>
+
+      <div class="register__form-group">
+        <input
+          type="tel"
+          id="phone"
+          formControlName="phone"
+          placeholder="Enter your phone number"
+          aria-describedby="phoneError"
+          class="register__input"
+        />
+        <div
+          *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid"
+          class="register__error-message"
+          id="phoneError"
+          role="alert"
+        >
+          <span *ngIf="registerForm.get('phone')?.errors?.['required']">Phone number is required</span>
+          <span *ngIf="registerForm.get('phone')?.errors?.['pattern']">Please enter a valid phone number</span>
+        </div>
+      </div>
+
+      <div class="register__form-group">
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="Enter your email"
+          aria-describedby="emailError"
+          class="register__input"
+        />
+        <div
+          *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid"
+          class="register__error-message"
+          id="emailError"
+          role="alert"
+        >
+          <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+          <span *ngIf="registerForm.get('email')?.errors?.['pattern']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <div class="register__form-group">
+        <div class="register__password-input">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            aria-describedby="passwordError"
+            class="register__input"
+          />
+          <button
+            type="button"
+            class="register__toggle-password"
+            (click)="togglePassword()"
+            aria-label="Toggle password visibility"
+          >
+            <i class="fas" [class.fa-eye-slash]="showPassword" [class.fa-eye]="!showPassword"></i>
+          </button>
+        </div>
+        <div
+          *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid"
+          class="register__error-message"
+          id="passwordError"
+          role="alert"
+        >
+          <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
+          <span *ngIf="registerForm.get('password')?.errors?.['minlength']">
+            Password must be at least 8 characters
+          </span>
+          <span *ngIf="registerForm.get('password')?.errors?.['pattern']">
+            Password must contain at least one uppercase letter, one lowercase letter, one number, and one special
+            character
+          </span>
+        </div>
+      </div>
+
+      <div class="register__form-group">
+        <div class="register__password-input">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            placeholder="Confirm your password"
+            aria-describedby="confirmPasswordError"
+            class="register__input"
+          />
+          <button
+            type="button"
+            class="register__toggle-password"
+            (click)="toggleConfirmPassword()"
+            aria-label="Toggle confirm password visibility"
+          >
+            <i class="fas" [class.fa-eye-slash]="showConfirmPassword" [class.fa-eye]="!showConfirmPassword"></i>
+          </button>
+        </div>
+        <div
+          *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.errors?.['passwordMismatch']"
+          class="register__error-message"
+          id="confirmPasswordError"
+          role="alert"
+        >
+          Passwords do not match
+        </div>
+      </div>
+
+      <div class="register__terms-section">
+        <label class="register__checkbox-container">
+          <input type="checkbox" formControlName="terms" class="register__checkbox" />
+          <span class="register__checkmark"></span>
+          I agree to the
+          <a target="_blank" class="register__terms-link">Terms and Conditions</a>
+        </label>
+        <div
+          *ngIf="registerForm.get('terms')?.touched && registerForm.get('terms')?.invalid"
+          class="register__error-message"
+        >
+          You must accept the terms and conditions
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="register__button"
+        [disabled]="registerForm.invalid || isLoading"
+        aria-label="Register"
+      >
+        <span *ngIf="!isLoading">Register</span>
+        <div *ngIf="isLoading" class="register__spinner"></div>
+      </button>
+
+      <div class="register__social-register">
+        <p class="register__social-text">Or register with</p>
+        <div class="register__social-buttons">
+          <button
+            type="button"
+            class="register__social-button register__social-button--google"
+            (click)="registerWithGoogle()"
+            aria-label="Register with Google"
+          >
+            <i class="fab fa-google"></i>
+            Google
+          </button>
+          <button
+            type="button"
+            class="register__social-button register__social-button--facebook"
+            (click)="registerWithFacebook()"
+            aria-label="Register with Facebook"
+          >
+            <i class="fab fa-facebook-f"></i>
+            Facebook
+          </button>
+        </div>
+      </div>
+
+      <div class="register__login-section">
+        <p class="register__login-text">Already have an account?</p>
+        <button type="button" class="register__login-link" (click)="navigateToLogin()" aria-label="Login">Login</button>
+      </div>
+    </form>
+  </div>
 </div>

@@ -10,10 +10,12 @@ import { CategoryService } from '../../../services/category.service';
 import { ApiResponse } from '../../../models/response';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PostStatus } from '../../../enums/post-status.enum';
-import { ToastrService } from 'ngx-toastr';
 import { filter } from 'rxjs/operators';
 import { MessageService } from '../../../services/message.service';
 import { Subscription } from 'rxjs';
+import { ToasterService } from '../../../services/toaster.service';
+import { LoggingService } from '../../../services/logging.service';
+import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-post-admin',
@@ -50,10 +52,12 @@ export class PostAdminComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private toast: ToastrService,
+    private toast: ToasterService,
     private postService: PostService,
     private categoryService: CategoryService,
     private messageService: MessageService,
+    private loggingService: LoggingService,
+    private successHandlerService: SuccessHandlerService,
   ) {
     this.localStorage = document.defaultView?.localStorage;
     this.routerSubscription = this.router.events
@@ -76,8 +80,7 @@ export class PostAdminComponent implements OnInit {
   postStatus = PostStatus;
 
   ngOnInit(): void {
-    this.currentPage =
-      Number(this.localStorage?.getItem('currentProductAdminPage')) || 1;
+    this.currentPage = Number(this.localStorage?.getItem('currentProductAdminPage')) || 1;
     this.getPosts(
       this.keyword,
       this.selectedCategoryId,
@@ -98,11 +101,9 @@ export class PostAdminComponent implements OnInit {
   getCategories() {
     this.categoryService.getCategories().subscribe({
       next: (response: any) => {
-        this.categories = response.data;
-        console.log('Categories:', this.categories);
-      },
-      error: (error: any) => {
-        console.error('Error fetching categories:', error);
+        if (response.status === 'OK' && response.data) {
+          this.categories = response.data.categories;
+        }
       },
     });
   }
@@ -115,28 +116,14 @@ export class PostAdminComponent implements OnInit {
     status?: '' | PostStatus,
     createdAt?: string,
   ) {
-    this.postService
-      .getPostsForAdmin(
-        keyword,
-        selectedCategoryId,
-        page,
-        limit,
-        status,
-        createdAt,
-      )
-      .subscribe({
-        next: (response: any) => {
+    this.postService.getPostsForAdmin(keyword, selectedCategoryId, page, limit, status, createdAt).subscribe({
+      next: (response: any) => {
+        if (response.status === 'OK' && response.data) {
           this.posts = response.data.posts;
           this.totalPages = response.data.totalPages;
-          // this.visiblePages = this.generateVisiblePageArray(
-          //   this.currentPage,
-          //   this.totalPages,
-          // );
-        },
-        error: (error: any) => {
-          console.error('Error fetching posts:', error);
-        },
-      });
+        }
+      },
+    });
   }
 
   onPageChange(page: number) {
@@ -153,27 +140,9 @@ export class PostAdminComponent implements OnInit {
     }
   }
 
-  // generateVisiblePageArray(currentPage: number, totalPages: number): number[] {
-  //   const maxVisiblePages = 5; // Số trang tối đa để hiển thị
-  //   const halfVisiblePages = Math.floor(maxVisiblePages / 2);
-
-  //   let startPage = Math.max(currentPage - halfVisiblePages, 1);
-  //   let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
-
-  //   // Điều chỉnh khi có ít trang hơn maxVisiblePages
-  //   if (endPage - startPage + 1 < maxVisiblePages) {
-  //     startPage = Math.max(endPage - maxVisiblePages + 1, 1);
-  //   }
-
-  //   // Chỉ trả về các trang trong khoảng hợp lệ
-  //   return new Array(endPage - startPage + 1)
-  //     .fill(0)
-  //     .map((_, index) => startPage + index);
-  // }
   onKeywordChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.keyword = target.value;
-    console.log('Keyword:', this.keyword);
     this.getPosts(
       this.keyword,
       this.selectedCategoryId,
@@ -186,12 +155,7 @@ export class PostAdminComponent implements OnInit {
 
   onStatusChange(status: PostStatus | '') {
     this.status = status;
-    this.filterPosts(
-      this.status,
-      this.createdAt ?? undefined,
-      this.selectedCategoryId,
-    );
-    console.log('Status:', this.status);
+    this.filterPosts(this.status, this.createdAt ?? undefined, this.selectedCategoryId);
   }
 
   onDateChange(date: NgbDateStruct) {
@@ -205,12 +169,7 @@ export class PostAdminComponent implements OnInit {
   clearDate() {
     if (this.createdAt !== null && this.createdAt !== '') {
       this.createdAt = null;
-      this.filterPosts(
-        this.status,
-        this.createdAt ?? undefined,
-        this.selectedCategoryId,
-      );
-      console.log('Date cleared');
+      this.filterPosts(this.status, this.createdAt ?? undefined, this.selectedCategoryId);
     } else {
       console.log('Date is already cleared or not set');
     }
@@ -219,22 +178,13 @@ export class PostAdminComponent implements OnInit {
   onCategoryChange(event: Event) {
     const target = event.target as HTMLSelectElement;
     this.selectedCategoryId = +target.value;
-    this.filterPosts(
-      this.status,
-      this.createdAt ?? undefined,
-      this.selectedCategoryId,
-    );
+    this.filterPosts(this.status, this.createdAt ?? undefined, this.selectedCategoryId);
   }
 
-  filterPosts(
-    status: '' | PostStatus,
-    createdAt?: string,
-    categoryId?: number,
-  ) {
+  filterPosts(status: '' | PostStatus, createdAt?: string, categoryId?: number) {
     this.status = status;
     this.createdAt = createdAt || '';
-    this.selectedCategoryId =
-      categoryId !== undefined ? categoryId : this.selectedCategoryId;
+    this.selectedCategoryId = categoryId !== undefined ? categoryId : this.selectedCategoryId;
     this.getPosts(
       this.keyword,
       this.selectedCategoryId,
@@ -259,7 +209,6 @@ export class PostAdminComponent implements OnInit {
     this.postService.deletePost(postId).subscribe({
       next: (response: any) => {
         if (response.status === 'OK') {
-          this.toast.success(response.message);
           this.getPosts(
             this.keyword,
             this.selectedCategoryId,
@@ -269,13 +218,7 @@ export class PostAdminComponent implements OnInit {
             this.createdAt ?? undefined,
           );
           this.getPostCounts();
-        } else {
-          this.toast.error(response.message);
         }
-      },
-      error: (error: HttpErrorResponse) => {
-        this.toast.error('Error deleting post');
-        console.error('Error deleting post:', error);
       },
     });
   }
@@ -284,7 +227,6 @@ export class PostAdminComponent implements OnInit {
     this.postService.deletePosts(selectedPostIds).subscribe({
       next: (response: any) => {
         if (response.status === 'OK') {
-          this.toast.success(response.message);
           this.getPosts(
             this.keyword,
             this.selectedCategoryId,
@@ -296,13 +238,7 @@ export class PostAdminComponent implements OnInit {
           this.getPostCounts();
           this.selectedPosts.clear();
           this.allPostsSelected = false;
-        } else {
-          this.toast.error(response.message);
         }
-      },
-      error: (error: HttpErrorResponse) => {
-        this.toast.error('Error deleting selected posts');
-        console.error('Error deleting selected posts:', error);
       },
     });
   }
@@ -362,10 +298,6 @@ export class PostAdminComponent implements OnInit {
         }>,
       ) => {
         this.counts = response.data; // Lưu trữ số lượng bài viết vào biến counts
-        console.log('Post counts:', this.counts);
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Error fetching post counts:', error);
       },
     });
   }

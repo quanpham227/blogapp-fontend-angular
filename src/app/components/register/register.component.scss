@@ -1,113 +1,253 @@
-.container {
-  color: rgb(0, 0, 0);
-  height: 100vh;
-}
+$primary-color: #6e8efb;
+$secondary-color: #a777e3;
+$error-color: #dc3545;
+$background-color: rgba(255, 255, 255, 0.95);
+$input-border-color: #e1e1e1;
+$input-focus-border-color: $primary-color;
+$input-focus-shadow-color: rgba(110, 142, 251, 0.1);
+$button-hover-color: #5c7cfa;
+$disabled-color: #ccc;
+$google-color: #444;
+$google-border-color: #ddd;
+$facebook-color: #1877f2;
 
-.register-form {
-  background-color: rgb(255, 255, 255);
-  border-radius: 10px;
-  padding: 20px;
-  max-width: 500px;
-  align-items: center;
-  justify-content: center;
-}
+.register {
+  &--container {
+    min-height: calc(100vh - 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, $primary-color, $secondary-color);
+    padding: 10px;
+  }
 
-.register-header {
-  text-align: center;
-  /*      color: rgb(233, 66, 178);*/
-  color: rgb(0, 0, 0);
-  margin-bottom: 20px;
-}
+  &__box {
+    background: $background-color;
+    border-radius: 15px;
+    padding: 20px 20px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+  }
 
-.label-text {
-  color: rgb(0, 0, 0);
-}
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-.form-control {
-  background-color: transparent;
-  border: 1px solid rgb(191, 190, 190);
-  color: rgb(80, 78, 78);
-  padding-left: 10px;
-}
+  &__header {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 28px;
+  }
 
-.form-control:focus {
-  color: rgb(0, 0, 0);
-  background-color: transparent;
-  outline: none;
-  border-color: transparent;
-}
+  &__form-group {
+    margin-bottom: 25px;
+    position: relative;
+  }
 
-.password-field {
-  position: relative;
-}
+  &__label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+  }
 
-.password-toggle {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  color: rgb(105, 244, 181);
-  cursor: pointer;
-}
+  &__input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid $input-border-color;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    border-radius: 0;
 
-.checkbox-text {
-  color: rgb(63, 47, 236);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
+    &:focus {
+      border-color: $input-focus-border-color;
+      box-shadow: 0 0 0 3px $input-focus-shadow-color;
+      outline: none;
+    }
+  }
 
-/* Màu checkbox khi được chọn */
-.checkbox-text input[type='checkbox']:checked {
-  border-color: white;
-  background-color: rgb(83, 66, 233);
-}
+  &__password-input {
+    position: relative;
+  }
 
-.form-check-input {
-  margin-right: 5px;
-}
+  &__toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+  }
 
-.register-link {
-  color: rgb(71, 73, 221);
-  text-decoration: none;
-  cursor: pointer;
-}
+  &__error-message {
+    color: $error-color;
+    font-size: 12px;
+    margin: 5px;
+    position: absolute;
+  }
 
-.register-button {
-  background: rgb(42, 76, 243);
-  color: white;
-  border-radius: 30px;
-  width: 100%;
-  padding: 10px 0;
-  margin-top: 20px;
-  border: none;
-}
+  &__terms-section {
+    margin-bottom: 20px;
+  }
 
-.divider {
-  height: 1px;
-  background-color: rgb(42, 76, 243);
-  /*      background-color: rgb(105, 244, 181)*/
-  margin: 20px;
-}
+  &__checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+  }
 
-.divider-nospace {
-  border-top: 1px solid white;
-}
+  &__checkbox {
+    width: auto;
+    margin-right: 10px;
+  }
 
-.form-control::placeholder {
-  /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: rgba(243, 165, 42, 0.4);
-  opacity: 1;
-  /* Firefox */
-}
+  &__terms-link {
+    color: $primary-color;
+    text-decoration: none;
+  }
 
-.form-control:-ms-input-placeholder {
-  /* Internet Explorer 10-11 */
-  color: rgba(243, 165, 42, 0.4);
-}
+  &__spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
 
-.form-control::-ms-input-placeholder {
-  /* Microsoft Edge */
-  color: rgba(243, 165, 42, 0.4);
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  &__button {
+    width: 100%;
+    padding: 10px;
+    background: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 0px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      background: $button-hover-color;
+    }
+
+    &:disabled {
+      background: $disabled-color;
+      cursor: not-allowed;
+    }
+  }
+
+  &__social-register {
+    margin-top: 25px;
+    text-align: center;
+  }
+
+  &__social-text {
+    color: #666;
+    margin-bottom: 15px;
+  }
+
+  &__social-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  &__social-button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 0px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &--google {
+      background: #fff;
+      color: $google-color;
+      border: 1px solid $google-border-color;
+    }
+
+    &--facebook {
+      background: $facebook-color;
+      color: white;
+    }
+
+    i {
+      margin-right: 8px;
+    }
+  }
+
+  &__login-section {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  &__login-text {
+    margin-bottom: 10px;
+    color: #666;
+  }
+
+  &__login-link {
+    background: none;
+    border: 2px solid $primary-color;
+    color: $primary-color;
+    padding: 5px 10px;
+    border-radius: 0px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: $primary-color;
+      color: white;
+    }
+  }
+
+  @media (max-width: 480px) {
+    &__box {
+      padding: 20px;
+    }
+
+    &__header {
+      font-size: 24px;
+    }
+
+    &__social-button {
+      font-size: 12px;
+    }
+  }
 }

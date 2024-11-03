@@ -1,11 +1,13 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Slide } from '../../models/slide';
 import Swiper from 'swiper';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SlideService } from '../../services/slide.service';
-import { ToastrService } from 'ngx-toastr';
+import { LoggingService } from '../../services/logging.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-hero',
   templateUrl: './hero.component.html',
@@ -15,12 +17,12 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class HeroComponent implements OnInit, AfterViewInit {
   slides: Slide[] = [];
-
   swiperSlides: Swiper | null = null;
+  isLoading = true;
 
   constructor(
     private slideService: SlideService,
-    private toastr: ToastrService,
+    private loggingService: LoggingService,
   ) {}
 
   ngOnInit() {
@@ -28,7 +30,9 @@ export class HeroComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.initSwiperSlides();
+    if (this.slides.length > 0) {
+      this.initSwiperSlides();
+    }
   }
 
   private initSwiperSlides() {
@@ -54,19 +58,21 @@ export class HeroComponent implements OnInit, AfterViewInit {
   }
 
   getSlides() {
-    this.slideService.getSlides().subscribe({
-      next: (response: any) => {
-        this.slides = response.data;
-        // Re-initialize Swiper after slides are loaded
-        setTimeout(() => {
-          this.initSwiperSlides();
-        }, 0);
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching clients:', error);
-        this.toastr.error('An error occurred while fetching clients.');
-      },
-    });
+    this.slideService
+      .getSlides()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: any) => {
+          this.slides = response.data;
+          this.isLoading = false;
+          // Re-initialize Swiper after slides are loaded
+          setTimeout(() => {
+            this.initSwiperSlides();
+          }, 0);
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+        },
+      });
   }
 }

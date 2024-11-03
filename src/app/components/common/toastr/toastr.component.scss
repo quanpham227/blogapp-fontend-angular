@@ -1,0 +1,119 @@
+.toastr-container {
+  position: fixed;
+  top: 30px;
+  right: 10px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  cursor: pointer;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  width: 320px;
+  min-height: 50px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Roboto', sans-serif;
+}
+.toast-icon {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+  justify-content: center;
+  width: 25px !important;
+  height: 25px !important;
+  padding: 12px;
+}
+.toast-icon .fa {
+  font-size: 20px; /* Điều chỉnh kích thước icon */
+}
+.toast-content {
+  flex-grow: 1;
+  padding: 12px 8px;
+}
+.toast-title {
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.toast-message {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.toast-message .emoji {
+  margin-left: 8px; /* Khoảng cách giữa message và biểu tượng cảm xúc */
+  font-size: 20px; /* Kích thước của biểu tượng cảm xúc */
+}
+.toast-close {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  margin-right: 5px;
+  background: none;
+  border: none;
+  font-weight: 600;
+  font-size: 22px !important;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.close-btn:hover {
+  opacity: 1;
+}
+.success {
+  background-color: #ffffff;
+  border-left: 4px solid #51a351;
+  color: #51a351;
+}
+.error {
+  background-color: #ffffff;
+  border-left: 4px solid #bd362f;
+  color: #bd362f;
+}
+.warning {
+  background-color: #ffffff;
+  border-left: 4px solid #f89406;
+  color: #f89406;
+}
+.info {
+  background-color: #ffffff;
+  border-left: 4px solid #2f96b4;
+  color: #2f96b4;
+}
+
+.success .toast-loader {
+  background-color: #51a351;
+}
+.error .toast-loader {
+  background-color: #bd362f;
+}
+.warning .toast-loader {
+  background-color: #f89406;
+}
+.info .toast-loader {
+  background-color: #2f96b4;
+}
+.toast-loader {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  animation: loader 3s linear;
+}
+.toast-loader.paused {
+  animation-play-state: paused;
+}
+@keyframes loader {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}

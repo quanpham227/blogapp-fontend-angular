@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 import { AboutService } from '../../services/about.service';
-import { ApiResponse } from '../../models/response';
 import { About } from '../../models/about';
+import { LoggingService } from '../../services/logging.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-about',
   templateUrl: './about.component.html',
@@ -15,21 +16,31 @@ import { About } from '../../models/about';
 })
 export class AboutComponent implements OnInit {
   about: About = {} as About;
-  constructor(private aboutService: AboutService) {}
+  isLoading = true;
+
+  constructor(
+    private aboutService: AboutService,
+    private loggingService: LoggingService,
+  ) {}
 
   ngOnInit() {
     this.getAbout();
   }
 
   getAbout() {
-    this.aboutService.getAbout().subscribe({
-      next: (response: any) => {
-        this.about = response.data;
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching recent clients:', error);
-      },
-    });
+    this.aboutService
+      .getAbout()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: any) => {
+          if (response && response.data) {
+            this.about = response.data;
+          }
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+        },
+      });
   }
 }

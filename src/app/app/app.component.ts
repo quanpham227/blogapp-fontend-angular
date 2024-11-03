@@ -4,6 +4,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { CommonModule } from '@angular/common';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
+import { ToastrComponent } from '../components/common/toastr/toastr.component';
 
 @Component({
   standalone: true,
@@ -16,6 +17,7 @@ import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
     NgxSpinnerModule,
     LoadingBarHttpClientModule,
     LoadingBarRouterModule,
+    ToastrComponent,
   ],
 })
 export class AppComponent {}

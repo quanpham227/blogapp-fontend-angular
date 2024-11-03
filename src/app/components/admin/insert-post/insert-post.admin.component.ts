@@ -6,36 +6,22 @@ import { ImageSelectModalAdminComponent } from '../shared/components/image-selec
 import { CategoryService } from '../../../services/category.service';
 import { Category } from '../../../models/category';
 import { ApiResponse } from '../../../models/response';
-import { ToastrService } from 'ngx-toastr';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CategoryRequest } from '../../../request/category.request';
 import { PostStatus } from '../../../enums/post-status.enum';
 import { PostVisibility } from '../../../enums/post-visibility.enum';
-import {
-  maxTagsValidator,
-  nonEmptyTagsValidator,
-} from '../../../validators/validators';
+import { maxTagsValidator, nonEmptyTagsValidator } from '../../../validators/validators';
 import { PostRequest } from '../../../request/post.request';
 import { PostService } from '../../../services/post.service';
 import { Post } from '../../../models/post';
 import { Router, NavigationExtras } from '@angular/router';
+import { ToasterService } from '../../../services/toaster.service';
+import { LoggingService } from '../../../services/logging.service';
 
 @Component({
   selector: 'app-insert-post-admin',
   standalone: true,
-  imports: [
-    TinymceEditorComponent,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
+  imports: [TinymceEditorComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './insert-post.admin.component.html',
   styleUrl: './insert-post.admin.component.scss',
 })
@@ -57,10 +43,7 @@ export class InsertPostAdminComponent implements OnInit {
 
   isLoading = false;
 
-  tagInputControl = new FormControl('', [
-    Validators.required,
-    Validators.minLength(3),
-  ]);
+  tagInputControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
   tags: string[] = [];
   maxTags = 5; // Giới hạn số lượng thẻ
   tagLimitExceeded = false; // Biến để kiểm tra xem có vượt quá giới hạn không
@@ -84,10 +67,11 @@ export class InsertPostAdminComponent implements OnInit {
   constructor(
     private modalService: NgbModal,
     private categoryService: CategoryService,
-    private toastr: ToastrService,
+    private toast: ToasterService,
     private fb: FormBuilder,
     private postService: PostService,
     private router: Router,
+    private loggingService: LoggingService,
   ) {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
@@ -137,8 +121,7 @@ export class InsertPostAdminComponent implements OnInit {
 
       // Hoán đổi trạng thái hiển thị của các card
       const tempVisibility = this.cardVisibility[tempCard];
-      this.cardVisibility[tempCard] =
-        this.cardVisibility[this.cards[index - 1]];
+      this.cardVisibility[tempCard] = this.cardVisibility[this.cards[index - 1]];
       this.cardVisibility[this.cards[index - 1]] = tempVisibility;
     }
   }
@@ -152,8 +135,7 @@ export class InsertPostAdminComponent implements OnInit {
 
       // Hoán đổi trạng thái hiển thị của các card
       const tempVisibility = this.cardVisibility[tempCard];
-      this.cardVisibility[tempCard] =
-        this.cardVisibility[this.cards[index + 1]];
+      this.cardVisibility[tempCard] = this.cardVisibility[this.cards[index + 1]];
       this.cardVisibility[this.cards[index + 1]] = tempVisibility;
     }
   }
@@ -211,12 +193,12 @@ export class InsertPostAdminComponent implements OnInit {
             // Force change detection
             this.postForm.updateValueAndValidity();
           } else {
-            console.error('Received values are undefined');
+            this.toast.warning('Received values are undefined');
           }
         }
       })
       .catch((error) => {
-        console.log('Modal dismissed with error:', error);
+        this.toast.error('Modal dismissed with error:', error);
       });
   }
 
@@ -232,24 +214,18 @@ export class InsertPostAdminComponent implements OnInit {
   getCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (response: ApiResponse<Category[]>) => {
-        this.categories = response.data;
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching categories:', error);
-        this.toastr.error('An error occurred while fetching categories.');
+        if (response.status === 'OK' && response.data) {
+          this.categories = response.data;
+        }
       },
     });
   }
   getTopCategoriesByPostCount(): void {
     this.categoryService.getTopCategoriesByPostCount().subscribe({
       next: (response: ApiResponse<Category[]>) => {
-        this.topCategories = response.data;
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching top categories:', error);
-        this.toastr.error('An error occurred while fetching top categories.');
+        if (response.status === 'OK' && response.data) {
+          this.topCategories = response.data;
+        }
       },
     });
   }
@@ -273,33 +249,22 @@ export class InsertPostAdminComponent implements OnInit {
 
       this.categoryService.insertCategory(categoryRequest).subscribe({
         next: (response: ApiResponse<Category>) => {
-          if (response.status === 'OK') {
-            this.toastr.success(response.message);
+          if (response.status === 'OK' || response.status === 'CREATED') {
             this.getCategories();
             this.getTopCategoriesByPostCount();
             this.toggleAddCategory();
             this.newCategoryNameControl.reset(); // Reset giá trị sau khi thêm
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        complete: () => {},
-        error: (error: any) => {
-          const errorMessage =
-            error.error?.message ||
-            'An unexpected error occurred. Please try again.';
-          this.toastr.error(errorMessage);
-          console.error('Error:', error);
         },
       });
     } else {
-      this.toastr.error('Vui lòng nhập tên chuyên mục hợp lệ');
+      this.toast.warning('Vui lòng nhập tên chuyên mục hợp lệ');
     }
   }
 
   onSubmitPost() {
     if (this.postForm.invalid) {
-      this.toastr.error('Vui lòng điền đầy đủ thông tin');
+      this.toast.warning('Vui lòng điền đầy đủ thông tin');
       return;
     }
     this.isLoading = true;
@@ -313,32 +278,22 @@ export class InsertPostAdminComponent implements OnInit {
 
     this.postService.insertPost(postRequest).subscribe({
       next: (response: ApiResponse<Post>) => {
-        if (response.status === 'CREATED') {
+        if (response.status === 'CREATED' || response.status === 'OK') {
           const navigationExtras: NavigationExtras = {
             state: { message: response.message },
           };
           console.log('Navigation Extras:', navigationExtras); // Kiểm tra navigationExtras
           setTimeout(() => {
-            this.router
-              .navigate(['/admin/posts'], navigationExtras)
-              .then(() => {
-                this.isLoading = false;
-              });
+            this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
+              this.isLoading = false;
+            });
           }, 3000); // Thời gian chờ 3 giây trước khi điều hướng
         } else {
           this.isLoading = false;
-          // Xử lý lỗi server trả về
-          this.toastr.error(response.message);
         }
       },
       error: (error: any) => {
         this.isLoading = false;
-        // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-        const errorMessage =
-          error.error?.message ||
-          'An unexpected error occurred. Please try again.';
-        this.toastr.error(errorMessage);
-        console.error('Error:', error);
       },
     });
   }

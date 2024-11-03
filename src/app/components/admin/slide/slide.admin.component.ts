@@ -1,7 +1,6 @@
 import { Component, HostListener, TemplateRef, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { filter, Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
@@ -13,6 +12,8 @@ import { InsertSlideAdminComponent } from '../insert-slide/insert-slide.admin.co
 import { UpdateSlideAdminComponent } from '../update-slide/update-slide.component';
 import { NavigationEnd, Router } from '@angular/router';
 import { MessageService } from '../../../services/message.service';
+import { ToasterService } from '../../../services/toaster.service';
+import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-slide',
@@ -32,10 +33,9 @@ export class SlideAdminComponent {
 
   constructor(
     private slideService: SlideService,
-    private toastr: ToastrService,
+    private toast: ToasterService,
     private modalService: NgbModal,
-    private router: Router,
-    private messageService: MessageService,
+    private successHandlerService: SuccessHandlerService,
   ) {}
 
   ngOnInit() {
@@ -45,12 +45,9 @@ export class SlideAdminComponent {
   getSlides() {
     this.slideService.getSlides().subscribe({
       next: (response: any) => {
-        this.slides = response.data;
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching clients:', error);
-        this.toastr.error('An error occurred while fetching clients.');
+        if (response.status === 'OK' && response.data) {
+          this.slides = response.data;
+        }
       },
     });
   }
@@ -66,19 +63,9 @@ export class SlideAdminComponent {
     modalRef.componentInstance.addSlide.subscribe((slide: SlideRequest) => {
       this.slideService.insertSlide(slide).subscribe({
         next: (response: ApiResponse<Slide>) => {
-          if (response.status === 'OK') {
-            this.toastr.success(response.message);
+          if (response.status === 'OK' || response.status === 'CREATE') {
             this.getSlides();
-          } else {
-            // Xử lý lỗi server trả về
-            this.toastr.error(response.message);
           }
-        },
-        error: (error: any) => {
-          // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-          const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
-          this.toastr.error(errorMessage);
-          console.error('Error:', error);
         },
       });
     });
@@ -97,7 +84,7 @@ export class SlideAdminComponent {
         this.confirmDelete();
       });
     } else {
-      console.error('Slide ID is null');
+      this.toast.warning('Slide ID is null');
     }
   }
 
@@ -108,15 +95,8 @@ export class SlideAdminComponent {
       this.slideService.deleteSlide(this.slideIdToDelete).subscribe({
         next: (response: ApiResponse<any>) => {
           if (response.status === 'OK') {
-            this.toastr.success(response.message || 'Slide deleted successfully!');
             this.getSlides();
-          } else {
-            this.toastr.error(response.message || 'Failed to delete slide.');
           }
-        },
-        error: (error: any) => {
-          console.error('Error deleting slide:', error);
-          this.toastr.error('An error occurred while deleting the slide.');
         },
         complete: () => {
           if (this.modalRef) {
@@ -142,24 +122,14 @@ export class SlideAdminComponent {
       modalRef.componentInstance.updateSlide.subscribe((slide: SlideRequest) => {
         this.slideService.updateSlide(id, slide).subscribe({
           next: (response: ApiResponse<Slide>) => {
-            if (response.status === 'OK') {
-              this.toastr.success(response.message);
+            if (response.status === 'OK' || response.status === 'UPDATE') {
               this.getSlides();
-            } else {
-              // Xử lý lỗi server trả về
-              this.toastr.error(response.message);
             }
-          },
-          error: (error: any) => {
-            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-            const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
-            this.toastr.error(errorMessage);
-            console.error('Error:', error);
           },
         });
       });
     } else {
-      console.error('Category ID is null');
+      this.toast.warning('Category ID is null');
     }
   }
 
@@ -181,7 +151,7 @@ export class SlideAdminComponent {
       }
       event.stopPropagation(); // Ensure no other unwanted events are triggered
     } else {
-      console.error('Client ID is null');
+      this.toast.warning('Client ID is null');
     }
   }
 }

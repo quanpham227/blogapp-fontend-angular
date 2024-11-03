@@ -4,7 +4,6 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Client } from '../../../models/client';
 import { ClientService } from '../../../services/client.service';
 import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
 import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
@@ -13,6 +12,7 @@ import { InsertClientAdminComponent } from '../insert-client/insert-client.admin
 import { ClientRequest } from '../../../request/client.request';
 import { UpdateClientAdminComponent } from '../update-client/update-client.admin.component';
 import { HttpClient } from '@angular/common/http';
+import { ToasterService } from '../../../services/toaster.service';
 
 @Component({
   selector: 'app-client-admin',
@@ -31,8 +31,8 @@ export class ClientAdminComponent implements OnInit {
 
   constructor(
     private clientService: ClientService,
-    private toastr: ToastrService,
     private modalService: NgbModal,
+    private toastr: ToasterService,
   ) {}
 
   ngOnInit() {
@@ -51,10 +51,6 @@ export class ClientAdminComponent implements OnInit {
         this.clients = response.data;
       },
       complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching clients:', error);
-        this.toastr.error('An error occurred while fetching clients.');
-      },
     });
   }
 
@@ -69,21 +65,11 @@ export class ClientAdminComponent implements OnInit {
     modalRef.componentInstance.addClient.subscribe((client: ClientRequest) => {
       this.clientService.insertClient(client).subscribe({
         next: (response: ApiResponse<Client>) => {
-          if (response.status === 'OK') {
-            this.toastr.success(response.message);
+          if (response.status === 'OK' || response.status === 'CREATED') {
             this.getClients();
-          } else {
-            // Xử lý lỗi server trả về
-            this.toastr.error(response.message);
           }
         },
         complete() {},
-        error: (error: any) => {
-          // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-          const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
-          this.toastr.error(errorMessage);
-          console.error('Error:', error);
-        },
       });
     });
   }
@@ -110,16 +96,9 @@ export class ClientAdminComponent implements OnInit {
     if (this.clientIdToDelete !== null) {
       this.clientService.deleteClient(this.clientIdToDelete).subscribe({
         next: (response: ApiResponse<any>) => {
-          if (response.status === 'OK') {
-            this.toastr.success(response.message || 'Category deleted successfully!');
+          if (response.status === 'OK' || response.status === 'NO_CONTENT') {
             this.getClients();
-          } else {
-            this.toastr.error(response.message || 'Failed to delete category.');
           }
-        },
-        error: (error: any) => {
-          console.error('Error deleting category:', error);
-          this.toastr.error('An error occurred while deleting the category.');
         },
         complete: () => {
           if (this.modalRef) {
@@ -144,24 +123,14 @@ export class ClientAdminComponent implements OnInit {
       modalRef.componentInstance.updateClient.subscribe((client: ClientRequest) => {
         this.clientService.updateClient(id, client).subscribe({
           next: (response: ApiResponse<Client>) => {
-            if (response.status === 'OK') {
-              this.toastr.success(response.message);
+            if (response.status === 'OK' || response.status === 'UPDATED') {
               this.getClients();
-            } else {
-              // Xử lý lỗi server trả về
-              this.toastr.error(response.message);
             }
-          },
-          error: (error: any) => {
-            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-            const errorMessage = error.error?.message || 'An unexpected error occurred. Please try again.';
-            this.toastr.error(errorMessage);
-            console.error('Error:', error);
           },
         });
       });
     } else {
-      console.error('Category ID is null');
+      this.toastr.error('Client ID is null');
     }
   }
 

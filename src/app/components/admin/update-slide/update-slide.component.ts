@@ -1,19 +1,14 @@
 import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SlideRequest } from '../../../request/slide.request';
 import { ImageSelectModalAdminComponent } from '../shared/components/image-select-modal/image-select-modal.admin.component';
-import { ToastrService } from 'ngx-toastr';
 import { Slide } from '../../../models/slide';
 import { SlideService } from '../../../services/slide.service';
 import { ApiResponse } from '../../../models/response';
+import { ToasterService } from '../../../services/toaster.service';
+import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-update-slide',
@@ -36,25 +31,12 @@ export class UpdateSlideAdminComponent {
     private modalService: NgbModal,
     private fb: FormBuilder,
     private slideService: SlideService,
-    private toastr: ToastrService,
+    private toast: ToasterService,
+    private successHandlerService: SuccessHandlerService,
   ) {
     this.slideForm = this.fb.group({
-      title: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
-      description: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(255),
-        ],
-      ],
+      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
       status: [true, Validators.required],
       order: [0, Validators.required],
       image_url: ['', Validators.required],
@@ -72,18 +54,11 @@ export class UpdateSlideAdminComponent {
     if (this.slideId !== null) {
       this.slideService.getSlideById(this.slideId).subscribe({
         next: (response: ApiResponse<Slide>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' && response.data) {
             this.slideForm.patchValue(response.data);
             this.selectedImageUrl = response.data.image_url;
             this.selectedPublicId = response.data.public_id;
-          } else {
-            this.toastr.error(response.message);
           }
-          console.log(this.slideForm.value);
-        },
-        error: (error: any) => {
-          console.error('Error loading client:', error);
-          this.toastr.error('An error occurred while loading the client.');
         },
       });
     }

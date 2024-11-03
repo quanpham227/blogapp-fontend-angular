@@ -1,17 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CategoryService } from '../../../services/category.service';
-import { ToastrService } from 'ngx-toastr';
 import { Category } from '../../../models/category';
 import { ApiResponse } from '../../../models/response';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ToasterService } from '../../../services/toaster.service';
 
 @Component({
   selector: 'app-category-form-admin',
@@ -38,17 +33,10 @@ export class CategoryAddOrUpdateAdminComponent implements OnInit {
     private categoryService: CategoryService,
     private route: ActivatedRoute,
     private router: Router,
-    private toastr: ToastrService,
+    private toastr: ToasterService,
   ) {
     this.categoryForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(50),
-        ],
-      ],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
     });
   }
 
@@ -67,15 +55,9 @@ export class CategoryAddOrUpdateAdminComponent implements OnInit {
     if (this.categoryId !== null) {
       this.categoryService.getCategoryById(this.categoryId).subscribe({
         next: (response: ApiResponse<Category>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' && response.data) {
             this.categoryForm.patchValue(response.data);
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        error: (error: any) => {
-          console.error('Error loading category:', error);
-          this.toastr.error('An error occurred while loading the category.');
         },
       });
     }
@@ -96,52 +78,26 @@ export class CategoryAddOrUpdateAdminComponent implements OnInit {
   addCategory(): void {
     this.categoryService.insertCategory(this.categoryForm.value).subscribe({
       next: (response: ApiResponse<Category>) => {
-        if (response.status === 'OK') {
-          this.toastr.success(response.message);
+        if (response.status === 'OK' || response.status === 'CREATED') {
           this.router.navigate(['/admin/categories'], {
             state: { message: response.message },
           });
-        } else {
-          // Xử lý lỗi server trả về
-          this.toastr.error(response.message);
         }
-      },
-      error: (error: any) => {
-        // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-        const errorMessage =
-          error.error?.message ||
-          'An unexpected error occurred. Please try again.';
-        this.toastr.error(errorMessage);
-        console.error('Error:', error);
       },
     });
   }
 
   updateCategory(): void {
     if (this.categoryId !== null) {
-      this.categoryService
-        .updateCategory(this.categoryId, this.categoryForm.value)
-        .subscribe({
-          next: (response: ApiResponse<Category>) => {
-            if (response.status === 'OK') {
-              this.toastr.success(response.message);
-              this.router.navigate(['/admin/categories'], {
-                state: { message: response.message },
-              });
-            } else {
-              // Xử lý lỗi server trả về
-              this.toastr.error(response.message);
-            }
-          },
-          error: (error: any) => {
-            // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-            const errorMessage =
-              error.error?.message ||
-              'An unexpected error occurred while updating the category. Please try again.';
-            this.toastr.error(errorMessage);
-            console.error('Error:', error);
-          },
-        });
+      this.categoryService.updateCategory(this.categoryId, this.categoryForm.value).subscribe({
+        next: (response: ApiResponse<Category>) => {
+          if (response.status === 'OK' || response.status === 'UPDATED') {
+            this.router.navigate(['/admin/categories'], {
+              state: { message: response.message },
+            });
+          }
+        },
+      });
     }
   }
 }

@@ -1,88 +1,113 @@
 import { UserService } from './../../services/user.service';
-import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegisterDTO } from '../../dtos/user/register.dto';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { LoggingService } from '../../services/logging.service';
 import { SuccessHandlerService } from '../../services/success-handler.service';
 
+@UntilDestroy()
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule],
 })
-export class RegisterComponent implements OnDestroy {
-  @ViewChild('registerForm') registerForm!: NgForm;
-  // khai báo các biến tương ứng với các trường trong form đăng ký
-  fullName: string;
-  phone_number: string;
-  email: string;
-  password: string;
-  retypePassword: string;
-  isAccepted: boolean;
-  private subscriptions: Subscription = new Subscription();
+export class RegisterComponent implements OnInit, OnDestroy {
+  registerForm: FormGroup;
+  showPassword = false;
+  showConfirmPassword = false;
+  isLoading = false;
 
   constructor(
+    private fb: FormBuilder,
     private router: Router,
     private userService: UserService,
     private loggingService: LoggingService,
     private successHandlerService: SuccessHandlerService,
   ) {
-    this.fullName = '';
-    this.phone_number = '';
-    this.email = '';
-    this.password = '';
-    this.retypePassword = '';
-    this.isAccepted = false;
+    this.registerForm = this.fb.group(
+      {
+        fullName: this.fb.control('', Validators.required),
+        phone: this.fb.control('', [Validators.required, Validators.pattern(/^\d{10}$/)]),
+        email: this.fb.control('', [Validators.required, Validators.email]),
+        password: this.fb.control('', [
+          Validators.required,
+          Validators.minLength(8),
+          Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/),
+        ]),
+        confirmPassword: this.fb.control('', Validators.required),
+        terms: this.fb.control(false, Validators.requiredTrue),
+      },
+      { validators: this.passwordMatchValidator() },
+    );
   }
 
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+  ngOnInit(): void {}
+
+  ngOnDestroy() {}
+
+  passwordMatchValidator(): ValidatorFn {
+    return (form: AbstractControl): { [key: string]: any } | null => {
+      const password = form.get('password')?.value;
+      const confirmPassword = form.get('confirmPassword')?.value;
+      return password === confirmPassword ? null : { passwordMismatch: true };
+    };
   }
 
-  onEmailChange() {
-    console.log('Email:', this.email);
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
-  register() {
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  onSubmit(): void {
+    if (this.registerForm.invalid) {
+      return;
+    }
+
+    this.isLoading = true;
     const registerDTO: RegisterDTO = {
-      fullname: this.fullName,
-      phone_number: this.phone_number,
-      email: this.email,
-      password: this.password,
-      retype_password: this.retypePassword,
+      fullname: this.registerForm.value.fullName,
+      phone_number: this.registerForm.value.phone,
+      email: this.registerForm.value.email,
+      password: this.registerForm.value.password,
+      retype_password: this.registerForm.value.confirmPassword,
       facebook_account_id: '',
       google_account_id: '',
       role_id: 2,
     };
-    const registerSub = this.userService.register(registerDTO).subscribe({
-      next: (response: any) => {
-        this.successHandlerService.handleApiResponse(response, 'Register success');
-        this.router.navigate(['/login']);
-      },
 
-      error: (error) => {
-        this.loggingService.logError('Register error', error);
-      },
-    });
-    this.subscriptions.add(registerSub);
-  }
-
-  //how to check if the password and retype password are the same
-  checkPasswordsMatch() {
-    if (this.password !== this.retypePassword) {
-      this.registerForm.controls['retypePassword'].setErrors({
-        passwordMismatch: true,
+    this.userService
+      .register(registerDTO)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: any) => {
+          if (response.status === 'OK') {
+            this.router.navigate(['/login']);
+            this.isLoading = false;
+          }
+        },
+        error: (error) => {
+          this.isLoading = false;
+        },
       });
-    } else {
-      this.registerForm.controls['retypePassword'].setErrors(null);
-    }
   }
-  navigateToLogin() {
+
+  registerWithGoogle(): void {
+    console.log('Register with Google');
+  }
+
+  registerWithFacebook(): void {
+    console.log('Register with Facebook');
+  }
+
+  navigateToLogin(): void {
     this.router.navigate(['/login']);
   }
 }

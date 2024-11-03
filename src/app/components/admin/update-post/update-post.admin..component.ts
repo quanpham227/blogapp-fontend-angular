@@ -1,13 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TinymceEditorComponent } from '../../tinymce-editor/tinymce-editor.component';
 import { Category } from '../../../models/category';
@@ -15,12 +8,8 @@ import { PostStatus } from '../../../enums/post-status.enum';
 import { PostVisibility } from '../../../enums/post-visibility.enum';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CategoryService } from '../../../services/category.service';
-import { ToastrService } from 'ngx-toastr';
 import { PostService } from '../../../services/post.service';
-import {
-  maxTagsValidator,
-  nonEmptyTagsValidator,
-} from '../../../validators/validators';
+import { maxTagsValidator, nonEmptyTagsValidator } from '../../../validators/validators';
 import { ImageSelectModalAdminComponent } from '../shared/components/image-select-modal/image-select-modal.admin.component';
 import { ApiResponse } from '../../../models/response';
 import { CategoryRequest } from '../../../request/category.request';
@@ -33,16 +22,13 @@ import { MessageService } from '../../../services/message.service';
 import { TokenService } from '../../../services/token.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
+import { ToasterService } from '../../../services/toaster.service';
+import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-update-post-admin',
   standalone: true,
-  imports: [
-    TinymceEditorComponent,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-  ],
+  imports: [TinymceEditorComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './update-post.admin..component.html',
   styleUrls: ['./update-post.admin..component.scss'],
   providers: [DatePipe], // Thêm DatePipe vào providers
@@ -74,10 +60,7 @@ export class UpdatePostAdminComponent implements OnInit {
   tinymceUpdatedAt: string | null = null;
   isLoading = false;
   isDeleting = false;
-  tagInputControl = new FormControl('', [
-    Validators.required,
-    Validators.minLength(3),
-  ]);
+  tagInputControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
   tags: string[] = [];
   maxTags = 5; // Giới hạn số lượng thẻ
   tagLimitExceeded = false; // Biến để kiểm tra xem có vượt quá giới hạn không
@@ -111,7 +94,7 @@ export class UpdatePostAdminComponent implements OnInit {
   constructor(
     private modalService: NgbModal,
     private categoryService: CategoryService,
-    private toastr: ToastrService,
+    private toast: ToasterService,
     private fb: FormBuilder,
     private postService: PostService,
     private router: Router,
@@ -119,8 +102,8 @@ export class UpdatePostAdminComponent implements OnInit {
     private datePipe: DatePipe,
     private commentService: CommentService,
     private messageService: MessageService,
-    private tokenService: TokenService,
     private authService: AuthService,
+    private successHandlerService: SuccessHandlerService,
   ) {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
@@ -174,33 +157,27 @@ export class UpdatePostAdminComponent implements OnInit {
   getPostById(postId: number): void {
     this.postService.getPostById(postId).subscribe({
       next: (response: ApiResponse<Post>) => {
-        this.post = response.data;
-        console.log('Post:', this.post); // Kiểm tra dữ liệu bài viết
-        this.postForm.patchValue({
-          title: this.post.title,
-          content: this.post.content,
-          category: { category_id: this.post.category.id },
-          status: this.post.status,
-          visibility: this.post.visibility,
-          revision_count: this.post.revision_count,
-          tags: this.post.tags.map((tag) => tag.name),
-          thumbnail: this.post.thumbnail_url,
-          public_id: this.post.public_id,
-        });
-        this.selectedThumbnailUrl = this.post.thumbnail_url;
-        this.tags = this.post.tags.map((tag) => tag.name);
-        this.revisionCount = this.post.revision_count; // Lưu giá trị revision_count
-        this.viewCount = this.post.view_count; // Lưu giá trị view_count
-        this.tinymceAuthorName = this.post.author_name;
-        this.tinymceUpdatedAt = this.datePipe.transform(
-          this.post.updated_at,
-          "dd MMMM, yyyy 'lúc' HH:mm",
-        ); // Định dạng updated_at
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error loading post:', error);
-        this.toastr.error('An error occurred while loading the post.');
+        if (response.status === 'OK') {
+          this.post = response.data;
+          console.log('Post:', this.post); // Kiểm tra dữ liệu bài viết
+          this.postForm.patchValue({
+            title: this.post.title,
+            content: this.post.content,
+            category: { category_id: this.post.category.id },
+            status: this.post.status,
+            visibility: this.post.visibility,
+            revision_count: this.post.revision_count,
+            tags: this.post.tags.map((tag) => tag.name),
+            thumbnail: this.post.thumbnail_url,
+            public_id: this.post.public_id,
+          });
+          this.selectedThumbnailUrl = this.post.thumbnail_url;
+          this.tags = this.post.tags.map((tag) => tag.name);
+          this.revisionCount = this.post.revision_count; // Lưu giá trị revision_count
+          this.viewCount = this.post.view_count; // Lưu giá trị view_count
+          this.tinymceAuthorName = this.post.author_name;
+          this.tinymceUpdatedAt = this.datePipe.transform(this.post.updated_at, "dd MMMM, yyyy 'lúc' HH:mm");
+        }
       },
     });
   }
@@ -217,16 +194,8 @@ export class UpdatePostAdminComponent implements OnInit {
               }
             });
             // Lọc các bình luận gốc
-            this.rootComments = this.comments.filter(
-              (comment) => !comment.parent_comment_id,
-            );
-          } else {
-            this.toastr.error('Failed to load comments.');
+            this.rootComments = this.comments.filter((comment) => !comment.parent_comment_id);
           }
-        },
-        error: (error: any) => {
-          console.error('Error fetching comments:', error);
-          this.toastr.error('An error occurred while fetching comments.');
         },
       });
     }
@@ -251,44 +220,25 @@ export class UpdatePostAdminComponent implements OnInit {
     const replyContent = this.replyContentControls[commentId].value;
     const userId = this.authService.getUser()?.id ?? 0;
     const parentCommentId = commentId;
-    this.commentService
-      .replyComment(commentId, userId, replyContent, parentCommentId)
-      .subscribe({
-        next: (response: ApiResponse<CommentResponse>) => {
-          if (response.status === 'OK') {
-            this.toastr.success(response.message);
-            this.getCommentsByPostId(this.postId);
-          } else {
-            this.toastr.error(response.message);
-          }
-          this.toggleReplyForm(commentId);
-        },
-        error: (error: any) => {
-          this.toastr.error('An error occurred while adding the reply.');
-        },
-      });
+    this.commentService.replyComment(commentId, userId, replyContent, parentCommentId).subscribe({
+      next: (response: ApiResponse<CommentResponse>) => {
+        if (response.status === 'OK') {
+          this.getCommentsByPostId(this.postId);
+        }
+        this.toggleReplyForm(commentId);
+      },
+    });
   }
 
   addComment(): void {
     const userId = this.authService.getUser()?.id ?? 0;
     const content = this.newCommentContentControl.value;
-    console.log('Adding userId comment:', userId, content);
     this.commentService.addComment(this.postId, userId, content).subscribe({
       next: (response: ApiResponse<CommentResponse>) => {
         if (response.status === 'OK') {
-          this.toastr.success('Comment added successfully.');
           this.getCommentsByPostId(this.postId);
-        } else {
-          this.toastr.error('Failed to add comment.');
         }
         this.toggleCommentForm();
-      },
-      error: (error: any) => {
-        if (error.error && error.error.message) {
-          this.toastr.error(error.error.message);
-        } else {
-          this.toastr.error('An error occurred while deleting the comment.');
-        }
       },
     });
   }
@@ -300,50 +250,22 @@ export class UpdatePostAdminComponent implements OnInit {
   updateComment(): void {
     if (this.editingComment) {
       const userId = this.authService.getUser()?.id ?? 0;
-      this.commentService
-        .editComment(
-          this.editingComment.id,
-          userId,
-          this.editCommentContentControl.value,
-        )
-        .subscribe({
-          next: (response: ApiResponse<CommentResponse>) => {
-            if (response.status === 'OK') {
-              this.toastr.success('Comment updated successfully.');
-              this.getCommentsByPostId(this.postId);
-            } else {
-              this.toastr.error(response.message);
-            }
-            this.editingComment = null;
-            this.editCommentContentControl.reset();
-          },
-          error: (error: any) => {
-            if (error.error && error.error.message) {
-              this.toastr.error(error.error.message);
-            } else {
-              this.toastr.error(
-                'An error occurred while deleting the comment.',
-              );
-            }
-          },
-        });
+      this.commentService.editComment(this.editingComment.id, userId, this.editCommentContentControl.value).subscribe({
+        next: (response: ApiResponse<CommentResponse>) => {
+          if (response.status === 'OK') {
+            this.getCommentsByPostId(this.postId);
+          }
+          this.editingComment = null;
+          this.editCommentContentControl.reset();
+        },
+      });
     }
   }
   deleteComment(commentId: number): void {
     this.commentService.deleteComment(commentId).subscribe({
       next: (response: ApiResponse<void>) => {
         if (response.status === 'OK') {
-          this.toastr.success(response.message);
           this.getCommentsByPostId(this.postId); // Refresh comments
-        } else {
-          this.toastr.error(response.message);
-        }
-      },
-      error: (error: any) => {
-        if (error.error && error.error.message) {
-          this.toastr.error(error.error.message);
-        } else {
-          this.toastr.error('An error occurred while deleting the comment.');
         }
       },
     });
@@ -387,8 +309,7 @@ export class UpdatePostAdminComponent implements OnInit {
 
       // Hoán đổi trạng thái hiển thị của các card
       const tempVisibility = this.cardVisibility[tempCard];
-      this.cardVisibility[tempCard] =
-        this.cardVisibility[this.cards[index - 1]];
+      this.cardVisibility[tempCard] = this.cardVisibility[this.cards[index - 1]];
       this.cardVisibility[this.cards[index - 1]] = tempVisibility;
     }
   }
@@ -402,8 +323,7 @@ export class UpdatePostAdminComponent implements OnInit {
 
       // Hoán đổi trạng thái hiển thị của các card
       const tempVisibility = this.cardVisibility[tempCard];
-      this.cardVisibility[tempCard] =
-        this.cardVisibility[this.cards[index + 1]];
+      this.cardVisibility[tempCard] = this.cardVisibility[this.cards[index + 1]];
       this.cardVisibility[this.cards[index + 1]] = tempVisibility;
     }
   }
@@ -482,24 +402,18 @@ export class UpdatePostAdminComponent implements OnInit {
   getCategories(): void {
     this.categoryService.getCategories().subscribe({
       next: (response: ApiResponse<Category[]>) => {
-        this.categories = response.data;
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching categories:', error);
-        this.toastr.error('An error occurred while fetching categories.');
+        if (response.status === 'OK') {
+          this.categories = response.data;
+        }
       },
     });
   }
   getTopCategoriesByPostCount(): void {
     this.categoryService.getTopCategoriesByPostCount().subscribe({
       next: (response: ApiResponse<Category[]>) => {
-        this.topCategories = response.data;
-      },
-      complete: () => {},
-      error: (error: any) => {
-        console.error('Error fetching top categories:', error);
-        this.toastr.error('An error occurred while fetching top categories.');
+        if (response.status === 'OK') {
+          this.topCategories = response.data;
+        }
       },
     });
   }
@@ -512,7 +426,7 @@ export class UpdatePostAdminComponent implements OnInit {
       selectedCategoryIdControl?.setValue(categoryId);
       this.previousSelectedCategoryId = categoryId;
     }
-    console.log('Selected Category ID:', categoryId);
+    this.toast.warning('Selected Category ID:');
   }
   addCategory() {
     if (this.newCategoryNameControl.valid) {
@@ -524,26 +438,15 @@ export class UpdatePostAdminComponent implements OnInit {
       this.categoryService.insertCategory(categoryRequest).subscribe({
         next: (response: ApiResponse<Category>) => {
           if (response.status === 'OK') {
-            this.toastr.success(response.message);
             this.getCategories();
             this.getTopCategoriesByPostCount();
             this.toggleAddCategory();
             this.newCategoryNameControl.reset(); // Reset giá trị sau khi thêm
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        complete: () => {},
-        error: (error: any) => {
-          const errorMessage =
-            error.error?.message ||
-            'An unexpected error occurred. Please try again.';
-          this.toastr.error(errorMessage);
-          console.error('Error:', error);
         },
       });
     } else {
-      this.toastr.error('Vui lòng nhập tên chuyên mục hợp lệ');
+      this.toast.warning('Vui lòng nhập tên chuyên mục hợp lệ');
     }
   }
   previewPost() {
@@ -556,12 +459,11 @@ export class UpdatePostAdminComponent implements OnInit {
   }
   onSubmitPost() {
     if (this.postForm.invalid) {
-      this.toastr.error('Vui lòng điền đầy đủ thông tin');
+      this.toast.warning('Vui lòng điền đầy đủ thông tin');
       return;
     }
     this.isLoading = true;
     const formValue = this.postForm.value;
-    console.log('Form Value:', formValue); // Kiểm tra dữ liệu trước khi gửi
 
     // Chuyển đổi cấu trúc dữ liệu
     const postRequest: PostRequest = {
@@ -571,7 +473,7 @@ export class UpdatePostAdminComponent implements OnInit {
 
     this.postService.updatePost(this.postId, postRequest).subscribe({
       next: (response: ApiResponse<Post>) => {
-        if (response.status === 'CREATED') {
+        if (response.status === 'UPDATED' || response.status === 'OK') {
           this.messageService.setMessage(response.message);
           setTimeout(() => {
             this.router.navigate(['/admin/posts']).then(() => {
@@ -580,18 +482,10 @@ export class UpdatePostAdminComponent implements OnInit {
           }, 3000); // Thời gian chờ 3 giây trước khi điều hướng
         } else {
           this.isLoading = false;
-          // Xử lý lỗi server trả về
-          this.toastr.error(response.message);
         }
       },
-      error: (error: any) => {
+      error: () => {
         this.isLoading = false;
-        // Xử lý lỗi không mong đợi (như lỗi mạng, server không phản hồi)
-        const errorMessage =
-          error.error?.message ||
-          'An unexpected error occurred. Please try again.';
-        this.toastr.error(errorMessage);
-        console.error('Error:', error);
       },
     });
   }
@@ -608,17 +502,10 @@ export class UpdatePostAdminComponent implements OnInit {
           }, 3000); // Thời gian chờ 3 giây trước khi điều hướng
         } else {
           this.isDeleting = false; // Kết thúc trạng thái xóa
-          // Xử lý lỗi server trả về
-          this.toastr.error(response.message);
         }
       },
-      error: (error: HttpErrorResponse) => {
+      error: () => {
         this.isDeleting = false; // Kết thúc trạng thái xóa
-        const errorMessage =
-          error.error?.message ||
-          'An unexpected error occurred. Please try again.';
-        this.toastr.error(errorMessage);
-        console.error('Error:', error);
       },
     });
   }
@@ -628,7 +515,6 @@ export class UpdatePostAdminComponent implements OnInit {
 
   saveStatus() {
     this.isEditingStatus = false;
-    console.log('Updated Status:', this.status); // Thêm dòng này để kiểm tra giá trị cập nhật
   }
 
   cancelEditStatus() {
@@ -641,7 +527,6 @@ export class UpdatePostAdminComponent implements OnInit {
 
   saveVisibility() {
     this.isEditingVisibility = false;
-    console.log('Updated Visibility:', this.visibility); // Thêm dòng này để kiểm tra giá trị cập nhật
   }
 
   cancelEditVisibility() {

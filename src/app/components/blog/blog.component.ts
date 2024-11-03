@@ -1,14 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DoCheck,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Category } from '../../models/category';
 import { Post } from '../../models/post';
@@ -18,12 +8,14 @@ import { PostService } from '../../services/post.service';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { Subject, combineLatest } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { takeUntil, distinctUntilChanged } from 'rxjs/operators';
 import { BlogStateService } from '../../services/blog-state.service';
 import { HttpStatusService } from '../../services/http-status.service';
 import { LoggingService } from '../../services/logging.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
+@UntilDestroy()
 @Component({
   selector: 'app-blog',
   templateUrl: './blog.component.html',
@@ -42,8 +34,6 @@ export class BlogComponent implements OnInit, OnDestroy {
   itemsPerPage: number = 10;
   totalPages: number = 0;
   searchForm: FormGroup;
-  renderCount: number = 0;
-  private destroy$ = new Subject<void>();
 
   constructor(
     private postService: PostService,
@@ -72,23 +62,21 @@ export class BlogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.saveState();
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private subscribeToRouteParamsAndQueryParams() {
     combineLatest([this.route.params, this.route.queryParams])
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+      )
       .subscribe(([params, queryParams]) => {
         this.handleRouteAndQueryParams(params, queryParams);
       });
   }
 
   private handleRouteAndQueryParams(params: any, queryParams: any) {
-    const keyword =
-      params['keyword'] || queryParams['keyword']
-        ? (params['keyword'] || queryParams['keyword']).replace(/-/g, ' ')
-        : '';
+    const keyword = this.extractKeyword(params, queryParams);
     const categorySlug = params['categorySlug'] || queryParams['categorySlug'] || '';
     const page = params['page'] || queryParams['page'] || 1;
 
@@ -96,6 +84,12 @@ export class BlogComponent implements OnInit, OnDestroy {
     this.currentPage = page;
     this.itemsPerPage = 10;
     this.getPosts();
+  }
+
+  private extractKeyword(params: any, queryParams: any): string {
+    return params['keyword'] || queryParams['keyword']
+      ? (params['keyword'] || queryParams['keyword']).replace(/-/g, ' ')
+      : '';
   }
 
   searchPosts() {
@@ -113,52 +107,55 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   getPosts() {
-    console.log('getPosts called');
     const keyword = this.searchForm.get('keyword')?.value || '';
     this.getPostsForUser(keyword, this.selectedCategorySlug, this.currentPage, this.itemsPerPage);
   }
 
   getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number) {
-    this.postService.getPostsForUser(keyword, categorySlug, page - 1, limit).subscribe({
-      next: (response: any) => {
-        const data = response.data;
-        console.log('Data:', data);
-        this.posts = response.data.posts;
-        this.totalPages = response.data.totalPages;
-        this.cdr.markForCheck();
-      },
-      error: (error: any) => {
-        this.loggingService.logError('Error fetching posts for user:', error);
-      },
-    });
-  }
-  getCategories() {
-    this.categoryService.getCategories().subscribe({
-      next: (response: ApiResponse<Category[]>) => {
-        if (response.data !== this.categories) {
-          this.categories = response.data;
+    console.log('Calling getPostsForUser with:', { keyword, categorySlug, page, limit });
+    this.postService
+      .getPostsForUser(keyword, categorySlug, page - 1, limit)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: any) => {
+          const data = response.data;
+          console.log('Data:', data);
+          this.posts = response.data.posts;
+          this.totalPages = response.data.totalPages;
           this.cdr.markForCheck();
-        }
-      },
-      error: (error: any) => {
-        this.loggingService.logError('Error fetching categories:', error);
-      },
-    });
+        },
+        error: (error: any) => {},
+      });
+  }
+
+  getCategories() {
+    this.categoryService
+      .getCategories()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Category[]>) => {
+          if (response.data !== this.categories) {
+            this.categories = response.data;
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error: any) => {},
+      });
   }
 
   getRecentPosts(page: number, limit: number) {
-    this.postService.getRecentPosts(page, limit).subscribe({
-      next: (response: any) => {
-        if (response.data.posts !== this.recentPosts) {
-          this.recentPosts = response.data.posts;
-          this.cdr.markForCheck();
-        }
-      },
-      error: (error: any) => {
-        this.loggingService.logError('Error fetching recent posts:', error);
-        // Không cần hiển thị thông báo lỗi vì đã được xử lý bởi HttpInterceptor
-      },
-    });
+    this.postService
+      .getRecentPosts(page, limit)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: any) => {
+          if (response.data.posts !== this.recentPosts) {
+            this.recentPosts = response.data.posts;
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error: any) => {},
+      });
   }
 
   onPageChange(page: number) {
@@ -169,12 +166,14 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   onCategorySelect(slug: string) {
-    this.selectedCategorySlug = this.selectedCategorySlug === slug ? '' : slug;
-    this.searchForm.reset();
-    this.selectedTagSlug = '';
-    this.currentPage = 1;
-    this.updateQueryParams();
-    this.getPosts();
+    if (this.selectedCategorySlug !== slug) {
+      this.selectedCategorySlug = slug;
+      this.searchForm.reset();
+      this.selectedTagSlug = '';
+      this.currentPage = 1;
+      this.updateQueryParams();
+      this.getPosts();
+    }
   }
 
   onPostClick(slug: string) {
@@ -198,7 +197,7 @@ export class BlogComponent implements OnInit, OnDestroy {
 
   isRequestPending(): boolean {
     let isPending = false;
-    this.httpStatusService.pendingRequests$.subscribe((status) => {
+    this.httpStatusService.pendingRequests$.pipe(untilDestroyed(this)).subscribe((status) => {
       isPending = status;
     });
     return isPending;

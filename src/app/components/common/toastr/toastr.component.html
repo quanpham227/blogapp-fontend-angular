@@ -1,0 +1,34 @@
+<div class="toastr-container">
+  <div
+    *ngFor="let toast of toasts; trackBy: trackById"
+    class="toast"
+    [ngClass]="toast.type"
+    [@toastAnimation]
+    (click)="pauseToast(toast.id)"
+  >
+    <div class="toast-icon">
+      <i
+        [ngClass]="{
+          'fa-check-circle': toast.type === 'success',
+          'fa-exclamation-circle': toast.type === 'error',
+          'fa-info-circle': toast.type === 'info',
+          'fa-exclamation-triangle': toast.type === 'warning',
+        }"
+        class="fa"
+      ></i>
+    </div>
+    <div class="toast-content">
+      <div class="toast-message">
+        {{ toast.message }}
+        <span *ngIf="toast.type === 'success'" class="emoji">😊</span>
+        <span *ngIf="toast.type === 'error'" class="emoji">😢</span>
+        <span *ngIf="toast.type === 'warning'" class="emoji">⚠️</span>
+        <span *ngIf="toast.type === 'info'" class="emoji">ℹ️</span>
+      </div>
+    </div>
+    <div class="toast-close" (click)="removeToast(toast.id)">
+      <i class="fa fa-times"></i>
+    </div>
+    <div class="toast-loader" [ngClass]="{ paused: toast.paused }"></div>
+  </div>
+</div>

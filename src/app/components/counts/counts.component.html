@@ -1,50 +1,19 @@
 <!-- ======= Counts Section ======= -->
 <section id="counts" class="counts">
-  <img
-    src="/assets/images/counts-bg.jpg"
-    alt="Background Image"
-    class="background-image"
-  />
+  <img src="/assets/images/counts-bg.jpg" alt="Background Image" class="background-image" />
   <div class="container position-relative">
     <div class="text-center title" data-aos="fade-up">
       <h3>Những gì chúng tôi đạt được cho đến nay</h3>
     </div>
     <div class="row counters">
-      <div class="col-lg-3 col-6 text-center" data-aos="fade-up">
+      <div *ngFor="let achievement of achievements$ | async" class="col-lg-3 col-6 text-center" data-aos="fade-up">
         <span
           data-purecounter-start="0"
-          data-purecounter-end="7040"
+          [attr.data-purecounter-end]="achievement.value"
           data-purecounter-duration="3"
           class="purecounter"
         ></span>
-        <p>Diện tích</p>
-      </div>
-      <div class="col-lg-3 col-6 text-center" data-aos="fade-up">
-        <span
-          data-purecounter-start="0"
-          data-purecounter-end="18"
-          data-purecounter-duration="3"
-          class="purecounter"
-        ></span>
-        <p>Dây chuyền sản xuất</p>
-      </div>
-      <div class="col-lg-3 col-6 text-center" data-aos="fade-up">
-        <span
-          data-purecounter-start="0"
-          data-purecounter-end="300000"
-          data-purecounter-duration="3"
-          class="purecounter"
-        ></span>
-        <p>Năng suất hàng tháng(pcs)</p>
-      </div>
-      <div class="col-lg-3 col-6 text-center" data-aos="fade-up">
-        <span
-          data-purecounter-start="0"
-          data-purecounter-end="1247"
-          data-purecounter-duration="3"
-          class="purecounter"
-        ></span>
-        <p>Nhân công chăm chỉ</p>
+        <p>{{ achievement.title }}</p>
       </div>
     </div>
   </div>

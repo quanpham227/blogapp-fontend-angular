@@ -5,29 +5,40 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Slide } from '../models/slide';
 import { SlideRequest } from '../request/slide.request';
+import { SuccessHandlerService } from './success-handler.service';
+import { tap } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
 export class SlideService {
   private apiSlides = `${environment.apiBaseUrl}/slides`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private successHandlerService: SuccessHandlerService,
+  ) {}
   getSlides(): Observable<ApiResponse<Slide[]>> {
     return this.http.get<ApiResponse<Slide[]>>(this.apiSlides);
   }
 
   insertSlide(slide: SlideRequest): Observable<ApiResponse<Slide>> {
-    return this.http.post<ApiResponse<Slide>>(this.apiSlides, slide);
+    return this.http
+      .post<ApiResponse<Slide>>(this.apiSlides, slide)
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 
   deleteSlide(id: number): Observable<any> {
-    return this.http.delete(`${this.apiSlides}/${id}`);
+    return this.http
+      .delete<ApiResponse<any>>(`${this.apiSlides}/${id}`)
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
   getSlideById(id: number): Observable<ApiResponse<Slide>> {
     return this.http.get<ApiResponse<Slide>>(`${this.apiSlides}/${id}`);
   }
 
   updateSlide(id: number, slide: SlideRequest): Observable<ApiResponse<Slide>> {
-    return this.http.put<ApiResponse<Slide>>(`${this.apiSlides}/${id}`, slide);
+    return this.http
+      .put<ApiResponse<Slide>>(`${this.apiSlides}/${id}`, slide)
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

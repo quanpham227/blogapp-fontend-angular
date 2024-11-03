@@ -1,125 +1,234 @@
-.container {
-  color: rgb(5, 5, 5);
-  height: 100vh;
-}
+$primary-color: #6e8efb;
+$secondary-color: #a777e3;
+$error-color: #dc3545;
+$background-color: rgba(255, 255, 255, 0.95);
+$input-border-color: #e1e1e1;
+$input-focus-border-color: $primary-color;
+$input-focus-shadow-color: rgba(110, 142, 251, 0.1);
+$button-hover-color: #5c7cfa;
+$disabled-color: #ccc;
+$google-color: #444;
+$google-border-color: #ddd;
+$facebook-color: #1877f2;
 
-.login-form {
-  margin-top: 50px;
-  background-color: rgb(252, 252, 252);
-  border-radius: 10px;
-  padding: 20px;
-  max-width: 500px;
-  border: 1px solid rgb(9, 22, 198);
-  align-items: center;
-  justify-content: center;
-}
+.login {
+  &--container {
+    min-height: calc(100vh - 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, $primary-color, $secondary-color);
+    padding: 20px;
+  }
 
-.login-header {
-  text-align: center;
-  color: rgb(8, 8, 8);
-  margin-bottom: 20px;
-}
+  &__wrapper {
+    background: $background-color;
+    border-radius: 15px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+  }
 
-.form-control {
-  background-color: transparent;
-  border: 1px solid rgb(191, 190, 190);
-  color: rgb(4, 4, 4);
-}
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-.form-control:focus {
-  color: rgb(0, 0, 0);
-  background-color: transparent;
-  outline: none;
-  border-color: transparent;
-}
+  &__header {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 28px;
+  }
 
-.divider-nospace {
-  border-top: 1px solid white;
-}
+  &__form-group {
+    margin-bottom: 25px;
+    position: relative;
 
-.password-field {
-  position: relative;
-}
+    &--password {
+      position: relative;
+    }
+  }
 
-.password-toggle {
-  position: absolute;
-  top: 70%;
-  right: 10px;
-  transform: translateY(-50%);
-  color: rgb(0, 0, 0);
-  cursor: pointer;
-}
+  &__label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+  }
 
-.checkbox-text {
-  color: rgb(0, 0, 0);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
+  &__input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid $input-border-color;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
 
-/* Màu checkbox khi được chọn */
-.checkbox-text input[type='checkbox']:checked {
-  border-color: white;
-  background-color: rgb(57, 40, 242);
-}
+    &:focus {
+      border-color: $input-focus-border-color;
+      box-shadow: 0 0 0 3px $input-focus-shadow-color;
+      outline: none;
+    }
+  }
 
-.form-check-input {
-  margin-right: 5px;
-}
+  &__password-input {
+    position: relative;
+  }
 
-.register-link {
-  color: rgb(0, 0, 0);
-  text-decoration: none;
-  cursor: pointer;
-}
+  &__toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+  }
 
-.register-link:hover {
-  color: rgb(57, 40, 242);
-  text-decoration: underline;
-}
+  &__error-message {
+    color: $error-color;
+    font-size: 14px;
+    margin-top: 5px;
+    position: absolute; // Đặt vị trí tuyệt đối
+    bottom: -20px; // Đặt vị trí dưới cùng của phần tử cha
+  }
 
-.access-right {
-  margin-top: 20px;
-  width: 200px;
-  color: rgb(0, 0, 0);
-  border: 1px solid rgb(57, 40, 242);
-}
+  &__forgot-password {
+    display: block;
+    text-align: right;
+    color: $primary-color;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
 
-.access-right:focus {
-  border: 1px solid rgb(57, 40, 242);
-}
+  &__spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
 
-.form-control::placeholder {
-  /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: rgba(0, 0, 0, 0.4);
-  opacity: 1;
-  /* Firefox */
-}
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 
-.form-control:-ms-input-placeholder {
-  /* Internet Explorer 10-11 */
-  color: rgba(5, 5, 5, 0.4);
-}
+  &__button {
+    width: 100%;
+    padding: 14px;
+    background: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-.form-control::-ms-input-placeholder {
-  /* Microsoft Edge */
-  color: rgba(0, 0, 0, 0.4);
-}
+    &:hover {
+      background: $button-hover-color;
+    }
 
-.login-button {
-  background: rgb(86, 91, 235);
-  color: white;
-  border-radius: 30px;
-  width: 100%;
-  padding: 10px 0;
-  margin-top: 20px;
-  border: none;
-}
+    &:disabled {
+      background: $disabled-color;
+      cursor: not-allowed;
+    }
+  }
 
-.divider {
-  height: 1px;
-  background-color: rgb(57, 40, 242);
-  /* background-color: rgb(105, 244, 181) */
-  margin: 20px;
+  &__social-login {
+    margin-top: 25px;
+  }
+
+  &__social-button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &--google {
+      background: #fff;
+      color: $google-color;
+      border: 1px solid $google-border-color;
+    }
+
+    &--facebook {
+      background: $facebook-color;
+      color: white;
+    }
+
+    i {
+      margin-right: 10px;
+    }
+  }
+
+  &__register-section {
+    text-align: center;
+    margin-top: 20px;
+
+    p {
+      margin-bottom: 10px;
+      color: #666;
+    }
+  }
+
+  &__register-button {
+    background: none;
+    border: 2px solid $primary-color;
+    color: $primary-color;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: $primary-color;
+      color: white;
+    }
+  }
+
+  @media (max-width: 480px) {
+    &__wrapper {
+      padding: 20px;
+    }
+
+    &__header {
+      font-size: 24px;
+    }
+
+    &__social-button {
+      font-size: 14px;
+    }
+  }
 }

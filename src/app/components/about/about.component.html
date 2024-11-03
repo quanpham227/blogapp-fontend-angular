@@ -1,5 +1,6 @@
 <!-- ======= About Section ======= -->
-<section id="about" class="about">
+<section *ngIf="about" id="about" class="about">
+  >
   <div class="container" data-aos="fade-up">
     <div class="section-title">
       <h2>GIỚI THIỆU</h2>
@@ -10,9 +11,11 @@
           *ngIf="about.image_url; else noImage"
           [src]="about.image_url"
           class="img-fluid"
-          alt="About Image"
+          [alt]="about.title || 'About Image'"
         />
-        <ng-template #noImage></ng-template>
+        <ng-template #noImage>
+          <p class="text-muted">Image not available</p>
+        </ng-template>
       </div>
       <div class="col-lg-6 pt-4 pt-lg-0 content">
         <h3 style="text-align: center" *ngIf="about.title">
@@ -24,15 +27,18 @@
 
         <ul>
           <li *ngIf="about.address">
-            <i class="bi bi-check-circle"></i> Địa chỉ:
+            <i class="bi bi-check-circle"></i>
+            Địa chỉ:
             {{ about.address }}
           </li>
           <li *ngIf="about.phone_number">
-            <i class="bi bi-check-circle"></i> Điện thoại:
+            <i class="bi bi-check-circle"></i>
+            Điện thoại:
             {{ about.phone_number }}
           </li>
           <li *ngIf="about.founding_date">
-            <i class="bi bi-check-circle"></i> Hoạt động tại Việt Nam:
+            <i class="bi bi-check-circle"></i>
+            Hoạt động tại Việt Nam:
             {{ about.founding_date }}
           </li>
           <li *ngIf="about.vision_statement">
@@ -40,8 +46,8 @@
             {{ about.vision_statement }}
           </li>
           <li>
-            <i class="bi bi-check-circle"></i> Chúng tôi quan tâm đến sự hài
-            lòng của khách hàng
+            <i class="bi bi-check-circle"></i>
+            Chúng tôi quan tâm đến sự hài lòng của khách hàng
           </li>
         </ul>
       </div>

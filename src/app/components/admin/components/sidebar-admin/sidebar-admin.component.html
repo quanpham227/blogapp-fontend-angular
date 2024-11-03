@@ -23,48 +23,33 @@
 
     <!-- End Components Nav -->
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'slides' }"
-        (click)="showAdminComponent('slides')"
-      >
-        <i class="bi bi-sliders"></i><span>Trình chiếu</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'slides' }" (click)="showAdminComponent('slides')">
+        <i class="bi bi-sliders"></i>
+        <span>Trình chiếu</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'about' }"
-        (click)="showAdminComponent('about')"
-      >
-        <i class="fa-solid fa-info"></i><span>Giới Thiệu</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'about' }" (click)="showAdminComponent('about')">
+        <i class="fa-solid fa-info"></i>
+        <span>Giới Thiệu</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'clients' }"
-        (click)="showAdminComponent('clients')"
-      >
-        <i class="bi bi-person-vcard-fill"></i><span>Khách hàng</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'clients' }" (click)="showAdminComponent('clients')">
+        <i class="bi bi-person-vcard-fill"></i>
+        <span>Khách hàng</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'emails' }"
-        (click)="showAdminComponent('emails')"
-      >
-        <i class="bi bi-envelope-fill"></i><span>Hộp thư của tôi</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'emails' }" (click)="showAdminComponent('emails')">
+        <i class="bi bi-envelope-fill"></i>
+        <span>Hộp thư của tôi</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'media' }"
-        (click)="showAdminComponent('media')"
-      >
-        <i class="bi bi-record-btn-fill"></i><span>Media</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'media' }" (click)="showAdminComponent('media')">
+        <i class="bi bi-record-btn-fill"></i>
+        <span>Media</span>
       </a>
     </li>
     <!-- End Forms Nav -->
@@ -81,42 +66,29 @@
         }"
         (click)="toggleNav('postNav', 'posts')"
       >
-        <i class="bi bi-pin-angle-fill"></i><span>Bài viết</span>
+        <i class="bi bi-pin-angle-fill"></i>
+        <span>Bài viết</span>
       </a>
-      <ul
-        id="post-nav"
-        class="nav-content"
-        [ngClass]="{ show: navStates['postNav'] }"
-      >
+      <ul id="post-nav" class="nav-content" [ngClass]="{ show: navStates['postNav'] }">
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'posts' }"
-            (click)="showAdminComponent('posts')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'posts' }" (click)="showAdminComponent('posts')">
             <span>Tất cả bài viết</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'add-post' }"
-            (click)="showAdminComponent('add-post')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'add-post' }" (click)="showAdminComponent('add-post')">
             <span>Viết bài mới</span>
           </a>
         </li>
 
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'categories' }"
-            (click)="showAdminComponent('categories')"
-            ><span>Chuyên mục</span>
+          <a [ngClass]="{ active: activeComponent === 'categories' }" (click)="showAdminComponent('categories')">
+            <span>Chuyên mục</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'tags' }"
-            (click)="showAdminComponent('tags')"
-            ><span>Thẻ</span>
+          <a [ngClass]="{ active: activeComponent === 'tags' }" (click)="showAdminComponent('tags')">
+            <span>Thẻ</span>
           </a>
         </li>
       </ul>
@@ -128,131 +100,88 @@
         [ngClass]="{ active: activeComponent === 'comments' }"
         (click)="showAdminComponent('comments')"
       >
-        <i class="bi bi-chat-right-quote-fill"></i><span>Bình luận</span>
+        <i class="bi bi-chat-right-quote-fill"></i>
+        <span>Bình luận</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'jetpack' }"
-        (click)="showAdminComponent('jetpack')"
-      >
-        <i class="bi bi-lightning-fill"></i><span>Jetpack</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'jetpack' }" (click)="showAdminComponent('jetpack')">
+        <i class="bi bi-lightning-fill"></i>
+        <span>Jetpack</span>
       </a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         [ngClass]="{
-          active:
-            activeComponent === 'interface' ||
-            activeComponent === 'editor' ||
-            activeComponent === 'customize',
+          active: activeComponent === 'interface' || activeComponent === 'editor' || activeComponent === 'customize',
         }"
-        (click)="toggleNav('interfaceNav', 'interface')"
+        (click)="toggleNav('interfaceNav', 'achievements')"
       >
         <i class="fas fa-palette"></i>
         <span>Giao diện</span>
       </a>
-      <ul
-        id="icons-nav"
-        class="nav-content"
-        [ngClass]="{ show: navStates['interfaceNav'] }"
-      >
+      <ul id="icons-nav" class="nav-content" [ngClass]="{ show: navStates['interfaceNav'] }">
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'interface' }"
-            (click)="showAdminComponent('interface')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'achievements' }" (click)="showAdminComponent('achievements')">
             <span>UI</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'editor' }"
-            (click)="showAdminComponent('editor')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'editor' }" (click)="showAdminComponent('editor')">
             <span>Trình chỉnh sửa</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'customize' }"
-            (click)="showAdminComponent('customize')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'customize' }" (click)="showAdminComponent('customize')">
             <span>Tuỳ biến</span>
           </a>
         </li>
       </ul>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'plugin' }"
-        (click)="showAdminComponent('plugin')"
-      >
-        <i class="bi bi-plugin"></i> <span>Plugin</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'plugin' }" (click)="showAdminComponent('plugin')">
+        <i class="bi bi-plugin"></i>
+        <span>Plugin</span>
       </a>
     </li>
     <li class="nav-item">
       <a
         class="nav-link"
         [ngClass]="{
-          active:
-            activeComponent === 'users' ||
-            activeComponent === 'add-user' ||
-            activeComponent === 'profile',
+          active: activeComponent === 'users' || activeComponent === 'add-user' || activeComponent === 'profile',
         }"
         (click)="toggleNav('userNav', 'users')"
       >
-        <i class="bi bi-person-fill"></i><span>Thành viên</span>
+        <i class="bi bi-person-fill"></i>
+        <span>Thành viên</span>
       </a>
-      <ul
-        id="icons-nav"
-        class="nav-content"
-        [ngClass]="{ show: navStates['userNav'] }"
-      >
+      <ul id="icons-nav" class="nav-content" [ngClass]="{ show: navStates['userNav'] }">
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'users' }"
-            (click)="showAdminComponent('users')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'users' }" (click)="showAdminComponent('users')">
             <span>Mọi người</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'add-user' }"
-            (click)="showAdminComponent('add-user')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'add-user' }" (click)="showAdminComponent('add-user')">
             <span>Thêm người dùng mới</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'profile' }"
-            (click)="showAdminComponent('profile')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'profile' }" (click)="showAdminComponent('profile')">
             <span>Hồ sơ</span>
           </a>
         </li>
       </ul>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'tools' }"
-        (click)="showAdminComponent('tools')"
-      >
-        <i class="bi bi-wrench-adjustable"></i> <span>Công cụ</span>
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'tools' }" (click)="showAdminComponent('tools')">
+        <i class="bi bi-wrench-adjustable"></i>
+        <span>Công cụ</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'contact' }"
-        (click)="showAdminComponent('contact')"
-      >
+      <a class="nav-link" [ngClass]="{ active: activeComponent === 'contact' }" (click)="showAdminComponent('contact')">
         <i class="bi bi-envelope-arrow-up-fill"></i>
         <span>Liên hệ</span>
       </a>
@@ -273,66 +202,42 @@
         }"
         (click)="toggleNav('settingNav', 'general')"
       >
-        <i class="bi bi-gear-fill"></i><span>Cài đặt</span>
+        <i class="bi bi-gear-fill"></i>
+        <span>Cài đặt</span>
       </a>
-      <ul
-        id="icons-nav"
-        class="nav-content"
-        [ngClass]="{ show: navStates['settingNav'] }"
-      >
+      <ul id="icons-nav" class="nav-content" [ngClass]="{ show: navStates['settingNav'] }">
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'general' }"
-            (click)="showAdminComponent('general')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'general' }" (click)="showAdminComponent('general')">
             <span>Cài đặt chung</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'write' }"
-            (click)="showAdminComponent('write')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'write' }" (click)="showAdminComponent('write')">
             <span>Viết</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'read' }"
-            (click)="showAdminComponent('read')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'read' }" (click)="showAdminComponent('read')">
             <span>Đọc</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'discuss' }"
-            (click)="showAdminComponent('discuss')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'discuss' }" (click)="showAdminComponent('discuss')">
             <span>Thảo luận</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'newsletter' }"
-            (click)="showAdminComponent('newsletter')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'newsletter' }" (click)="showAdminComponent('newsletter')">
             <span>Bản tin</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'podcast' }"
-            (click)="showAdminComponent('podcast')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'podcast' }" (click)="showAdminComponent('podcast')">
             <span>Podcast</span>
           </a>
         </li>
         <li>
-          <a
-            [ngClass]="{ active: activeComponent === 'storage' }"
-            (click)="showAdminComponent('storage')"
-          >
+          <a [ngClass]="{ active: activeComponent === 'storage' }" (click)="showAdminComponent('storage')">
             <span>Tính năng lưu trữ</span>
           </a>
         </li>

@@ -3,7 +3,6 @@ import { PreloadAllModules, provideRouter, withPreloading } from '@angular/route
 import { HttpClientModule, provideHttpClient, HTTP_INTERCEPTORS, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { TokenInterceptor } from './interceptors/token.interceptor';
-import { provideToastr } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { LazyLoadDirective } from './directives/lazy-load.directive';
@@ -18,6 +17,7 @@ import { HttpStatusInterceptor } from './interceptors/http-status.interceptor';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { ApiResponseInterceptor } from './interceptors/api-response.interceptor';
+import { NewlinePipe } from './pipes/newline.pipe';
 
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -59,19 +59,9 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(HttpClientModule),
     importProvidersFrom(BrowserAnimationsModule),
     provideHttpClient(),
+    NewlinePipe,
     importProvidersFrom(EditorModule),
     importProvidersFrom(LazyLoadDirective),
-    provideToastr({
-      timeOut: 3000,
-      positionClass: 'toast-top-right',
-      preventDuplicates: true,
-      progressBar: true,
-      closeButton: true,
-      newestOnTop: true,
-      easeTime: 300,
-      tapToDismiss: true,
-      progressAnimation: 'increasing',
-    }),
     provideAnimationsAsync(),
     { provide: NgbDateParserFormatter, useClass: MonthYearFormatter },
     ngbDatepickerConfigProvider,
@@ -85,6 +75,5 @@ export const appConfig: ApplicationConfig = {
     },
     importProvidersFrom(LoadingBarHttpClientModule),
     importProvidersFrom(LoadingBarRouterModule),
-    // provideLoadingBar({ latencyThreshold: 100 }),
   ],
 };

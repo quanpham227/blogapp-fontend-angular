@@ -7,18 +7,19 @@ import {
   AfterViewInit,
   forwardRef,
   SimpleChanges,
+  ChangeDetectionStrategy,
+  OnDestroy,
 } from '@angular/core';
-import {
-  FormsModule,
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-} from '@angular/forms';
+import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ImageSelectModalAdminComponent } from '../admin/shared/components/image-select-modal/image-select-modal.admin.component';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { from } from 'rxjs';
 
 declare var tinymce: any; // Khai báo biến toàn cục
 
+@UntilDestroy()
 @Component({
   selector: 'app-tinymce-editor',
   standalone: true,
@@ -31,10 +32,9 @@ declare var tinymce: any; // Khai báo biến toàn cục
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TinymceEditorComponent
-  implements ControlValueAccessor, AfterViewInit
-{
+export class TinymceEditorComponent implements ControlValueAccessor, AfterViewInit, OnDestroy {
   @Input() content: string = '';
   @Input() editorConfig: any = {}; // Nhận cấu hình tùy chỉnh từ component cha
   @Input() helpText: string = ''; // Nhận dòng chữ tùy chỉnh từ component cha
@@ -83,15 +83,12 @@ export class TinymceEditorComponent
       'visualchars', // Hiển thị ký tự ẩn
     ],
     toolbar: [
-      'blocks formatselect | bold italic underline strikethrough forecolor backcolor alignleft aligncenter alignright alignjustify bullist numlist outdent indent | removeformat | undo redo | link customInsertImage media table emoticons charmap fullscreen code preview searchreplace ',
-      'fontsizeselect fontselect insertdatetime anchor hr visualblocks visualchars spellchecker wordcount | image editimage customInsertLocation customRemoveElement imagetools ltr rtl help',
+      'blocks formatselect fontsizeselect fontselect | bold italic underline strikethrough forecolor backcolor  alignleft aligncenter alignright alignjustify  bullist numlist outdent indent',
+      'removeformat undo redo | link customInsertImage media table emoticons charmap fullscreen code preview | insertdatetime anchor hr visualblocks visualchars spellchecker wordcount | customInsertLocation customRemoveElement ltr rtl help',
     ],
     paste_data_images: true, // Cho phép dán hình ảnh từ clipboard
     paste_as_text: true, // Dán nội dung dưới dạng văn bản thuần túy
-    content_css: [
-      '/assets/tinymce/skins/ui/oxide/content.min.css',
-      '/assets/tinymce/skins/ui/oxide/skin.min.css',
-    ],
+    content_css: ['/assets/tinymce/skins/ui/oxide/content.min.css', '/assets/tinymce/skins/ui/oxide/skin.min.css'],
 
     content_style: `
     body { font-family:Helvetica,Arial,sans-serif; font-size:14px }
@@ -123,32 +120,24 @@ export class TinymceEditorComponent
 
       // Thêm đoạn mã này để loại bỏ phần tử "Upgrade"
       editor.on('init', () => {
-        const upgradeElement = document.querySelector(
-          '.tox-promotion',
-        ) as HTMLElement;
+        const upgradeElement = document.querySelector('.tox-promotion') as HTMLElement;
         if (upgradeElement) {
           upgradeElement.style.display = 'none';
         }
 
         // Loại bỏ phần tử "tox-statusbar__path"
-        const pathElement = document.querySelector(
-          '.tox-statusbar__path',
-        ) as HTMLElement;
+        const pathElement = document.querySelector('.tox-statusbar__path') as HTMLElement;
         if (pathElement) {
           pathElement.style.display = 'none';
         }
         // Thay đổi hoặc loại bỏ dòng chữ "Press ⌥0 for help"
-        const helpTextElement = document.querySelector(
-          '.tox-statusbar__help-text',
-        ) as HTMLElement;
+        const helpTextElement = document.querySelector('.tox-statusbar__help-text') as HTMLElement;
         if (helpTextElement) {
           helpTextElement.innerHTML = this.helpText; // Thay đổi dòng chữ
           helpTextElement.style.flex = '1'; // Chiếm toàn bộ chiều rộng còn lại
         }
         // Di chuyển phần tử "tox-statusbar__resize-handle" sang góc phải
-        const resizeHandleElement = document.querySelector(
-          '.tox-statusbar__resize-handle',
-        ) as HTMLElement;
+        const resizeHandleElement = document.querySelector('.tox-statusbar__resize-handle') as HTMLElement;
         if (resizeHandleElement) {
           resizeHandleElement.style.position = 'absolute';
           resizeHandleElement.style.right = '0';
@@ -202,6 +191,7 @@ export class TinymceEditorComponent
   }
 
   ngAfterViewInit() {
+    console.log(this.helpText);
     tinymce.init({
       target: document.getElementById('tinymce-editor'),
       ...this.mergedConfig,
@@ -230,6 +220,12 @@ export class TinymceEditorComponent
     }
   }
 
+  ngOnDestroy() {
+    if (this.editorInstance) {
+      tinymce.remove(this.editorInstance);
+    }
+  }
+
   onContentChange(content: string) {
     this.contentChange.emit(content);
   }
@@ -246,18 +242,18 @@ export class TinymceEditorComponent
         size: 'lg',
       });
 
-      modalRef.result.then(
-        (result: { url: string; publicId: string }) => {
-          if (result) {
-            editor.insertContent(
-              `<img class="content-image" src="${result.url}" alt="Image" loading="lazy" />`,
-            );
-          }
-        },
-        (reason) => {
-          console.log('Modal dismissed: ' + reason);
-        },
-      );
+      from(modalRef.result)
+        .pipe(untilDestroyed(this))
+        .subscribe({
+          next: (result: { url: string; publicId: string }) => {
+            if (result) {
+              editor.insertContent(`<img class="content-image" src="${result.url}" alt="Image" loading="lazy" />`);
+            }
+          },
+          error: (reason) => {
+            console.log('Modal dismissed: ' + reason);
+          },
+        });
     });
   }
 }

@@ -1,46 +1,6 @@
 <div class="container mt-4">
-  <h2 class="mb-4">To-Do List</h2>
-
-  <!-- Form to add new tasks -->
-  <form (ngSubmit)="addTask()">
-    <div class="input-group mb-3">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="New task"
-        [(ngModel)]="newTask"
-        name="task"
-        required
-      />
-      <button class="btn btn-primary" type="submit">Add</button>
-    </div>
-  </form>
-
-  <!-- List of tasks -->
-  <ul class="list-group">
-    <li
-      *ngFor="let task of tasks; let i = index"
-      class="list-group-item d-flex justify-content-between align-items-center"
-    >
-      <span [class.text-decoration-line-through]="task.completed">{{
-        task.name
-      }}</span>
-      <div>
-        <button
-          class="btn btn-success btn-sm me-2"
-          (click)="toggleTaskCompletion(i)"
-        >
-          <i
-            class="bi"
-            [ngClass]="
-              task.completed ? 'bi-check-circle-fill' : 'bi-check-circle'
-            "
-          ></i>
-        </button>
-        <button class="btn btn-danger btn-sm" (click)="removeTask(i)">
-          <i class="bi bi-trash"></i>
-        </button>
-      </div>
-    </li>
-  </ul>
+  <button (click)="showSuccess()">showSucess</button>
+  <button (click)="showError()">showError</button>
+  <button (click)="showInfo()">showInfo</button>
+  <button (click)="showWarning()">showWarning</button>
 </div>

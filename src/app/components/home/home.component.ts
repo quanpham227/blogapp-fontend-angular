@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, OnDestroy, Renderer2 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../header/header.component';
 import { HeroComponent } from '../hero/hero.component';
@@ -27,13 +27,18 @@ import aos from 'aos';
     ContactComponent,
   ],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   backToTopButton: HTMLElement | null = null;
-  constructor() {}
+  private unlistenScroll: (() => void) | null = null;
+
+  constructor(private renderer: Renderer2) {}
 
   ngOnInit() {
     this.backToTopButton = document.querySelector('.back-to-top');
-    window.addEventListener('scroll', this.toggleBackToTop.bind(this));
+  }
+
+  ngAfterViewInit() {
+    this.unlistenScroll = this.renderer.listen('window', 'scroll', this.toggleBackToTop.bind(this));
 
     // AOS
     aos.init({
@@ -43,6 +48,13 @@ export class HomeComponent implements OnInit {
       mirror: false,
     });
   }
+
+  ngOnDestroy() {
+    if (this.unlistenScroll) {
+      this.unlistenScroll();
+    }
+  }
+
   @HostListener('window:scroll', [])
   onWindowScroll() {
     this.toggleBackToTop();

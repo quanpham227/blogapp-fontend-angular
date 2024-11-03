@@ -1,15 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AboutService } from '../../../services/about.service';
 import { About } from '../../../models/about';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
-import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-about-admin',
@@ -57,19 +51,18 @@ export class AboutAdminComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private aboutService: AboutService,
-    private toastr: ToastrService,
   ) {
     this.aboutForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
-      content: [''],
+      content: ['', Validators.maxLength(10000)],
       image_url: ['', Validators.maxLength(2048)],
       address: ['', Validators.maxLength(255)],
-      phone_number: ['', Validators.maxLength(20)],
+      phone_number: ['', Validators.maxLength(50)],
       email: ['', [Validators.email, Validators.maxLength(100)]],
       working_hours: ['', Validators.maxLength(255)],
       facebook_link: ['', Validators.maxLength(255)],
       youtube: ['', Validators.maxLength(255)],
-      vision_statement: [''],
+      vision_statement: ['', Validators.maxLength(10000)],
       founding_date: ['', Validators.maxLength(100)],
       ceo_name: ['', Validators.maxLength(50)],
     });
@@ -111,17 +104,10 @@ export class AboutAdminComponent implements OnInit {
       };
       this.aboutService.updateAbout(this.about.id, updatedAbout).subscribe({
         next: (response: ApiResponse<About>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' || response.status === 'CREATED') {
             this.about = response.data;
             this.isEditing[field] = false;
-
-            this.toastr.success(response.message);
-          } else {
-            this.toastr.error(response.message);
           }
-        },
-        error: (error) => {
-          console.error('Error updating about information:', error);
         },
       });
     }
@@ -137,20 +123,9 @@ export class AboutAdminComponent implements OnInit {
       const updatedAbout = this.aboutForm.value;
       this.aboutService.updateAbout(this.about.id, updatedAbout).subscribe({
         next: (response: ApiResponse<About>) => {
-          if (response.status === 'OK') {
+          if (response.status === 'OK' || response.status === 'CREATED') {
             this.about = response.data;
-            alert('About information updated successfully');
-          } else {
-            console.error(
-              'Failed to update about information:',
-              response.message,
-            );
           }
-        },
-        error: (error) => {
-          console.error('Error updating about information:', error);
-          console.error('Error status:', error.status); // Thêm dòng này để in ra mã lỗi
-          console.error('Error response:', error.error); // Thêm dòng này để xem chi tiết thông điệp lỗi
         },
       });
     }

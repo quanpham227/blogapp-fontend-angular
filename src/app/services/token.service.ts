@@ -24,7 +24,6 @@ export class TokenService {
 
   refreshToken(): Observable<any> {
     if (!this.authService.hasRefreshToken()) {
-      console.log('No refresh token found');
       return of(null);
     }
     return this.http

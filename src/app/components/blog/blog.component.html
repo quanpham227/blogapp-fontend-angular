@@ -1,124 +1,99 @@
-<!-- ======= Blog Section ======= -->
-
+<ngx-spinner type="ball-climbing-dot">
+  <p class="text-white">Loading...</p>
+</ngx-spinner>
 <div class="blog">
-  <div class="container">
-    <div class="row g-5">
-      <div class="col-lg-8 blog__main">
-        <div class="row gy-5 blog__posts-list">
-          <div class="col-lg-6 blog__post-item" *ngFor="let post of posts; trackBy: trackByFn">
-            <article class="d-flex flex-column blog__post">
-              <div class="blog__post-img">
-                <img [src]="post.thumbnail_url" alt="" class="img-fluid" />
-              </div>
-              <h2 class="blog__post-title">
-                <a (click)="onPostClick(post.slug)">{{ post.title }}</a>
-              </h2>
-              <div class="blog__post-meta-top">
-                <ul class="blog__post-meta-list">
-                  <li class="d-flex align-items-center blog__post-meta-item">
-                    <i class="bi bi-person"></i>
-                    <a>{{ post.author_name }}</a>
-                  </li>
-                  <li class="d-flex align-items-center blog__post-meta-item">
-                    <i class="bi bi-clock"></i>
-                    <a>
-                      <time [attr.datetime]="post.created_at">
-                        {{ post.created_at | date: 'MMM d, y' }}
-                      </time>
-                    </a>
-                  </li>
-                  <li class="d-flex align-items-center blog__post-meta-item">
-                    <i class="bi bi-chat-dots"></i>
-                    <a href="">{{ post.comment_count }} Comments</a>
-                  </li>
-                </ul>
-              </div>
-              <div class="blog__post-content">
-                <p>{{ post.excerpt }}</p>
-              </div>
-
-              <div class="blog__post-read-more mt-auto align-self-end">
-                <a (click)="onPostClick(post.slug)">
-                  Read More
-                  <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </article>
-          </div>
-          <!-- End post list item -->
-        </div>
-        <!-- End blog posts list -->
-        <div class="blog__pagination d-flex justify-content-center">
-          <span class="pagination-links">
-            <ngb-pagination
-              [collectionSize]="totalPages * itemsPerPage"
-              [pageSize]="itemsPerPage"
-              [page]="currentPage"
-              (pageChange)="onPageChange($event)"
-            ></ngb-pagination>
-          </span>
-        </div>
-        <!-- End blog pagination -->
-      </div>
-      <div class="col-lg-4 blog__sidebar">
-        <div class="blog__sidebar-content ps-lg-4">
-          <div class="blog__sidebar-item blog__sidebar-item--search">
-            <h3 class="blog__sidebar-title">Search</h3>
-            <div class="row mt-3" [formGroup]="searchForm">
-              <div class="col-md-9">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Search..."
-                  formControlName="keyword"
-                  (input)="limitWords($event, 10, 100)"
-                />
-              </div>
-              <div class="col-md-3">
-                <button type="button" class="btn btn-primary" (click)="searchPosts()">Tìm kiếm</button>
-              </div>
-              <div class="col-md-2">
-                <button type="button" class="btn btn-secondary" (click)="resetSearch()">Xóa</button>
-              </div>
-            </div>
-          </div>
-          <!-- End sidebar search form -->
-
-          <div class="blog__sidebar-item blog__sidebar-item--categories">
-            <h3 class="blog__sidebar-title">Categories</h3>
-            <ul class="mt-3">
-              <li *ngFor="let category of categories" [class.active]="selectedCategorySlug === category.code">
-                <a (click)="onCategorySelect(category.code)">
-                  {{ category.name }}
-                  <span>({{ category.postCount }})</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-          <!-- End sidebar categories -->
-
-          <div class="blog__sidebar-item blog__sidebar-item--recent-posts">
-            <h3 class="blog__sidebar-title">Recent Posts</h3>
-
-            <div class="mt-3">
-              <div class="blog__recent-post-item mt-3" *ngFor="let post of recentPosts">
-                <img [src]="post.thumbnail_url" class="flex-shrink-0" height="50px" />
-                <div>
-                  <p>
-                    <a (click)="onPostClick(post.slug)">{{ post.title }}</a>
-                  </p>
-                  <time [attr.datetime]="post.created_at">
-                    {{ post.created_at | date: 'MMM d, y' }}
-                  </time>
-                </div>
-              </div>
-              <!-- End recent post item -->
-            </div>
-          </div>
-          <!-- End sidebar recent posts -->
+  <div class="blog__banner-content">
+    <div class="blog__content-wrapper">
+      <div class="blog__row">
+        <div class="blog__col">
+          <h1 class="blog__title">PI VINA DANANG Blogs</h1>
+          <p class="blog__description">Cập nhật những thông tin mới về tuyển dụng, tin tức của công ty</p>
         </div>
       </div>
     </div>
   </div>
+  <div class="blog__container">
+    <div class="blog__search-and-category">
+      <div [formGroup]="searchForm" class="blog__search-form">
+        <div class="blog__search-section">
+          <div class="blog__search-bar">
+            <i *ngIf="!showClearIcon" class="fas fa-search blog__search-icon"></i>
+            <input
+              type="text"
+              formControlName="keyword"
+              (input)="toggleClearIcon(); limitWords($event, 10, 100)"
+              (keydown.enter)="searchPosts()"
+              placeholder="Search articles..."
+              class="blog__search-input"
+            />
+            <i *ngIf="showClearIcon" class="fas fa-times blog__clear-icon" (click)="resetSearch()"></i>
+          </div>
+        </div>
+
+        <nav class="blog__category-nav">
+          <ng-select
+            [items]="categories"
+            bindLabel="name"
+            bindValue="code"
+            placeholder="Select Category"
+            formControlName="categorySlug"
+            (change)="onCategorySelect($event)"
+            [clearable]="true"
+            (clear)="clearCategory()"
+            (mouseenter)="ngSelect.open()"
+            (mouseleave)="ngSelect.close()"
+            #ngSelect
+          ></ng-select>
+        </nav>
+      </div>
+    </div>
+
+    <div class="blog__articles-container">
+      <div *ngIf="articles.length > 0; else noResults" class="blog__articles-grid">
+        <div *ngFor="let article of articles; trackBy: trackByPost" class="blog__article-card" #articleCard>
+          <div class="blog__article-image">
+            <img [appLazyLoad]="article.thumbnailUrl" [transitionDuration]="'0.5s'" [alt]="article.title" />
+          </div>
+          <div class="blog__article-content">
+            <h2 class="blog__article-title" (click)="onPostClick(article.slug)">{{ article.title }}</h2>
+            <div class="blog__article-meta">
+              <span class="blog__author">
+                <i class="fas fa-user"></i>
+                {{ article.authorName }}
+              </span>
+              <span class="blog__comment-count">
+                <i class="fas fa-comments"></i>
+                {{ article.commentCount }}
+              </span>
+              <span class="blog__creation-date">
+                <i class="fas fa-calendar-alt"></i>
+                {{ article.createdAt | date }}
+              </span>
+            </div>
+            <p class="blog__article-summary">{{ article.excerpt }}</p>
+            <button class="blog__read-more" (click)="onPostClick(article.slug)">Read More</button>
+          </div>
+        </div>
+      </div>
+      <ng-template #noResults>
+        <div class="blog__no-results">
+          <p>Không có kết quả nào được tìm thấy.</p>
+        </div>
+      </ng-template>
+    </div>
+    <div class="blog__articles-pagination">
+      <span class="blog__pagination-links">
+        <ngb-pagination
+          [collectionSize]="totalPages * itemsPerPage"
+          [pageSize]="itemsPerPage"
+          [page]="currentPage"
+          (pageChange)="onPageChange($event)"
+          [maxSize]="5"
+          [rotate]="true"
+          [ellipses]="true"
+          [boundaryLinks]="true"
+        ></ngb-pagination>
+      </span>
+    </div>
+  </div>
 </div>
-<!-- End Blog Section -->

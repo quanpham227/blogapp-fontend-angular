@@ -2,14 +2,14 @@ export interface About {
   id: number;
   title: string;
   content: string;
-  image_url: string;
+  imageUrl: string;
   address: string;
-  phone_number: string;
+  phoneNumber: string;
   email: string;
-  working_hours: string;
-  facebook_link: string;
+  workingHours: string;
+  facebookLink: string;
   youtube: string;
-  vision_statement: string;
-  founding_date: string;
-  ceo_name: string;
+  visionStatement: string;
+  foundingDate: string;
+  ceoName: string;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CategoryService } from '../../../services/category.service';
 import { ApiResponse } from '../../../models/response';
 import { Category } from '../../../models/category';
@@ -13,8 +13,6 @@ import { InsertCategoryAdminComponent } from '../insert-category/insert-category
 import { CategoryRequest } from '../../../request/category.request';
 import { UpdateCategoryAdminComponent } from '../update-category/update-category.admin.component';
 import { ToasterService } from '../../../services/toaster.service';
-import { LoggingService } from '../../../services/logging.service';
-import { SuccessHandlerService } from '../../../services/success-handler.service';
 
 @Component({
   selector: 'app-category-admin',
@@ -37,7 +35,6 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
     private router: Router,
     private toast: ToasterService,
     private modalService: NgbModal,
-    private successHandlerService: SuccessHandlerService,
   ) {}
 
   ngOnInit(): void {
@@ -111,23 +108,32 @@ export class CategoryAdminComponent implements OnInit, OnDestroy {
 
   editCategory(id: number | null): void {
     if (id !== null) {
-      const modalRef = this.modalService.open(UpdateCategoryAdminComponent);
-      modalRef.componentInstance.categoryId = id; // Truyền ID vào modal
-      modalRef.componentInstance.updateCategory.subscribe((category: CategoryRequest) => {
-        // Gọi phương thức updateCategory từ CategoryService để cập nhật chuyên mục
-        this.categoryService.updateCategory(id, category).subscribe({
-          next: (response: ApiResponse<Category>) => {
-            if (response.status === 'OK' || response.status === 'UPDATED') {
-              this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
-            }
-          },
+      const category = this.categories.find((cat) => cat.id === id);
+      if (category) {
+        const modalRef = this.modalService.open(UpdateCategoryAdminComponent, {
+          centered: true,
+          backdrop: 'static',
+          keyboard: true,
+          windowClass: 'admin-modal',
+          size: 'md',
         });
-      });
+        modalRef.componentInstance.categoryId = id; // Truyền ID vào modal
+        modalRef.componentInstance.categoryForm.patchValue(category); // Truyền dữ liệu vào form
+        modalRef.componentInstance.updateCategory.subscribe((categoryRequest: CategoryRequest) => {
+          // Gọi phương thức updateCategory từ CategoryService để cập nhật chuyên mục
+          this.categoryService.updateCategory(id, categoryRequest).subscribe({
+            next: (response: ApiResponse<Category>) => {
+              if (response.status === 'OK' || response.status === 'UPDATED') {
+                this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
+              }
+            },
+          });
+        });
+      }
     } else {
       this.toast.warning('Category ID is null');
     }
   }
-
   private checkNavigationState(): void {
     this.routerSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {

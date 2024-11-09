@@ -7,7 +7,11 @@ import { PostService } from '../../services/post.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { HttpStatusService } from '../../services/http-status.service';
 import { LoggingService } from '../../services/logging.service';
-import { take } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, take, tap } from 'rxjs/operators';
+import { LazyLoadDirective } from '../../directives/lazy-load.directive';
+import { isEqual } from 'lodash';
+import { ApiResponse } from '../../models/response';
+import { PostListResponse } from '../../responses/post/post-list-response';
 
 @UntilDestroy()
 @Component({
@@ -15,7 +19,7 @@ import { take } from 'rxjs/operators';
   templateUrl: './recent-posts.component.html',
   styleUrls: ['./recent-posts.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, LazyLoadDirective],
 })
 export class RecentPostsComponent implements OnInit {
   recentPosts: Post[] = [];
@@ -25,7 +29,6 @@ export class RecentPostsComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private httpStatusService: HttpStatusService,
-    private loggingService: LoggingService,
   ) {}
 
   ngOnInit() {
@@ -35,14 +38,24 @@ export class RecentPostsComponent implements OnInit {
   getRecentPosts(page: number, limit: number) {
     this.postService
       .getRecentPosts(page, limit)
-      .pipe(untilDestroyed(this))
-      .subscribe({
-        next: (response: any) => {
-          this.recentPosts = response.data.posts;
-          this.cdr.detectChanges();
-        },
-        error: (error: any) => {},
-      });
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        tap((response: ApiResponse<PostListResponse>) => {
+          if (response.status == 'OK' && response.data.posts) {
+            const newPosts = response.data.posts;
+            if (!isEqual(this.recentPosts, newPosts)) {
+              this.recentPosts = newPosts;
+              this.cdr.detectChanges();
+            }
+          }
+        }),
+        catchError((error) => {
+          console.error('Error fetching posts:', error);
+          return [];
+        }),
+      )
+      .subscribe();
   }
 
   onPostClick(slug: string) {

@@ -1,51 +1,49 @@
 <!-- ======= About Section ======= -->
 <section *ngIf="about" id="about" class="about">
-  >
-  <div class="container" data-aos="fade-up">
-    <div class="section-title">
+  <div class="about__container" data-aos="fade-up">
+    <div class="about__section-title">
       <h2>GIỚI THIỆU</h2>
     </div>
-    <div class="row">
-      <div class="col-lg-6">
+    <div class="about__row">
+      <div class="about__col about__col--left">
         <img
-          *ngIf="about.image_url; else noImage"
-          [src]="about.image_url"
-          class="img-fluid"
+          *ngIf="about.imageUrl; else noImage"
+          [src]="about.imageUrl"
+          class="about__image"
           [alt]="about.title || 'About Image'"
         />
         <ng-template #noImage>
-          <p class="text-muted">Image not available</p>
+          <p class="about__no-image">Image not available</p>
         </ng-template>
       </div>
-      <div class="col-lg-6 pt-4 pt-lg-0 content">
-        <h3 style="text-align: center" *ngIf="about.title">
+      <div class="about__col about__col--right">
+        <h3 class="about__title" *ngIf="about.title">
           {{ about.title }}
         </h3>
-        <p class="fst-italic mt-4" *ngIf="about.content">
+        <p class="about__content" *ngIf="about.content">
           {{ about.content }}
         </p>
-
-        <ul>
-          <li *ngIf="about.address">
+        <ul class="about__list">
+          <li class="about__list-item" *ngIf="about.address">
             <i class="bi bi-check-circle"></i>
             Địa chỉ:
             {{ about.address }}
           </li>
-          <li *ngIf="about.phone_number">
+          <li class="about__list-item" *ngIf="about.phoneNumber">
             <i class="bi bi-check-circle"></i>
             Điện thoại:
-            {{ about.phone_number }}
+            {{ about.phoneNumber }}
           </li>
-          <li *ngIf="about.founding_date">
+          <li class="about__list-item" *ngIf="about.foundingDate">
             <i class="bi bi-check-circle"></i>
             Hoạt động tại Việt Nam:
-            {{ about.founding_date }}
+            {{ about.foundingDate }}
           </li>
-          <li *ngIf="about.vision_statement">
+          <li class="about__list-item" *ngIf="about.visionStatement">
             <i class="bi bi-check-circle"></i>
-            {{ about.vision_statement }}
+            {{ about.visionStatement }}
           </li>
-          <li>
+          <li class="about__list-item">
             <i class="bi bi-check-circle"></i>
             Chúng tôi quan tâm đến sự hài lòng của khách hàng
           </li>

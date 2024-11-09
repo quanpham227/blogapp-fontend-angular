@@ -83,9 +83,7 @@ export class ClientsComponent implements OnInit, AfterViewInit {
           this.cdr.detectChanges(); // Cập nhật view sau khi dữ liệu clients thay đổi
           this.initSwiperClients(); // Khởi tạo lại Swiper sau khi có dữ liệu
         },
-        error: (error: any) => {
-          this.logingService.logError('Error loading clients', error);
-        },
+        error: (error: any) => {},
       });
   }
 }

@@ -1,96 +1,207 @@
-.admin-media {
-  font-family: Arial, sans-serif;
-  font-size: 14px;
+.comment-management {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-  /* Media Header */
-  .media-header__title {
-    font-size: 20px;
-    font-weight: 400;
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.filters {
+  display: flex;
+  gap: 20px;
+}
+
+select,
+.search-box input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.comments-container {
+  display: grid;
+  gap: 20px;
+}
+
+.comment-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-details h4 {
+  margin: 0;
+  color: #333;
+}
+
+.date {
+  font-size: 12px;
+  color: #666;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-badge.approved {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.rejected {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.comment-content {
+  margin: 15px 0;
+  color: #444;
+  line-height: 1.5;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s ease;
+}
+
+.approve-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.reject-btn {
+  background: #f44336;
+  color: white;
+}
+
+.edit-btn {
+  background: #2196f3;
+  color: white;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin: 15px 0;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  border-radius: 6px;
+  color: white;
+  z-index: 1000;
+}
+
+.notification.success {
+  background: #4caf50;
+}
+
+.notification.error {
+  background: #f44336;
+}
+
+.notification.info {
+  background: #2196f3;
+}
+
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    gap: 15px;
   }
 
-  /* Comment Filter Bar */
-  .comment-filter__bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0;
-    border: 2px solid #dee2e6;
-    position: relative;
-    height: auto;
+  .filters {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .comment-actions {
     flex-wrap: wrap;
-
-    /* Nav Container within Comment Filter */
-    .comment-filter__nav-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 68%;
-      margin: 0;
-      padding: 0;
-      height: auto;
-      position: relative;
-      border-right: 1px solid #dee2e6;
-      flex: 1 1 auto;
-      flex-wrap: wrap;
-
-      /* Categories Navigation */
-      .comment-filter__categories-nav {
-        .nav-pills {
-          display: flex;
-          align-items: center;
-          height: auto;
-          flex-wrap: wrap;
-
-          /* Nav Links */
-          .nav-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgb(0, 103, 173);
-            border-radius: 0;
-            position: relative;
-            transition: background-color 0.3s;
-            height: 100%;
-            padding-right: 20px;
-            border-bottom: 2px solid transparent; /* Thêm border-bottom để đảm bảo nhất quán */
-            .badge {
-              display: inline-flex; /* Sử dụng inline-flex để căn giữa nội dung */
-              align-items: center; /* Căn giữa nội dung theo chiều dọc */
-              justify-content: center; /* Căn giữa nội dung theo chiều ngang */
-              padding: 0; /* Loại bỏ padding để đảm bảo hình tròn */
-              font-size: 13px; /* Giảm kích thước font để làm cho nét nhỏ hơn */
-              color: rgb(1, 1, 1);
-              text-align: center;
-              margin-left: 10px;
-              border-radius: 50%; /* Làm cho badge có hình tròn */
-              border: 1px solid rgb(121, 121, 121);
-              background-color: rgb(255, 255, 255); /* Thêm màu nền nếu cần */
-              line-height: 1; /* Đảm bảo nội dung được căn giữa */
-              min-width: 35px; /* Đặt chiều rộng tối thiểu */
-              min-height: 30px; /* Đặt chiều cao tối thiểu */
-              width: auto; /* Đặt chiều rộng tự động */
-              height: auto; /* Đặt chiều cao tự động */
-            }
-
-            &:hover {
-              background-color: rgb(215, 224, 230);
-            }
-
-            &.active {
-              background-color: rgb(215, 224, 230);
-              color: #0e0e0f;
-              border-bottom: 2px solid #000;
-            }
-          }
-        }
-      }
-
-      &.active .media-search-input {
-        display: block;
-        left: 0;
-        right: 0;
-        width: 100%; /* Đảm bảo input chiếm toàn bộ chiều rộng của khối */
-      }
-    }
   }
 }

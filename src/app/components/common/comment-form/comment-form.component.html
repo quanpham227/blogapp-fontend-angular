@@ -1,20 +1,6 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="comment-form">
-  <textarea class="comment-form__textarea" rows="3" [placeholder]="placeholder" formControlName="content"></textarea>
-  <div
-    *ngIf="formGroup.get('content')?.invalid && (formGroup.get('content')?.dirty || formGroup.get('content')?.touched)"
-    class="comment-form__error text-danger"
-  >
-    <div *ngIf="formGroup.get('content')?.errors?.['required']" class="comment-form__error-message">
-      Nội dung không được để trống.
-    </div>
-    <div *ngIf="formGroup.get('content')?.errors?.['minlength']" class="comment-form__error-message">
-      Nội dung phải có ít nhất 5 ký tự.
-    </div>
-  </div>
-  <div class="comment-form__actions">
-    <button class="comment-form__submit" type="submit" [disabled]="formGroup.invalid">
-      {{ submitLabel }}
-    </button>
-    <button class="comment-form__cancel" type="button" (click)="onCancel()">Hủy bỏ</button>
-  </div>
+  <textarea class="comment-form__textarea" [placeholder]="placeholder" formControlName="content"></textarea>
+  <button class="comment-form__button" type="submit" [disabled]="formGroup.invalid">
+    {{ submitLabel }}
+  </button>
 </form>

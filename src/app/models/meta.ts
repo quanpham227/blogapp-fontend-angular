@@ -1,11 +1,11 @@
 export interface Meta {
-  meta_title: string;
-  meta_description: string;
-  meta_keywords: string;
-  og_title: string;
-  og_description: string;
-  og_image: string;
-  created_at: string;
-  updated_at: string;
+  metaTitle: string;
+  metaDescription: string;
+  metaKeywords: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: string;
+  createdAt: string;
+  updatedAt: string;
   slug: string;
 }

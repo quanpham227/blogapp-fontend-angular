@@ -7,7 +7,9 @@ import { ApiResponse } from '../../app/models/response';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostRequest } from '../request/post.request';
 import { SuccessHandlerService } from './success-handler.service';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
+import { convertToCamelCase, convertToSnakeCase } from '../utils/case-converter';
+import { PostListResponse } from '../responses/post/post-list-response';
 
 @Injectable({
   providedIn: 'root',
@@ -28,10 +30,10 @@ export class PostService {
     limit: number,
     status?: '' | PostStatus,
     createdAt?: string,
-  ): Observable<Post[]> {
+  ): Observable<ApiResponse<PostListResponse>> {
     let params = new HttpParams()
       .set('keyword', keyword)
-      .set('category_id', categoryId)
+      .set('categoryId', categoryId)
       .set('page', page.toString())
       .set('limit', limit.toString());
 
@@ -39,28 +41,60 @@ export class PostService {
       params = params.set('status', status.toString());
     }
     if (createdAt) {
-      params = params.set('created_at', createdAt);
+      params = params.set('createdAt', createdAt);
     }
-    return this.http.get<Post[]>(this.apiAdminPosts, { params });
+    return this.http.get<ApiResponse<PostListResponse>>(this.apiAdminPosts, { params }).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data.posts = response.data.posts.map((post) => convertToCamelCase(post));
+        }
+        return response;
+      }),
+    );
   }
 
-  getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number): Observable<ApiResponse<Post[]>> {
+  getPostsForUser(
+    keyword: string,
+    categorySlug: string,
+    page: number,
+    limit: number,
+  ): Observable<ApiResponse<PostListResponse>> {
     let params = new HttpParams()
       .set('keyword', keyword)
       .set('categorySlug', categorySlug)
       .set('page', page.toString())
       .set('limit', limit.toString());
-    return this.http.get<ApiResponse<Post[]>>(this.apiUserPosts, { params });
+    return this.http.get<ApiResponse<PostListResponse>>(this.apiUserPosts, { params }).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data.posts = response.data.posts.map((post) => convertToCamelCase(post));
+        }
+        return response;
+      }),
+    );
   }
 
   getPostBySlug(slug: string): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(`${this.apiUserPosts}/${slug}`);
+    return this.http.get<ApiResponse<Post>>(`${this.apiUserPosts}/${slug}`).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data = convertToCamelCase(response.data);
+        }
+        return response;
+      }),
+    );
   }
-  getRecentPosts(page: number, limit: number): Observable<Post[]> {
+
+  getRecentPosts(page: number, limit: number): Observable<ApiResponse<PostListResponse>> {
     const params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
-    return this.http.get<Post[]>(`${this.apiUserPosts}/recent`, {
-      params,
-    });
+    return this.http.get<ApiResponse<PostListResponse>>(`${this.apiUserPosts}/recent`, { params }).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data.posts = response.data.posts.map((post) => convertToCamelCase(post));
+        }
+        return response;
+      }),
+    );
   }
 
   countPostsByStatus(): Observable<
@@ -68,26 +102,45 @@ export class PostService {
       [key in PostStatus]: number;
     }>
   > {
-    return this.http.get<
-      ApiResponse<{
-        [key in PostStatus]: number;
-      }>
-    >(`${this.apiAdminPosts}/counts`);
+    return this.http
+      .get<
+        ApiResponse<{
+          [key in PostStatus]: number;
+        }>
+      >(`${this.apiAdminPosts}/counts`)
+      .pipe(
+        map((response) => {
+          if (response && response.data) {
+            response.data = convertToCamelCase(response.data);
+          }
+          return response;
+        }),
+      );
   }
 
   insertPost(post: PostRequest): Observable<any> {
+    const snakeCasePost = convertToSnakeCase(post);
     return this.http
-      .post<ApiResponse<Post>>(this.apiAdminPosts, post)
+      .post<ApiResponse<Post>>(this.apiAdminPosts, snakeCasePost)
       .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
+
   updatePost(id: number, post: PostRequest): Observable<ApiResponse<Post>> {
+    const snakeCasePost = convertToSnakeCase(post);
     return this.http
-      .put<ApiResponse<Post>>(`${this.apiAdminPosts}/${id}`, post)
+      .put<ApiResponse<Post>>(`${this.apiAdminPosts}/${id}`, snakeCasePost)
       .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 
   getPostById(id: number): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(`${this.apiAdminPosts}/details/${id}`);
+    return this.http.get<ApiResponse<Post>>(`${this.apiAdminPosts}/details/${id}`).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data = convertToCamelCase(response.data);
+        }
+        return response;
+      }),
+    );
   }
 
   deletePost(id: number): Observable<any> {

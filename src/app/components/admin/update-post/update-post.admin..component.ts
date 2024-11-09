@@ -142,7 +142,6 @@ export class UpdatePostAdminComponent implements OnInit {
       this.postId = +(params.get('id') ?? 0); // Sử dụng nullish coalescing để cung cấp giá trị mặc định
       if (this.postId) {
         this.getPostById(this.postId);
-        this.getCommentsByPostId(this.postId);
       }
     });
   }
@@ -166,40 +165,22 @@ export class UpdatePostAdminComponent implements OnInit {
             category: { category_id: this.post.category.id },
             status: this.post.status,
             visibility: this.post.visibility,
-            revision_count: this.post.revision_count,
+            revision_count: this.post.revisionCount,
             tags: this.post.tags.map((tag) => tag.name),
-            thumbnail: this.post.thumbnail_url,
-            public_id: this.post.public_id,
+            thumbnail: this.post.thumbnailUrl,
+            public_id: this.post.publicId,
           });
-          this.selectedThumbnailUrl = this.post.thumbnail_url;
+          this.selectedThumbnailUrl = this.post.thumbnailUrl;
           this.tags = this.post.tags.map((tag) => tag.name);
-          this.revisionCount = this.post.revision_count; // Lưu giá trị revision_count
-          this.viewCount = this.post.view_count; // Lưu giá trị view_count
-          this.tinymceAuthorName = this.post.author_name;
-          this.tinymceUpdatedAt = this.datePipe.transform(this.post.updated_at, "dd MMMM, yyyy 'lúc' HH:mm");
+          this.revisionCount = this.post.revisionCount; // Lưu giá trị revision_count
+          this.viewCount = this.post.viewCount; // Lưu giá trị view_count
+          this.tinymceAuthorName = this.post.authorName;
+          this.tinymceUpdatedAt = this.datePipe.transform(this.post.updatedAt, "dd MMMM, yyyy 'lúc' HH:mm");
         }
       },
     });
   }
-  getCommentsByPostId(postId: number): void {
-    if (postId) {
-      this.commentService.getCommentsByPostId(postId).subscribe({
-        next: (response: ApiResponse<CommentResponse[]>) => {
-          if (response.status === 'OK') {
-            this.comments = response.data;
-            console.log('Comments:', this.comments);
-            this.comments.forEach((comment) => {
-              if (!this.replyContentControls[comment.id]) {
-                this.replyContentControls[comment.id] = new FormControl('');
-              }
-            });
-            // Lọc các bình luận gốc
-            this.rootComments = this.comments.filter((comment) => !comment.parent_comment_id);
-          }
-        },
-      });
-    }
-  }
+
   toggleReplyForm(commentId: number): void {
     if (!this.replyContentControls[commentId]) {
       this.replyContentControls[commentId] = new FormControl('');
@@ -216,65 +197,7 @@ export class UpdatePostAdminComponent implements OnInit {
       this.newCommentContentControl.reset(); // Đặt lại nội dung textarea
     }
   }
-  addReply(commentId: number): void {
-    const replyContent = this.replyContentControls[commentId].value;
-    const userId = this.authService.getUser()?.id ?? 0;
-    const parentCommentId = commentId;
-    this.commentService.replyComment(commentId, userId, replyContent, parentCommentId).subscribe({
-      next: (response: ApiResponse<CommentResponse>) => {
-        if (response.status === 'OK') {
-          this.getCommentsByPostId(this.postId);
-        }
-        this.toggleReplyForm(commentId);
-      },
-    });
-  }
 
-  addComment(): void {
-    const userId = this.authService.getUser()?.id ?? 0;
-    const content = this.newCommentContentControl.value;
-    this.commentService.addComment(this.postId, userId, content).subscribe({
-      next: (response: ApiResponse<CommentResponse>) => {
-        if (response.status === 'OK') {
-          this.getCommentsByPostId(this.postId);
-        }
-        this.toggleCommentForm();
-      },
-    });
-  }
-
-  editComment(comment: CommentResponse): void {
-    this.editingComment = comment;
-    this.editCommentContentControl.setValue(comment.content);
-  }
-  updateComment(): void {
-    if (this.editingComment) {
-      const userId = this.authService.getUser()?.id ?? 0;
-      this.commentService.editComment(this.editingComment.id, userId, this.editCommentContentControl.value).subscribe({
-        next: (response: ApiResponse<CommentResponse>) => {
-          if (response.status === 'OK') {
-            this.getCommentsByPostId(this.postId);
-          }
-          this.editingComment = null;
-          this.editCommentContentControl.reset();
-        },
-      });
-    }
-  }
-  deleteComment(commentId: number): void {
-    this.commentService.deleteComment(commentId).subscribe({
-      next: (response: ApiResponse<void>) => {
-        if (response.status === 'OK') {
-          this.getCommentsByPostId(this.postId); // Refresh comments
-        }
-      },
-    });
-  }
-
-  cancelEdit(): void {
-    this.editingComment = null; // Đặt lại bình luận đang chỉnh sửa
-    this.editCommentContentControl.reset(); // Đặt lại nội dung textarea của form chỉnh sửa
-  }
   getGlobalIndex(commentIndex: number, replyIndex: number): number {
     let globalIndex = 0;
     for (let i = 0; i < commentIndex; i++) {

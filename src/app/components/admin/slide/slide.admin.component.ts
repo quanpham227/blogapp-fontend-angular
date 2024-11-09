@@ -35,7 +35,6 @@ export class SlideAdminComponent {
     private slideService: SlideService,
     private toast: ToasterService,
     private modalService: NgbModal,
-    private successHandlerService: SuccessHandlerService,
   ) {}
 
   ngOnInit() {

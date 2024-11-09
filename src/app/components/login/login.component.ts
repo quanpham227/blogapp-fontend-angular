@@ -1,17 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { UserDetailService } from '../../services/user.details';
-import { LoggingService } from '../../services/logging.service';
 import { LoginResponse } from '../../responses/user/login.response';
 import { UserResponse } from './../../responses/user/user.response';
 import { CommonModule } from '@angular/common';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { SuccessHandlerService } from '../../services/success-handler.service';
 
 @UntilDestroy()
 @Component({
@@ -35,9 +32,7 @@ export class LoginComponent implements OnInit {
     private userService: UserService,
     private userDetailService: UserDetailService,
     private authService: AuthService,
-    private loggingService: LoggingService,
     private spinner: NgxSpinnerService,
-    private successHandlerService: SuccessHandlerService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

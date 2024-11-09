@@ -104,52 +104,25 @@
         <span>Bình luận</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'jetpack' }" (click)="showAdminComponent('jetpack')">
-        <i class="bi bi-lightning-fill"></i>
-        <span>Jetpack</span>
-      </a>
-    </li>
+
     <li class="nav-item">
       <a
         class="nav-link"
         [ngClass]="{
-          active: activeComponent === 'interface' || activeComponent === 'editor' || activeComponent === 'customize',
+          active: activeComponent === 'achievements',
         }"
-        (click)="toggleNav('interfaceNav', 'achievements')"
+        (click)="showAdminComponent('achievements')"
       >
-        <i class="fas fa-palette"></i>
-        <span>Giao diện</span>
-      </a>
-      <ul id="icons-nav" class="nav-content" [ngClass]="{ show: navStates['interfaceNav'] }">
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'achievements' }" (click)="showAdminComponent('achievements')">
-            <span>UI</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'editor' }" (click)="showAdminComponent('editor')">
-            <span>Trình chỉnh sửa</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'customize' }" (click)="showAdminComponent('customize')">
-            <span>Tuỳ biến</span>
-          </a>
-        </li>
-      </ul>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'plugin' }" (click)="showAdminComponent('plugin')">
-        <i class="bi bi-plugin"></i>
-        <span>Plugin</span>
+        <i class="fa-solid fa-trophy"></i>
+        <span>Thành tựu</span>
       </a>
     </li>
+
     <li class="nav-item">
       <a
         class="nav-link"
         [ngClass]="{
-          active: activeComponent === 'users' || activeComponent === 'add-user' || activeComponent === 'profile',
+          active: activeComponent === 'users' || activeComponent === 'forgot-password' || activeComponent === 'profile',
         }"
         (click)="toggleNav('userNav', 'users')"
       >
@@ -163,8 +136,11 @@
           </a>
         </li>
         <li>
-          <a [ngClass]="{ active: activeComponent === 'add-user' }" (click)="showAdminComponent('add-user')">
-            <span>Thêm người dùng mới</span>
+          <a
+            [ngClass]="{ active: activeComponent === 'forgot-password' }"
+            (click)="showAdminComponent('forgot-password')"
+          >
+            <span>Quên mật khẩu</span>
           </a>
         </li>
         <li>
@@ -175,73 +151,16 @@
       </ul>
     </li>
     <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'tools' }" (click)="showAdminComponent('tools')">
-        <i class="bi bi-wrench-adjustable"></i>
-        <span>Công cụ</span>
-      </a>
-    </li>
-    <li class="nav-item">
       <a class="nav-link" [ngClass]="{ active: activeComponent === 'contact' }" (click)="showAdminComponent('contact')">
         <i class="bi bi-envelope-arrow-up-fill"></i>
         <span>Liên hệ</span>
       </a>
     </li>
     <li class="nav-item">
-      <a
-        class="nav-link"
-        [ngClass]="{
-          active:
-            activeComponent === 'general' ||
-            activeComponent === 'write' ||
-            activeComponent === 'read' ||
-            activeComponent === 'discuss' ||
-            activeComponent === 'newsletter' ||
-            activeComponent === 'podcast' ||
-            activeComponent === 'Efficiency' ||
-            activeComponent === 'storage',
-        }"
-        (click)="toggleNav('settingNav', 'general')"
-      >
+      <a class="nav-link">
         <i class="bi bi-gear-fill"></i>
         <span>Cài đặt</span>
       </a>
-      <ul id="icons-nav" class="nav-content" [ngClass]="{ show: navStates['settingNav'] }">
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'general' }" (click)="showAdminComponent('general')">
-            <span>Cài đặt chung</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'write' }" (click)="showAdminComponent('write')">
-            <span>Viết</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'read' }" (click)="showAdminComponent('read')">
-            <span>Đọc</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'discuss' }" (click)="showAdminComponent('discuss')">
-            <span>Thảo luận</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'newsletter' }" (click)="showAdminComponent('newsletter')">
-            <span>Bản tin</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'podcast' }" (click)="showAdminComponent('podcast')">
-            <span>Podcast</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'storage' }" (click)="showAdminComponent('storage')">
-            <span>Tính năng lưu trữ</span>
-          </a>
-        </li>
-      </ul>
     </li>
     <li class="nav-item">
       <a class="nav-link" (click)="toggleMenuCollapse()">

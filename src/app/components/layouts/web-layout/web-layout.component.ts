@@ -10,12 +10,7 @@ import { FooterComponent } from '../../footer/footer.component';
   templateUrl: './web-layout.component.html',
   styleUrls: ['./web-layout.component.scss'],
   standalone: true,
-  imports: [
-    RouterModule,
-    CommonModule,
-    FormsModule,
-    HeaderComponent,
-    FooterComponent,
-  ],
+
+  imports: [RouterModule, CommonModule, FormsModule, HeaderComponent, FooterComponent],
 })
 export class WebLayoutComponent {}

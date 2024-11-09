@@ -31,16 +31,14 @@ export class UpdateSlideAdminComponent {
     private modalService: NgbModal,
     private fb: FormBuilder,
     private slideService: SlideService,
-    private toast: ToasterService,
-    private successHandlerService: SuccessHandlerService,
   ) {
     this.slideForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       description: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
       status: [true, Validators.required],
       order: [0, Validators.required],
-      image_url: ['', Validators.required],
-      public_id: ['', Validators.required],
+      imageUrl: ['', Validators.required],
+      publicId: ['', Validators.required],
       link: [''],
     });
   }
@@ -56,8 +54,8 @@ export class UpdateSlideAdminComponent {
         next: (response: ApiResponse<Slide>) => {
           if (response.status === 'OK' && response.data) {
             this.slideForm.patchValue(response.data);
-            this.selectedImageUrl = response.data.image_url;
-            this.selectedPublicId = response.data.public_id;
+            this.selectedImageUrl = response.data.imageUrl;
+            this.selectedPublicId = response.data.publicId;
           }
         },
       });
@@ -78,8 +76,8 @@ export class UpdateSlideAdminComponent {
         this.selectedImageUrl = result.url;
         this.selectedPublicId = result.publicId;
         this.slideForm.patchValue({
-          image_url: result.url,
-          public_id: result.publicId,
+          imageUrl: result.url,
+          publicId: result.publicId,
         });
       },
       (reason) => {
@@ -90,6 +88,6 @@ export class UpdateSlideAdminComponent {
 
   removeImage() {
     this.selectedImageUrl = null;
-    this.slideForm.patchValue({ image_url: null });
+    this.slideForm.patchValue({ imageUrl: null });
   }
 }

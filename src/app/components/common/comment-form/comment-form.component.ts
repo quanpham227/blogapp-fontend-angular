@@ -13,13 +13,8 @@ export class CommentFormComponent {
   @Input() placeholder: string = '';
   @Input() submitLabel: string = '';
   @Output() submitForm = new EventEmitter<void>();
-  @Output() cancelForm = new EventEmitter<void>();
 
   onSubmit() {
     this.submitForm.emit();
-  }
-
-  onCancel() {
-    this.cancelForm.emit();
   }
 }

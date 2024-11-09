@@ -1,11 +1,8 @@
 <div class="admin-layout">
   <app-header-admin></app-header-admin>
-  <app-sidebar-admin> </app-sidebar-admin>
-  <main
-    class="main"
-    [ngClass]="{ shifted: !isSidebarVisible, collapsed: isMenuCollapsed }"
-  >
-    <router-outlet></router-outlet>
+  <app-sidebar-admin></app-sidebar-admin>
+  <main class="main" [ngClass]="{ shifted: !isSidebarVisible, collapsed: isMenuCollapsed }">
+    <router-outlet #outlet="outlet"></router-outlet>
   </main>
   <app-footer-admin></app-footer-admin>
 </div>

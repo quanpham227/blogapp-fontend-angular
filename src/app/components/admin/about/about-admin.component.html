@@ -1,70 +1,317 @@
-<div class="about-container container mt-2">
-  <h1 class="text-center mb-4">About Information</h1>
-  <form [formGroup]="aboutForm" (ngSubmit)="onSubmit()">
-    <div *ngFor="let field of fields" class="mb-3 row">
-      <label [for]="field" class="col-sm-3 col-form-label">{{
-        fieldLabels[field]
-      }}</label>
-      <div class="col-sm-9">
-        <div *ngIf="!isEditing[field]" class="d-flex align-items-center">
-          <span class="form-control-plaintext">{{ getFieldValue(field) }}</span>
-          <button
-            type="button"
-            class="btn btn-primary ms-2"
-            (click)="editField(field)"
-          >
-            Edit
-          </button>
-        </div>
-        <div *ngIf="isEditing[field]" class="d-flex align-items-center">
-          <input
-            *ngIf="field !== 'content' && field !== 'vision_statement'"
-            [id]="field"
-            [formControlName]="field"
-            class="form-control"
-          />
-          <textarea
-            *ngIf="field === 'content' || field === 'vision_statement'"
-            [id]="field"
-            [formControlName]="field"
-            class="form-control"
-          ></textarea>
-          <button
-            type="button"
-            class="btn btn-success ms-2"
-            (click)="saveField(field)"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            class="btn btn-secondary ms-2"
-            (click)="cancelEdit(field)"
-          >
-            Cancel
-          </button>
-        </div>
-        <div
-          *ngIf="
-            aboutForm.controls[field].invalid &&
-            (aboutForm.controls[field].dirty ||
-              aboutForm.controls[field].touched)
-          "
-          class="text-danger mt-1"
-        >
-          <div *ngIf="aboutForm.controls[field].errors?.['required']">
-            {{ fieldLabels[field] }} không được để trống.
+<div class="admin-about">
+  <div class="admin-about__header">
+    <div class="admin-about__header-content">
+      <div class="admin-about__header-title">
+        <i class="fas fa-building"></i>
+        <h1>Business Profile</h1>
+      </div>
+      <button
+        class="admin-about__edit-toggle-btn"
+        (click)="toggleEditMode()"
+        [ngClass]="{ 'admin-about__edit-toggle-btn--active': isEditMode }"
+      >
+        <i class="fas" [ngClass]="{ 'fa-times': isEditMode, 'fa-edit': !isEditMode }"></i>
+        {{ isEditMode ? 'Exit Edit Mode' : 'Edit Profile' }}
+      </button>
+    </div>
+  </div>
+
+  <form [formGroup]="businessForm" (ngSubmit)="onSubmit()" class="admin-about__form">
+    <div class="admin-about__form-section">
+      <div class="admin-about__form-section-header">
+        <i class="fas fa-info-circle"></i>
+        <h2>Basic Information</h2>
+      </div>
+      <div class="admin-about__form-section-row">
+        <div class="admin-about__form-section-field">
+          <label for="title">
+            <i class="fas fa-briefcase"></i>
+            Business Name
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="text"
+              id="title"
+              formControlName="title"
+              placeholder="Enter business name"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
           </div>
-          <div *ngIf="aboutForm.controls[field].errors?.['maxlength']">
-            Độ dài tối đa của {{ fieldLabels[field] }} là
-            {{ aboutForm.controls[field].errors?.["maxlength"].requiredLength }}
-            ký tự.
+          <div
+            class="admin-about__error-text"
+            *ngIf="businessForm.get('title')?.invalid && businessForm.get('title')?.touched"
+          >
+            Business name is required
           </div>
-          <div *ngIf="aboutForm.controls[field].errors?.['email']">
-            Email không hợp lệ.
+        </div>
+
+        <div class="admin-about__form-section-field">
+          <label for="email">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="Enter email address"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+          <div
+            class="admin-about__error-text"
+            *ngIf="businessForm.get('email')?.invalid && businessForm.get('email')?.touched"
+          >
+            Please enter a valid email address
           </div>
         </div>
       </div>
+
+      <div class="admin-about__form-section-row">
+        <div class="admin-about__form-section-field">
+          <label for="phone">
+            <i class="fas fa-phone"></i>
+            Phone Number
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="tel"
+              id="phone"
+              formControlName="phoneNumber"
+              placeholder="Enter phone number"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-about__form-section-field">
+          <label for="ceo">
+            <i class="fas fa-user-tie"></i>
+            CEO Name
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="text"
+              id="ceo"
+              formControlName="ceoName"
+              placeholder="Enter CEO name"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-about__form-section-row">
+        <div class="admin-about__form-section-field">
+          <label for="content">
+            <i class="fas fa-align-left"></i>
+            Content
+          </label>
+          <div class="admin-about__input-container">
+            <textarea
+              [readonly]="!isEditMode"
+              id="content"
+              formControlName="content"
+              rows="3"
+              placeholder="Enter content"
+            ></textarea>
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-about__form-section-field">
+          <label for="imageUrl">
+            <i class="fas fa-image"></i>
+            Image URL
+          </label>
+          <div class="admin-about__input-container">
+            <textarea
+              [readonly]="!isEditMode"
+              rows="3"
+              id="imageUrl"
+              formControlName="imageUrl"
+              placeholder="Enter image URL"
+            ></textarea>
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-about__form-section">
+      <div class="admin-about__form-section-header">
+        <i class="fas fa-map-marker-alt"></i>
+        <h2>Location & Hours</h2>
+      </div>
+      <div class="admin-about__form-section-row admin-about__form-section-row--full-width">
+        <div class="admin-about__form-section-field">
+          <label for="address">
+            <i class="fas fa-location-arrow"></i>
+            Business Address
+          </label>
+          <div class="admin-about__input-container">
+            <textarea
+              [readonly]="!isEditMode"
+              id="address"
+              formControlName="address"
+              rows="3"
+              placeholder="Enter business address"
+            ></textarea>
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-about__form-section-row admin-about__form-section-row--full-width">
+        <div class="admin-about__form-section-field">
+          <label for="hours">
+            <i class="fas fa-clock"></i>
+            Working Hours
+          </label>
+          <div class="admin-about__input-container">
+            <textarea
+              [readonly]="!isEditMode"
+              id="hours"
+              formControlName="workingHours"
+              rows="3"
+              placeholder="Enter working hours"
+            ></textarea>
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-about__form-section">
+      <div class="admin-about__form-section-header">
+        <i class="fas fa-link"></i>
+        <h2>Social Media</h2>
+      </div>
+      <div class="admin-about__form-section-row">
+        <div class="admin-about__form-section-field">
+          <label for="facebookLink">
+            <i class="fab fa-facebook"></i>
+            Facebook Link
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="text"
+              id="facebookLink"
+              formControlName="facebookLink"
+              placeholder="Enter Facebook link"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-about__form-section-field">
+          <label for="youtube">
+            <i class="fab fa-youtube"></i>
+            YouTube Link
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="text"
+              id="youtube"
+              formControlName="youtube"
+              placeholder="Enter YouTube link"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-about__form-section">
+      <div class="admin-about__form-section-header">
+        <i class="fas fa-bullseye"></i>
+        <h2>Vision Statement</h2>
+      </div>
+      <div class="admin-about__form-section-row admin-about__form-section-row--full-width">
+        <div class="admin-about__form-section-field">
+          <label for="visionStatement">
+            <i class="fas fa-eye"></i>
+            Vision Statement
+          </label>
+          <div class="admin-about__input-container">
+            <textarea
+              [readonly]="!isEditMode"
+              id="visionStatement"
+              formControlName="visionStatement"
+              rows="3"
+              placeholder="Enter vision statement"
+            ></textarea>
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-about__form-section">
+      <div class="admin-about__form-section-header">
+        <i class="fas fa-calendar-alt"></i>
+        <h2>Founding Date</h2>
+      </div>
+      <div class="admin-about__form-section-row admin-about__form-section-row--full-width">
+        <div class="admin-about__form-section-field">
+          <label for="foundingDate">
+            <i class="fas fa-calendar"></i>
+            Founding Date
+          </label>
+          <div class="admin-about__input-container">
+            <input
+              [readonly]="!isEditMode"
+              type="date"
+              id="foundingDate"
+              formControlName="foundingDate"
+              placeholder="Enter founding date"
+            />
+            <div class="admin-about__field-icon">
+              <i *ngIf="isEditMode" class="fas fa-pen"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-about__form-actions" *ngIf="isEditMode">
+      <button type="button" class="admin-about__cancel-btn" (click)="toggleEditMode()">
+        <i class="fas fa-times"></i>
+        Cancel
+      </button>
+      <button type="submit" class="admin-about__save-btn" [disabled]="businessForm.invalid || isLoading">
+        <i class="fas" [ngClass]="{ 'fa-spinner fa-spin': isLoading, 'fa-check': !isLoading }"></i>
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
     </div>
   </form>
 </div>

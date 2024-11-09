@@ -56,8 +56,6 @@ export class PostAdminComponent implements OnInit {
     private postService: PostService,
     private categoryService: CategoryService,
     private messageService: MessageService,
-    private loggingService: LoggingService,
-    private successHandlerService: SuccessHandlerService,
   ) {
     this.localStorage = document.defaultView?.localStorage;
     this.routerSubscription = this.router.events
@@ -297,7 +295,7 @@ export class PostAdminComponent implements OnInit {
           [key in PostStatus]: number;
         }>,
       ) => {
-        this.counts = response.data; // Lưu trữ số lượng bài viết vào biến counts
+        this.counts = response.data;
       },
     });
   }

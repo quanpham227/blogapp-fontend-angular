@@ -1,5 +1,4 @@
 import { Component, HostListener, inject, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Client } from '../../../models/client';
 import { ClientService } from '../../../services/client.service';
@@ -11,7 +10,6 @@ import { FormsModule } from '@angular/forms';
 import { InsertClientAdminComponent } from '../insert-client/insert-client.admin.component';
 import { ClientRequest } from '../../../request/client.request';
 import { UpdateClientAdminComponent } from '../update-client/update-client.admin.component';
-import { HttpClient } from '@angular/common/http';
 import { ToasterService } from '../../../services/toaster.service';
 
 @Component({

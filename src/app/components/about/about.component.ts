@@ -18,10 +18,7 @@ export class AboutComponent implements OnInit {
   about: About = {} as About;
   isLoading = true;
 
-  constructor(
-    private aboutService: AboutService,
-    private loggingService: LoggingService,
-  ) {}
+  constructor(private aboutService: AboutService) {}
 
   ngOnInit() {
     this.getAbout();

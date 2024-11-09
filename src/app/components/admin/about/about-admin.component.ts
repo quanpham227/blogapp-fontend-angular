@@ -4,6 +4,7 @@ import { AboutService } from '../../../services/about.service';
 import { About } from '../../../models/about';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-about-admin',
@@ -11,60 +12,40 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './about-admin.component.html',
   styleUrls: ['./about-admin.component.scss'],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(20px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [animate('300ms ease-in', style({ opacity: 0, transform: 'translateY(20px)' }))]),
+    ]),
+  ],
 })
 export class AboutAdminComponent implements OnInit {
-  aboutForm: FormGroup;
+  businessForm: FormGroup;
   about: About = {} as About;
-  isEditing: { [key: string]: boolean } = {};
-
-  // Định nghĩa các trường và ánh xạ sang tên hiển thị tiếng Việt
-  fields: string[] = [
-    'title',
-    'content',
-    'image_url',
-    'address',
-    'phone_number',
-    'email',
-    'working_hours',
-    'facebook_link',
-    'youtube',
-    'vision_statement',
-    'founding_date',
-    'ceo_name',
-  ];
-
-  fieldLabels: { [key: string]: string } = {
-    title: 'Tiêu đề',
-    content: 'Nội dung',
-    image_url: 'URL hình ảnh',
-    address: 'Địa chỉ',
-    phone_number: 'Số điện thoại',
-    email: 'Email',
-    working_hours: 'Giờ làm việc',
-    facebook_link: 'Liên kết Facebook',
-    youtube: 'Youtube',
-    vision_statement: 'Tuyên bố tầm nhìn',
-    founding_date: 'Ngày thành lập',
-    ceo_name: 'Tên Giám đốc điều hành',
-  };
+  isEditMode = false;
+  isLoading = false;
+  successMessage: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private aboutService: AboutService,
   ) {
-    this.aboutForm = this.fb.group({
+    this.businessForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
       content: ['', Validators.maxLength(10000)],
-      image_url: ['', Validators.maxLength(2048)],
+      imageUrl: ['', Validators.maxLength(2048)],
       address: ['', Validators.maxLength(255)],
-      phone_number: ['', Validators.maxLength(50)],
+      phoneNumber: ['', Validators.maxLength(50)],
       email: ['', [Validators.email, Validators.maxLength(100)]],
-      working_hours: ['', Validators.maxLength(255)],
-      facebook_link: ['', Validators.maxLength(255)],
+      workingHours: ['', Validators.maxLength(255)],
+      facebookLink: ['', Validators.maxLength(255)],
       youtube: ['', Validators.maxLength(255)],
-      vision_statement: ['', Validators.maxLength(10000)],
-      founding_date: ['', Validators.maxLength(100)],
-      ceo_name: ['', Validators.maxLength(50)],
+      visionStatement: ['', Validators.maxLength(10000)],
+      foundingDate: ['', Validators.maxLength(100)],
+      ceoName: ['', Validators.maxLength(50)],
     });
   }
 
@@ -74,12 +55,12 @@ export class AboutAdminComponent implements OnInit {
 
   loadAbout(): void {
     this.aboutService.getAbout().subscribe({
-      next: (response: ApiResponse<About>) => {
-        if (response.status === 'OK' || response.status === 'ok') {
-          this.about = response.data;
-          this.aboutForm.patchValue(this.about);
+      next: (data: ApiResponse<About>) => {
+        if (data.status === 'OK' || data.status === 'ok') {
+          this.about = data.data;
+          this.businessForm.patchValue(this.about);
         } else {
-          console.error('Failed to load about information:', response.message);
+          console.error('Failed to load about information:', data.message);
         }
       },
       error: (error) => {
@@ -88,46 +69,32 @@ export class AboutAdminComponent implements OnInit {
     });
   }
 
-  getFieldValue(field: string): any {
-    return this.about[field as keyof About];
-  }
-
-  editField(field: string): void {
-    this.isEditing[field] = true;
-  }
-
-  saveField(field: string): void {
-    if (this.aboutForm.controls[field].valid) {
-      const updatedAbout = {
-        ...this.about,
-        [field]: this.aboutForm.controls[field].value,
-      };
-      this.aboutService.updateAbout(this.about.id, updatedAbout).subscribe({
-        next: (response: ApiResponse<About>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.about = response.data;
-            this.isEditing[field] = false;
-          }
-        },
-      });
+  toggleEditMode(): void {
+    if (this.isEditMode && this.businessForm.dirty) {
+      if (!confirm('You have unsaved changes. Do you really want to cancel?')) {
+        return;
+      }
     }
-  }
-
-  cancelEdit(field: string): void {
-    this.isEditing[field] = false;
-    this.aboutForm.controls[field].setValue(this.about[field as keyof About]);
+    this.isEditMode = !this.isEditMode;
   }
 
   onSubmit(): void {
-    if (this.aboutForm.valid) {
-      const updatedAbout = this.aboutForm.value;
-      this.aboutService.updateAbout(this.about.id, updatedAbout).subscribe({
-        next: (response: ApiResponse<About>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.about = response.data;
-          }
-        },
-      });
+    if (this.businessForm.invalid) {
+      return;
     }
+    this.isLoading = true;
+    const updatedAbout = this.businessForm.value;
+    this.aboutService.updateAbout(this.about.id, updatedAbout).subscribe({
+      next: (response: ApiResponse<About>) => {
+        if (response.status === 'OK' || response.status === 'CREATED') {
+          this.about = response.data;
+        }
+        this.isLoading = false;
+        this.toggleEditMode();
+      },
+      error: (error) => {
+        this.isLoading = false;
+      },
+    });
   }
 }

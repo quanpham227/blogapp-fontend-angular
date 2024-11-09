@@ -5,7 +5,8 @@ import { About } from '../models/about';
 import { ApiResponse } from '../models/response';
 import { environment } from '../../environments/environment';
 import { SuccessHandlerService } from './success-handler.service';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
+import { convertToCamelCase, convertToSnakeCase } from '../utils/case-converter';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +20,19 @@ export class AboutService {
   ) {}
 
   getAbout(): Observable<ApiResponse<About>> {
-    return this.http.get<ApiResponse<About>>(this.apiAbout);
+    return this.http.get<ApiResponse<About>>(this.apiAbout).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data = convertToCamelCase(response.data);
+        }
+        return response;
+      }),
+    );
   }
   updateAbout(id: number, about: About): Observable<ApiResponse<About>> {
+    const snakeCaseAbout = convertToSnakeCase(about);
     return this.http
-      .put<ApiResponse<About>>(`${this.apiAbout}/${id}`, about)
+      .put<ApiResponse<About>>(`${this.apiAbout}/${id}`, snakeCaseAbout)
       .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

@@ -9,11 +9,11 @@
       <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="100" *ngFor="let post of recentPosts">
         <div class="post-box">
           <div class="post-img">
-            <img [src]="post.thumbnail_url" class="img-fluid" alt="" />
+            <img [appLazyLoad]="post.thumbnailUrl" [transitionDuration]="'0.5s'" class="img-fluid" alt="" />
           </div>
           <div class="meta">
             <a>
-              <time [attr.datetime]="post.created_at">{{ post.created_at | date: 'MMM d, y' }}</time>
+              <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'MMM d, y' }}</time>
             </a>
             <span class="post-author">/ Julia Parker</span>
           </div>
@@ -23,7 +23,7 @@
           <p>
             {{ post.excerpt }}
           </p>
-          <a (click)="onPostClick(post.slug)" class="readmore stretched-link">
+          <a class="readmore" (click)="onPostClick(post.slug)">
             <span>Read More</span>
             <i class="bi bi-arrow-right"></i>
           </a>

@@ -1,16 +1,14 @@
-import { User } from './user';
-
 export interface CommentResponse {
   id: number;
   content: string;
-  post_id: number;
-  user_id: number;
-  full_name: string;
+  postId: number;
+  userId: number;
+  fullName: string;
   status?: string;
   email: string;
-  profile_image?: string;
-  parent_comment_id?: number;
-  created_at?: string;
-  updated_at?: string;
+  profileImage?: string;
+  parentCommentId?: number;
+  createdAt?: string;
+  updatedAt?: string;
   replies?: CommentResponse[];
 }

@@ -4,9 +4,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div class="text-left">
           <h1 class="title">Chuyên mục</h1>
-          <p class="text-muted">
-            Create, edit, and manage the chuyên mục on your site.
-          </p>
+          <p class="text-muted">Create, edit, and manage the chuyên mục on your site.</p>
         </div>
       </div>
     </header>
@@ -14,18 +12,9 @@
     <div class="input-wrapper mb-3">
       <div class="input-group">
         <i class="bi bi-search"></i>
-        <input
-          type="search"
-          class="form-control search"
-          placeholder="Tìm kiếm..."
-          aria-label="Tìm kiếm"
-        />
+        <input type="search" class="form-control search" placeholder="Tìm kiếm..." aria-label="Tìm kiếm" />
         <div class="button-container">
-          <button
-            class="btn btn-sm btn-primary custom-btn"
-            type="button"
-            (click)="addCategory()"
-          >
+          <button class="btn btn-sm btn-primary custom-btn" type="button" (click)="addCategory()">
             Thêm chuyên mục
           </button>
         </div>
@@ -42,22 +31,19 @@
         </div>
         <p class="category-name">{{ category.name }}</p>
         <div class="right-icon">
-          <i
-            class="bi bi-three-dots"
-            (click)="toggleMenu($event, category.id)"
-          ></i>
-          <div
-            class="options-menu"
-            *ngIf="menuVisible && selectedCategoryId === category.id"
-          >
+          <i class="bi bi-three-dots" (click)="toggleMenu($event, category.id)"></i>
+          <div class="options-menu" *ngIf="menuVisible && selectedCategoryId === category.id">
             <div class="option-item" (click)="editCategory(category.id)">
-              <i class="bi bi-pencil"></i> Sửa
+              <i class="bi bi-pencil"></i>
+              Sửa
             </div>
             <div class="option-item" (click)="openDeleteModal(category.id)">
-              <i class="bi bi-trash"></i> Xóa
+              <i class="bi bi-trash"></i>
+              Xóa
             </div>
             <div class="option-item">
-              <i class="bi bi-check-circle-fill"></i> Đặt làm mặc định
+              <i class="bi bi-check-circle-fill"></i>
+              Đặt làm mặc định
             </div>
           </div>
         </div>

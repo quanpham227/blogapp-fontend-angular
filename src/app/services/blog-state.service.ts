@@ -1,34 +1,47 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { Category } from '../models/category';
+import { Post } from '../models/post';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BlogStateService {
-  private currentPage: number = 1;
-  private currentCategory: string = '';
-  private currentKeyword: string = '';
+  private categoriesSubject = new BehaviorSubject<Category[]>([]);
+  private articlesSubject = new BehaviorSubject<Post[]>([]);
+  private selectedCategorySlugSubject = new BehaviorSubject<string>('');
+  private selectedCategoryNameSubject = new BehaviorSubject<string>('');
+  private currentPageSubject = new BehaviorSubject<number>(1);
+  private totalPagesSubject = new BehaviorSubject<number>(0);
 
-  setCurrentPage(page: number) {
-    this.currentPage = page;
+  categories$ = this.categoriesSubject.asObservable();
+  articles$ = this.articlesSubject.asObservable();
+  selectedCategorySlug$ = this.selectedCategorySlugSubject.asObservable();
+  selectedCategoryName$ = this.selectedCategoryNameSubject.asObservable();
+  currentPage$ = this.currentPageSubject.asObservable();
+  totalPages$ = this.totalPagesSubject.asObservable();
+
+  setCategories(categories: Category[]): void {
+    this.categoriesSubject.next(categories);
   }
 
-  getCurrentPage(): number {
-    return this.currentPage;
+  setArticles(articles: Post[]): void {
+    this.articlesSubject.next(articles);
   }
 
-  setCurrentCategory(category: string) {
-    this.currentCategory = category;
+  setSelectedCategorySlug(slug: string): void {
+    this.selectedCategorySlugSubject.next(slug);
   }
 
-  getCurrentCategory(): string {
-    return this.currentCategory;
+  setSelectedCategoryName(name: string): void {
+    this.selectedCategoryNameSubject.next(name);
   }
 
-  setCurrentKeyword(keyword: string) {
-    this.currentKeyword = keyword;
+  setCurrentPage(page: number): void {
+    this.currentPageSubject.next(page);
   }
 
-  getCurrentKeyword(): string {
-    return this.currentKeyword;
+  setTotalPages(totalPages: number): void {
+    this.totalPagesSubject.next(totalPages);
   }
 }

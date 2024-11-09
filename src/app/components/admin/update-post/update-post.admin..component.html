@@ -1,20 +1,13 @@
 <form [formGroup]="postForm" (ngSubmit)="onSubmitPost()">
   <div class="admin-update-post container">
-    <div
-      class="admin-update-post__loading loading-container"
-      *ngIf="isLoading || isDeleting"
-    >
-      <div
-        class="admin-update-post__loading-spinner loading-spinner"
-        *ngIf="isLoading"
-      >
-        <i class="fa fa-spinner fa-spin"></i> Đang lưu bài viết...
+    <div class="admin-update-post__loading loading-container" *ngIf="isLoading || isDeleting">
+      <div class="admin-update-post__loading-spinner loading-spinner" *ngIf="isLoading">
+        <i class="fa fa-spinner fa-spin"></i>
+        Đang lưu bài viết...
       </div>
-      <div
-        class="admin-update-post__loading-spinner loading-spinner"
-        *ngIf="isDeleting"
-      >
-        <i class="fa fa-spinner fa-spin"></i> Đang xoá bài viết...
+      <div class="admin-update-post__loading-spinner loading-spinner" *ngIf="isDeleting">
+        <i class="fa fa-spinner fa-spin"></i>
+        Đang xoá bài viết...
       </div>
     </div>
     <div class="admin-update-post__header">
@@ -23,275 +16,19 @@
     <div class="row">
       <div class="admin-update-post__main col-8-5">
         <div class="admin-update-post__content">
-          <input
-            class="admin-update-post__title"
-            type="text"
-            placeholder="Tiêu đề bài viết"
-            formControlName="title"
-          />
+          <input class="admin-update-post__title" type="text" placeholder="Tiêu đề bài viết" formControlName="title" />
           <app-tinymce-editor
             class="admin-update-post__editor"
             [editorConfig]="{ height: 900 }"
             formControlName="content"
-            [helpText]="
-              'Chỉnh sửa lần cuối bởi: ' +
-              tinymceAuthorName +
-              ' vào ngày ' +
-              tinymceUpdatedAt
-            "
+            [helpText]="'Chỉnh sửa lần cuối bởi: ' + tinymceAuthorName + ' vào ngày ' + tinymceUpdatedAt"
           ></app-tinymce-editor>
-          <div class="admin-update-post__comments">
-            <div
-              class="admin-update-post__comments-header d-flex justify-content-between align-items-center"
-              (click)="toggleCardCommentBody()"
-            >
-              <h5 class="admin-update-post__comments-title">Bình luận</h5>
-              <div class="admin-update-post__comments-controls">
-                <i class="fa-solid fa-chevron-up"></i>
-                <i class="fa-solid fa-chevron-down"></i>
-                <i
-                  class="fa-solid fa-caret-up"
-                  [ngClass]="{ 'fa-rotate-180': !cardVisibility['comment'] }"
-                ></i>
-              </div>
-            </div>
-            <div
-              class="admin-update-post__comments-body"
-              *ngIf="isCommentBodyCardVisible"
-            >
-              <div *ngIf="!showAddCommentForm">
-                <button
-                  class="admin-update-post__toggle-add-comment btn btn-primary"
-                  type="button"
-                  (click)="toggleCommentForm()"
-                >
-                  Thêm bình luận
-                </button>
-              </div>
-              <div
-                *ngIf="showAddCommentForm"
-                class="admin-update-post__add-comment-section"
-              >
-                <textarea
-                  class="admin-update-post__add-comment-textarea form-control"
-                  rows="3"
-                  placeholder="Nhập bình luận của bạn..."
-                  [formControl]="newCommentContentControl"
-                ></textarea>
-                <div class="admin-update-post__add-comment-actions mt-2">
-                  <button
-                    class="admin-update-post__add-comment-send btn btn-success mr-2"
-                    type="button"
-                    (click)="addComment()"
-                  >
-                    Thêm bình luận
-                  </button>
-                  <button
-                    class="admin-update-post__add-comment-cancel btn btn-secondary"
-                    type="button"
-                    (click)="toggleCommentForm()"
-                  >
-                    Hủy bỏ
-                  </button>
-                </div>
-              </div>
-              <div
-                *ngFor="let comment of rootComments; let i = index"
-                class="admin-update-post__root-comment mt-3"
-              >
-                <!-- Form chỉnh sửa duy nhất -->
-                <div
-                  *ngIf="editingComment && editingComment.id === comment.id"
-                  class="admin-update-post__edit-comment-section mt-2"
-                >
-                  <textarea
-                    class="admin-update-post__edit-comment-textarea form-control"
-                    rows="3"
-                    placeholder="Nhập bình luận của bạn..."
-                    [formControl]="editCommentContentControl"
-                  ></textarea>
-                  <div class="admin-update-post__edit-comment-actions mt-2">
-                    <button
-                      class="admin-update-post__edit-comment-save btn btn-success mr-2"
-                      type="button"
-                      (click)="updateComment()"
-                    >
-                      Lưu
-                    </button>
-                    <button
-                      class="admin-update-post__edit-comment-cancel btn btn-secondary"
-                      type="button"
-                      (click)="cancelEdit()"
-                    >
-                      Hủy bỏ
-                    </button>
-                  </div>
-                </div>
-                <div class="admin-update-post__root-comment-body mb-3">
-                  <div class="admin-update-post__root-comment-media d-flex">
-                    <img
-                      class="admin-update-post__root-comment-avatar mr-3 rounded-circle"
-                      [src]="
-                        comment.profile_image ||
-                        '/assets/images/no-image-available.jpg'
-                      "
-                      alt="User Avatar"
-                      style="width: 30px; height: 30px"
-                    />
-                    <div class="admin-update-post__root-comment-content">
-                      <h5 class="admin-update-post__root-comment-author mt-0">
-                        {{ comment.full_name }}
-                      </h5>
-                      <p class="admin-update-post__root-comment-text">
-                        {{ comment.content }}
-                      </p>
-                      <div class="admin-update-post__root-comment-actions">
-                        <a
-                          class="admin-update-post__root-comment-reply"
-                          (click)="toggleReplyForm(comment.id)"
-                          >Trả lời</a
-                        >
-                        <a
-                          class="admin-update-post__root-comment-edit"
-                          (click)="editComment(comment)"
-                          >Sửa nhanh</a
-                        >
-                        <a
-                          class="admin-update-post__root-comment-trash"
-                          (click)="deleteComment(comment.id)"
-                          >Thùng rác</a
-                        >
-                      </div>
-                      <div
-                        *ngIf="replyFormVisibility[comment.id]"
-                        class="admin-update-post__reply-section mt-2"
-                      >
-                        <textarea
-                          class="admin-update-post__reply-textarea form-control"
-                          rows="3"
-                          placeholder="Nhập phản hồi của bạn..."
-                          [formControl]="replyContentControls[comment.id]"
-                        ></textarea>
-                        <div class="admin-update-post__reply-actions mt-2">
-                          <button
-                            class="admin-update-post__reply-send btn btn-success mr-2"
-                            type="button"
-                            (click)="addReply(comment.id)"
-                          >
-                            Reply
-                          </button>
-                          <button
-                            class="admin-update-post__reply-cancel btn btn-secondary"
-                            type="button"
-                            (click)="toggleReplyForm(comment.id)"
-                          >
-                            Hủy bỏ
-                          </button>
-                        </div>
-                      </div>
-                      <div
-                        *ngIf="comment.replies && comment.replies.length > 0"
-                        class="admin-update-post__child-comments mt-3"
-                      >
-                        <div
-                          *ngFor="let reply of comment.replies; let j = index"
-                          class="admin-update-post__child-comment mb-3 ml-3"
-                        >
-                          <!-- Form chỉnh sửa duy nhất -->
-                          <div
-                            *ngIf="
-                              editingComment && editingComment.id === reply.id
-                            "
-                            class="admin-update-post__edit-comment-section mt-2"
-                          >
-                            <textarea
-                              class="admin-update-post__edit-comment-textarea form-control"
-                              rows="3"
-                              placeholder="Nhập bình luận của bạn..."
-                              [formControl]="editCommentContentControl"
-                            ></textarea>
-                            <div
-                              class="admin-update-post__edit-comment-actions mt-2"
-                            >
-                              <button
-                                class="admin-update-post__edit-comment-save btn btn-success mr-2"
-                                type="button"
-                                (click)="updateComment()"
-                              >
-                                Lưu
-                              </button>
-                              <button
-                                class="admin-update-post__edit-comment-cancel btn btn-secondary"
-                                type="button"
-                                (click)="cancelEdit()"
-                              >
-                                Hủy bỏ
-                              </button>
-                            </div>
-                          </div>
-                          <div class="admin-update-post__child-comment-body">
-                            <div
-                              class="admin-update-post__child-comment-media d-flex"
-                            >
-                              <img
-                                class="admin-update-post__child-comment-avatar mr-3 rounded-circle"
-                                [src]="
-                                  reply.profile_image ||
-                                  '/assets/images/no-image-available.jpg'
-                                "
-                                alt="User Avatar"
-                                style="width: 30px; height: 30px"
-                              />
-                              <div
-                                class="admin-update-post__child-comment-content"
-                              >
-                                <h6
-                                  class="admin-update-post__child-comment-author mt-0"
-                                >
-                                  {{ reply.full_name }}
-                                </h6>
-                                <p
-                                  class="admin-update-post__child-comment-text"
-                                >
-                                  <strong
-                                    >Trả lời {{ comment.full_name }}:</strong
-                                  >
-                                  {{ reply.content }}
-                                </p>
-                                <div
-                                  class="admin-update-post__child-comment-actions"
-                                >
-                                  <a
-                                    class="admin-update-post__child-comment-edit"
-                                    (click)="editComment(reply)"
-                                    >Sửa nhanh</a
-                                  >
-                                  <a
-                                    class="admin-update-post__child-comment-trash"
-                                    (click)="deleteComment(reply.id)"
-                                    >Thùng rác</a
-                                  >
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="admin-update-post__sidebar col-3-5">
         <ng-container *ngFor="let card of cards; let i = index">
           <div [ngSwitch]="card">
-            <div
-              *ngSwitchCase="'category'"
-              class="admin-update-post__category card w-100"
-            >
+            <div *ngSwitchCase="'category'" class="admin-update-post__category card w-100">
               <div
                 class="admin-update-post__category-header card-header d-flex justify-content-between align-items-center"
                 (click)="toggleCardBody('category')"
@@ -299,37 +36,30 @@
                 <h5 class="admin-update-post__category-title">Chuyên mục</h5>
                 <div class="admin-update-post__category-controls">
                   <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                  <i
-                    class="fa-solid fa-chevron-down"
-                    (click)="moveCardDown(i)"
-                  ></i>
-                  <i
-                    class="fa-solid fa-caret-up"
-                    [ngClass]="{ 'fa-rotate-180': !cardVisibility['category'] }"
-                  ></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['category'] }"></i>
                 </div>
               </div>
 
-              <div
-                class="admin-update-post__category-body card-body"
-                *ngIf="cardVisibility['category']"
-              >
+              <div class="admin-update-post__category-body card-body" *ngIf="cardVisibility['category']">
                 <ul class="admin-update-post__category-tabs nav nav-tabs">
                   <li class="nav-item">
                     <a
                       class="nav-link admin-update-post__category-tab"
                       [ngClass]="{ active: isCategoryTabActive('all') }"
                       (click)="setActiveCategoryTab('all')"
-                      >Tất cả</a
                     >
+                      Tất cả
+                    </a>
                   </li>
                   <li class="nav-item">
                     <a
                       class="nav-link admin-update-post__category-tab"
                       [ngClass]="{ active: isCategoryTabActive('popular') }"
                       (click)="setActiveCategoryTab('popular')"
-                      >Dùng nhiều nhất</a
                     >
+                      Dùng nhiều nhất
+                    </a>
                   </li>
                 </ul>
 
@@ -341,10 +71,7 @@
                     formGroupName="category"
                   >
                     <ul class="admin-update-post__category-list">
-                      <li
-                        class="admin-update-post__category-item"
-                        *ngFor="let category of categories"
-                      >
+                      <li class="admin-update-post__category-item" *ngFor="let category of categories">
                         <label class="admin-update-post__checkbox">
                           <input
                             type="radio"
@@ -363,10 +90,7 @@
                     formGroupName="category"
                   >
                     <ul class="admin-update-post__category-list">
-                      <li
-                        class="admin-update-post__category-item"
-                        *ngFor="let categoryTop of topCategories"
-                      >
+                      <li class="admin-update-post__category-item" *ngFor="let categoryTop of topCategories">
                         <label class="admin-update-post__checkbox">
                           <input
                             type="radio"
@@ -395,39 +119,20 @@
                         class="admin-update-post__add-category-input"
                         [formControl]="newCategoryNameControl"
                       />
-                      <div
-                        *ngIf="
-                          newCategoryNameControl.invalid &&
-                          newCategoryNameControl.touched
-                        "
-                      >
-                        <small
-                          class="text-danger"
-                          *ngIf="newCategoryNameControl.errors?.['required']"
-                        >
+                      <div *ngIf="newCategoryNameControl.invalid && newCategoryNameControl.touched">
+                        <small class="text-danger" *ngIf="newCategoryNameControl.errors?.['required']">
                           Vui lòng nhập tên chuyên mục.
                         </small>
-                        <small
-                          class="text-danger"
-                          *ngIf="newCategoryNameControl.errors?.['minlength']"
-                        >
+                        <small class="text-danger" *ngIf="newCategoryNameControl.errors?.['minlength']">
                           Tên chuyên mục phải có ít nhất 3 ký tự.
                         </small>
-                        <small
-                          class="text-danger"
-                          *ngIf="newCategoryNameControl.errors?.['maxlength']"
-                        >
+                        <small class="text-danger" *ngIf="newCategoryNameControl.errors?.['maxlength']">
                           Tên chuyên mục không được vượt quá 50 ký tự.
                         </small>
                       </div>
                       <select class="admin-update-post__add-category-select">
-                        <option value="" disabled>
-                          — Chuyên mục hiện tại —
-                        </option>
-                        <option
-                          *ngFor="let category of categories"
-                          [value]="category.id"
-                        >
+                        <option value="" disabled>— Chuyên mục hiện tại —</option>
+                        <option *ngFor="let category of categories" [value]="category.id">
                           {{ category.name }}
                         </option>
                       </select>
@@ -444,10 +149,7 @@
                 </div>
               </div>
             </div>
-            <div
-              *ngSwitchCase="'publish'"
-              class="admin-update-post__publish card"
-            >
+            <div *ngSwitchCase="'publish'" class="admin-update-post__publish card">
               <div
                 class="admin-update-post__publish-header card-header d-flex justify-content-between align-items-center"
                 (click)="toggleCardBody('publish')"
@@ -455,30 +157,17 @@
                 <h5 class="admin-update-post__publish-title">Xuất bản</h5>
                 <div class="admin-update-post__publish-controls">
                   <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                  <i
-                    class="fa-solid fa-chevron-down"
-                    (click)="moveCardDown(i)"
-                  ></i>
-                  <i
-                    class="fa-solid fa-caret-up"
-                    [ngClass]="{ 'fa-rotate-180': !cardVisibility['publish'] }"
-                  ></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['publish'] }"></i>
                 </div>
               </div>
 
-              <div
-                *ngIf="cardVisibility['publish']"
-                class="admin-update-post__publish-body card-body"
-              >
+              <div *ngIf="cardVisibility['publish']" class="admin-update-post__publish-body card-body">
                 <div class="admin-update-post__actions">
                   <!-- <button type="button" class="admin-update-post__button-draft">
                     Lưu nháp
                   </button> -->
-                  <button
-                    type="button"
-                    class="admin-update-post__button-preview"
-                    (click)="previewPost()"
-                  >
+                  <button type="button" class="admin-update-post__button-preview" (click)="previewPost()">
                     Xem trước
                   </button>
                 </div>
@@ -487,19 +176,16 @@
                     <span *ngIf="!isEditingStatus">
                       <i class="fa-solid fa-battery-three-quarters"></i>
                       <strong>Trạng thái:</strong>
-                      {{ postForm.get("status")?.value }}
+                      {{ postForm.get('status')?.value }}
                       <a (click)="startEditStatus()">Sửa</a>
                     </span>
                     <span *ngIf="isEditingStatus">
                       <i class="fa-solid fa-battery-three-quarters"></i>
                       <strong>Trạng thái:</strong>
-                      {{ postForm.get("status")?.value }}
+                      {{ postForm.get('status')?.value }}
                       <div class="edit-container">
                         <select formControlName="status">
-                          <option
-                            *ngFor="let status of PostStatus | keyvalue"
-                            [value]="status.value"
-                          >
+                          <option *ngFor="let status of PostStatus | keyvalue" [value]="status.value">
                             {{ status.value }}
                           </option>
                         </select>
@@ -512,31 +198,24 @@
                     <span *ngIf="!isEditingVisibility">
                       <i class="fa-solid fa-eye-slash"></i>
                       <strong>Chế độ xem:</strong>
-                      {{ postForm.get("visibility")?.value }}
+                      {{ postForm.get('visibility')?.value }}
                       <a (click)="startEditVisibility()">Sửa</a>
                     </span>
                     <span *ngIf="isEditingVisibility">
                       <i class="fa-solid fa-eye-slash"></i>
                       <strong>Chế độ xem:</strong>
-                      {{ postForm.get("visibility")?.value }}
+                      {{ postForm.get('visibility')?.value }}
                       <div class="edit-container">
-                        <div
-                          *ngFor="let visibility of PostVisibility | keyvalue"
-                          class="radio-group"
-                        >
+                        <div *ngFor="let visibility of PostVisibility | keyvalue" class="radio-group">
                           <input
                             type="radio"
                             [value]="visibility.value"
                             formControlName="visibility"
                             id="{{ visibility.key }}"
                           />
-                          <label [for]="visibility.key">{{
-                            visibility.value
-                          }}</label>
+                          <label [for]="visibility.key">{{ visibility.value }}</label>
                         </div>
-                        <button type="button" (click)="saveVisibility()">
-                          OK
-                        </button>
+                        <button type="button" (click)="saveVisibility()">OK</button>
                         <a (click)="cancelEditVisibility()">Huỷ bỏ</a>
                       </div>
                     </span>
@@ -545,26 +224,25 @@
                     <span>
                       <i class="fa-regular fa-clock"></i>
                       <!-- Icon cho Bản thảo -->
-                      <strong style="margin-right: 5px">Bản thảo:</strong
-                      >(<span>{{ revisionCount }}</span
-                      >)
+                      <strong style="margin-right: 5px">Bản thảo:</strong>
+                      (
+                      <span>{{ revisionCount }}</span>
+                      )
                     </span>
                   </div>
                   <div class="admin-update-post__publish-vcount">
                     <span>
                       <i class="fa-brands fa-readme"></i>
                       <!-- Icon cho Bản thảo -->
-                      <strong style="margin-right: 5px">Lượt xem:</strong
-                      >(<span>{{ viewCount }}</span
-                      >)
+                      <strong style="margin-right: 5px">Lượt xem:</strong>
+                      (
+                      <span>{{ viewCount }}</span>
+                      )
                     </span>
                   </div>
                 </div>
               </div>
-              <div
-                class="admin-update-post__publish-footer card-footer"
-                *ngIf="post"
-              >
+              <div class="admin-update-post__publish-footer card-footer" *ngIf="post">
                 <button
                   type="button"
                   class="admin-update-post__button-remove btn btn-link d-block mb-2"
@@ -589,21 +267,12 @@
                 <h5 class="admin-update-post__tags-title">Thẻ</h5>
                 <div class="admin-update-post__tags-controls">
                   <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                  <i
-                    class="fa-solid fa-chevron-down"
-                    (click)="moveCardDown(i)"
-                  ></i>
-                  <i
-                    class="fa-solid fa-caret-up"
-                    [ngClass]="{ 'fa-rotate-180': !cardVisibility['tags'] }"
-                  ></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['tags'] }"></i>
                 </div>
               </div>
 
-              <div
-                *ngIf="cardVisibility['tags']"
-                class="admin-update-post__tags-body card-body"
-              >
+              <div *ngIf="cardVisibility['tags']" class="admin-update-post__tags-body card-body">
                 <div class="admin-update-post__tags-input-group">
                   <input
                     type="text"
@@ -614,79 +283,46 @@
                   <button
                     type="button"
                     class="admin-update-post__button-add-tag"
-                    [disabled]="
-                      tagInputControl.invalid || !tagInputControl.value?.trim()
-                    "
+                    [disabled]="tagInputControl.invalid || !tagInputControl.value?.trim()"
                     (click)="addTag()"
                   >
                     Thêm
                   </button>
                 </div>
                 <div
-                  *ngIf="
-                    tagInputControl.invalid &&
-                    (tagInputControl.dirty || tagInputControl.touched)
-                  "
+                  *ngIf="tagInputControl.invalid && (tagInputControl.dirty || tagInputControl.touched)"
                   class="alert alert-danger mt-2"
                 >
-                  <div *ngIf="tagInputControl.errors?.['required']">
-                    Thẻ không được để trống.
-                  </div>
-                  <div *ngIf="tagInputControl.errors?.['minlength']">
-                    Thẻ phải có ít nhất 3 ký tự.
-                  </div>
+                  <div *ngIf="tagInputControl.errors?.['required']">Thẻ không được để trống.</div>
+                  <div *ngIf="tagInputControl.errors?.['minlength']">Thẻ phải có ít nhất 3 ký tự.</div>
                 </div>
-                <p class="admin-update-post__span-tags">
-                  Phân cách các thẻ bằng dấu phẩy (,).
-                </p>
+                <p class="admin-update-post__span-tags">Phân cách các thẻ bằng dấu phẩy (,).</p>
                 <div class="admin-update-post__tags-list mt-3">
-                  <span
-                    class="admin-update-post__tag badge badge-primary"
-                    *ngFor="let tag of tags; let i = index"
-                  >
+                  <span class="admin-update-post__tag badge badge-primary" *ngFor="let tag of tags; let i = index">
                     {{ tag }}
-                    <i
-                      class="fa-solid fa-times ms-2"
-                      (click)="removeTag(i)"
-                    ></i>
+                    <i class="fa-solid fa-times ms-2" (click)="removeTag(i)"></i>
                   </span>
                 </div>
-                <a class="admin-update-post__popular-tags d-block mt-2">
-                  Chọn từ những thẻ được dùng nhiều nhất
-                </a>
+                <a class="admin-update-post__popular-tags d-block mt-2">Chọn từ những thẻ được dùng nhiều nhất</a>
                 <div *ngIf="tagLimitExceeded" class="alert alert-warning mt-2">
                   Bạn chỉ có thể thêm tối đa {{ maxTags }} thẻ.
                 </div>
               </div>
             </div>
-            <div
-              *ngSwitchCase="'favorite'"
-              class="admin-update-post__favorite card"
-            >
+            <div *ngSwitchCase="'favorite'" class="admin-update-post__favorite card">
               <div
                 class="admin-update-post__favorite-header card-header d-flex justify-content-between align-items-center"
                 (click)="toggleCardBody('favorite')"
               >
-                <h5 class="admin-update-post__favorite-title">
-                  Lượt thích và chia sẻ
-                </h5>
+                <h5 class="admin-update-post__favorite-title">Lượt thích và chia sẻ</h5>
                 <div class="admin-update-post__favorite-controls">
                   <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                  <i
-                    class="fa-solid fa-chevron-down"
-                    (click)="moveCardDown(i)"
-                  ></i>
-                  <i
-                    class="fa-solid fa-caret-up"
-                    [ngClass]="{ 'fa-rotate-180': !cardVisibility['favorite'] }"
-                  ></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['favorite'] }"></i>
                 </div>
               </div>
 
-              <div
-                *ngIf="cardVisibility['favorite']"
-                class="admin-update-post__favorite-body card-body"
-              >
+              <div *ngIf="cardVisibility['favorite']" class="admin-update-post__favorite-body card-body">
                 <ul class="admin-update-post__favorite-list">
                   <li class="admin-update-post__favorite-item">
                     <label class="admin-update-post__checkbox">
@@ -703,10 +339,7 @@
                 </ul>
               </div>
             </div>
-            <div
-              *ngSwitchCase="'thumbnail'"
-              class="admin-update-post__thumbnail card"
-            >
+            <div *ngSwitchCase="'thumbnail'" class="admin-update-post__thumbnail card">
               <div
                 class="admin-update-post__thumbnail-header card-header d-flex justify-content-between align-items-center"
                 (click)="toggleCardBody('thumbnail')"
@@ -714,10 +347,7 @@
                 <h5 class="admin-update-post__thumbnail-title">Ảnh minh họa</h5>
                 <div class="admin-update-post__thumbnail-controls">
                   <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                  <i
-                    class="fa-solid fa-chevron-down"
-                    (click)="moveCardDown(i)"
-                  ></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
                   <i
                     class="fa-solid fa-caret-up"
                     [ngClass]="{
@@ -727,10 +357,7 @@
                 </div>
               </div>
 
-              <div
-                *ngIf="cardVisibility['thumbnail']"
-                class="admin-update-post__thumbnail-body card-body"
-              >
+              <div *ngIf="cardVisibility['thumbnail']" class="admin-update-post__thumbnail-body card-body">
                 <!-- Kiểm tra nếu có ảnh hay không -->
                 <ng-container *ngIf="selectedThumbnailUrl; else noImage">
                   <!-- Hiển thị ảnh nếu đã chọn -->
@@ -740,15 +367,10 @@
                     class="admin-update-post__thumbnail-img img-fluid"
                     (click)="openImageModal()"
                   />
-                  <p
-                    class="admin-update-post__thumbnail-description text-muted mt-2"
-                  >
+                  <p class="admin-update-post__thumbnail-description text-muted mt-2">
                     Nhấn vào ảnh để sửa hoặc cập nhật
                   </p>
-                  <a
-                    class="admin-update-post__thumbnail-remove text-danger"
-                    (click)="removeThumbnail()"
-                  >
+                  <a class="admin-update-post__thumbnail-remove text-danger" (click)="removeThumbnail()">
                     Xóa ảnh đại diện
                   </a>
                 </ng-container>

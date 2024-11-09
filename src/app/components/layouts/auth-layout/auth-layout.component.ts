@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -6,6 +6,8 @@ import { RouterModule } from '@angular/router';
   templateUrl: './auth-layout.component.html',
   styleUrls: ['./auth-layout.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+
   imports: [RouterModule],
 })
 export class AuthLayoutComponent {}

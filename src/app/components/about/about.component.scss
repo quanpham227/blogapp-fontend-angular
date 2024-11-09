@@ -2,30 +2,70 @@
 # About
 --------------------------------------------------------------*/
 
-.about .content {
-  background: #fff;
-}
+.about {
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
 
-.about .content h3 {
-  font-weight: 600;
-  font-size: 26px;
-}
+  &__section-title {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
 
-.about .content ul {
-  list-style: none;
-  padding: 0;
-}
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+  }
 
-.about .content ul li {
-  padding-bottom: 10px;
-}
+  &__col {
+    &--left {
+      flex: 1;
+      padding: 1rem;
+    }
 
-.about .content ul i {
-  font-size: 20px;
-  padding-right: 4px;
-  color: #00c1c1;
-}
+    &--right {
+      flex: 1;
+      padding: 1rem;
+    }
+  }
 
-.about .content p:last-child {
-  margin-bottom: 0;
+  &__image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+
+  &__no-image {
+    color: #6c757d;
+  }
+
+  &__title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 26px;
+    margin-bottom: 1rem;
+  }
+
+  &__content {
+    font-style: italic;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+  }
+
+  &__list-item {
+    padding-bottom: 10px;
+
+    i {
+      font-size: 20px;
+      padding-right: 4px;
+      color: #00c1c1;
+    }
+  }
 }

@@ -1,19 +1,35 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { Category } from '../../models/category';
-import { Post } from '../../models/post';
-import { ApiResponse } from '../../models/response';
-import { CategoryService } from '../../services/category.service';
-import { PostService } from '../../services/post.service';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ViewChildren,
+  QueryList,
+  ElementRef,
+  SimpleChanges,
+} from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { combineLatest } from 'rxjs';
-import { takeUntil, distinctUntilChanged } from 'rxjs/operators';
-import { BlogStateService } from '../../services/blog-state.service';
-import { HttpStatusService } from '../../services/http-status.service';
-import { LoggingService } from '../../services/logging.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ApiResponse } from '../../models/response';
+import { Category } from '../../models/category';
+import { CategoryService } from '../../services/category.service';
+import { PostService } from '../../services/post.service';
+import { Post } from '../../models/post';
+import { HttpStatusService } from '../../services/http-status.service';
+import { PostListResponse } from '../../responses/post/post-list-response';
+import { isEqual } from 'lodash';
+import { ToasterService } from '../../services/toaster.service';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { combineLatest, Subscription } from 'rxjs';
+import { BlogStateService } from '../../services/blog-state.service';
+import { gsap } from 'gsap';
+import { LazyLoadDirective } from '../../directives/lazy-load.directive';
+import { distinctUntilChanged, tap, catchError, map } from 'rxjs/operators';
+import { Title, Meta } from '@angular/platform-browser';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 @UntilDestroy()
 @Component({
@@ -22,18 +38,31 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
   styleUrls: ['./blog.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CommonModule, NgbPaginationModule, ReactiveFormsModule, NgbModule],
+  imports: [
+    FormsModule,
+    CommonModule,
+    NgbPaginationModule,
+    ReactiveFormsModule,
+    NgbModule,
+    NgSelectModule,
+    LazyLoadDirective,
+    NgxSpinnerModule,
+  ],
 })
-export class BlogComponent implements OnInit, OnDestroy {
-  posts: Post[] = [];
-  recentPosts: Post[] = [];
+export class BlogComponent implements OnInit {
+  @ViewChildren('articleCard') articleCards!: QueryList<ElementRef>;
+
   categories: Category[] = [];
+  articles: Post[] = [];
   selectedCategorySlug: string = '';
-  selectedTagSlug: string = '';
+  selectedCategoryName: string = '';
   currentPage: number = 1; // Sửa đổi để bắt đầu từ trang 1
-  itemsPerPage: number = 10;
+  itemsPerPage: number = 6;
   totalPages: number = 0;
   searchForm: FormGroup;
+  showClearIcon: boolean = false;
+  showDropdown: boolean = false;
+  private routeSub: Subscription | undefined;
 
   constructor(
     private postService: PostService,
@@ -41,158 +70,219 @@ export class BlogComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private fb: FormBuilder,
+    private httpStatusService: HttpStatusService,
+    private toast: ToasterService,
     private cdr: ChangeDetectorRef,
     private blogStateService: BlogStateService,
-    private httpStatusService: HttpStatusService,
-    private loggingService: LoggingService,
+    private titleService: Title,
+    private metaService: Meta,
   ) {
     this.searchForm = this.fb.group({
       keyword: [''],
-      categorySlug: [''],
+      categorySlug: [null],
+      selectedCategoryName: [''],
       page: [1],
     });
   }
 
   ngOnInit() {
-    this.restoreState();
-    this.subscribeToRouteParamsAndQueryParams();
+    console.log('Component ngOnInit');
     this.getCategories();
-    this.getRecentPosts(1, 5);
-  }
-
-  ngOnDestroy() {
-    this.saveState();
-  }
-
-  private subscribeToRouteParamsAndQueryParams() {
     combineLatest([this.route.params, this.route.queryParams])
       .pipe(
         untilDestroyed(this),
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+        map(([params, queryParams]) => {
+          const categorySlug = params['categorySlug'];
+          const keyword = params['keyword'];
+          const page = params['page'] ? +params['page'] : 1; // Lấy page từ URL
+          return { categorySlug, keyword, page };
+        }),
       )
-      .subscribe(([params, queryParams]) => {
-        this.handleRouteAndQueryParams(params, queryParams);
+      .subscribe(({ categorySlug, keyword, page }) => {
+        if (categorySlug) {
+          this.updateFormValues({ categorySlug, selectedCategoryName: this.getCategoryNameBySlug(categorySlug) });
+        } else if (keyword) {
+          this.updateFormValues({ keyword });
+        }
+
+        this.currentPage = page; // Cập nhật giá trị currentPage từ URL
+        this.blogStateService.setCurrentPage(page);
+        this.getPosts();
+        this.toggleClearIcon();
+        this.updateMetaTags(); // Cập nhật meta tags
       });
+
+    this.blogStateService.categories$.pipe(untilDestroyed(this)).subscribe((categories) => {
+      this.categories = categories;
+      this.cdr.markForCheck();
+    });
+
+    this.blogStateService.articles$.pipe(untilDestroyed(this)).subscribe((articles) => {
+      this.articles = articles;
+      this.cdr.markForCheck();
+      this.animateArticles();
+    });
+
+    this.blogStateService.selectedCategorySlug$.pipe(untilDestroyed(this)).subscribe((slug) => {
+      this.selectedCategorySlug = slug;
+      this.cdr.markForCheck();
+    });
+
+    this.blogStateService.selectedCategoryName$.pipe(untilDestroyed(this)).subscribe((name) => {
+      this.selectedCategoryName = name;
+      this.cdr.markForCheck();
+    });
+
+    this.blogStateService.currentPage$.pipe(untilDestroyed(this)).subscribe((page) => {
+      this.currentPage = page;
+      this.cdr.markForCheck();
+    });
+
+    this.blogStateService.totalPages$.pipe(untilDestroyed(this)).subscribe((totalPages) => {
+      this.totalPages = totalPages;
+      this.cdr.markForCheck();
+    });
   }
 
-  private handleRouteAndQueryParams(params: any, queryParams: any) {
-    const keyword = this.extractKeyword(params, queryParams);
-    const categorySlug = params['categorySlug'] || queryParams['categorySlug'] || '';
-    const page = params['page'] || queryParams['page'] || 1;
-
-    this.updateFormAndSlug(keyword, categorySlug);
-    this.currentPage = page;
-    this.itemsPerPage = 10;
-    this.getPosts();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['selectedCategorySlug'] || changes['currentPage']) {
+      this.getPosts();
+    }
   }
 
-  private extractKeyword(params: any, queryParams: any): string {
-    return params['keyword'] || queryParams['keyword']
-      ? (params['keyword'] || queryParams['keyword']).replace(/-/g, ' ')
-      : '';
+  getCategoryNameBySlug(slug: string): string {
+    const category = this.categories.find((cat) => cat.code === slug);
+    return category ? category.name : '';
   }
 
   searchPosts() {
-    this.currentPage = 1;
-    this.selectedCategorySlug = '';
-    this.updateQueryParams();
-    this.getPosts();
-  }
-
-  resetSearch() {
-    this.searchForm.reset();
-    this.currentPage = 1;
-    this.updateQueryParams();
-    this.getPosts();
+    const keyword = this.formatKeyword(this.searchForm.get('keyword')?.value.trim());
+    if (keyword) {
+      this.navigateToRoute(['/blog/search', keyword]);
+    } else {
+      this.navigateToRoute(['/blog']);
+    }
+    this.toggleClearIcon();
   }
 
   getPosts() {
     const keyword = this.searchForm.get('keyword')?.value || '';
-    this.getPostsForUser(keyword, this.selectedCategorySlug, this.currentPage, this.itemsPerPage);
+    const categorySlug = this.searchForm.get('categorySlug')?.value || '';
+    this.getPostsForUser(keyword, categorySlug, this.currentPage, this.itemsPerPage);
   }
 
   getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number) {
-    console.log('Calling getPostsForUser with:', { keyword, categorySlug, page, limit });
+    console.log('Calling getPostsForUser with:', {
+      keyword,
+      categorySlug,
+      page,
+      limit,
+    });
     this.postService
       .getPostsForUser(keyword, categorySlug, page - 1, limit)
-      .pipe(untilDestroyed(this))
-      .subscribe({
-        next: (response: any) => {
-          const data = response.data;
-          console.log('Data:', data);
-          this.posts = response.data.posts;
-          this.totalPages = response.data.totalPages;
-          this.cdr.markForCheck();
-        },
-        error: (error: any) => {},
-      });
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        tap((response: ApiResponse<PostListResponse>) => {
+          if (response.status == 'OK' && response.data.posts) {
+            const newPosts = response.data.posts;
+            if (!isEqual(this.articles, newPosts)) {
+              this.blogStateService.setArticles(newPosts);
+              this.blogStateService.setTotalPages(response.data.totalPages);
+            }
+          }
+        }),
+        catchError((error) => {
+          console.error('Error fetching posts:', error);
+          return [];
+        }),
+      )
+      .subscribe();
   }
 
   getCategories() {
     this.categoryService
       .getCategories()
-      .pipe(untilDestroyed(this))
-      .subscribe({
-        next: (response: ApiResponse<Category[]>) => {
-          if (response.data !== this.categories) {
-            this.categories = response.data;
-            this.cdr.markForCheck();
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+        tap((response: ApiResponse<Category[]>) => {
+          if (response.status === 'OK' && response.data) {
+            console.log('Categories:', response.data);
+            if (!isEqual(this.categories, response.data)) {
+              this.blogStateService.setCategories(response.data);
+            }
           }
-        },
-        error: (error: any) => {},
-      });
+        }),
+        catchError((error) => {
+          console.error('Error fetching categories:', error);
+          return [];
+        }),
+      )
+      .subscribe();
   }
 
-  getRecentPosts(page: number, limit: number) {
-    this.postService
-      .getRecentPosts(page, limit)
-      .pipe(untilDestroyed(this))
-      .subscribe({
-        next: (response: any) => {
-          if (response.data.posts !== this.recentPosts) {
-            this.recentPosts = response.data.posts;
-            this.cdr.markForCheck();
-          }
-        },
-        error: (error: any) => {},
-      });
+  onCategorySelect(event: any) {
+    if (event) {
+      const code = event.code || event;
+      const name = event.name || this.getCategoryNameBySlug(code);
+      if (this.selectedCategorySlug !== code) {
+        this.updateFormValues({ categorySlug: code, selectedCategoryName: name });
+        this.blogStateService.setSelectedCategorySlug(code);
+        this.blogStateService.setSelectedCategoryName(name);
+        this.currentPage = 1;
+        this.showDropdown = false;
+        this.navigateToRoute(['/blog/category', code]);
+      }
+    } else {
+      this.clearCategory();
+    }
+  }
+
+  clearCategory() {
+    this.updateFormValues({ categorySlug: '', selectedCategoryName: '' });
+    this.blogStateService.setSelectedCategorySlug('');
+    this.blogStateService.setSelectedCategoryName('');
+    this.currentPage = 1;
+    this.navigateToRoute(['/blog']);
   }
 
   onPageChange(page: number) {
     if (page !== this.currentPage && page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
-      this.getPosts(); // Call getPosts to fetch the posts for the new page
-    }
-  }
+      this.blogStateService.setCurrentPage(page);
+      const { keyword, categorySlug } = this.searchForm.value;
+      const route =
+        page === 1
+          ? categorySlug
+            ? ['/blog/category', categorySlug]
+            : keyword
+              ? ['/blog/search', this.formatKeyword(keyword)]
+              : ['/blog']
+          : categorySlug
+            ? ['/blog/category', categorySlug, 'page', page]
+            : keyword
+              ? ['/blog/search', this.formatKeyword(keyword), 'page', page]
+              : ['/blog/page', page];
 
-  onCategorySelect(slug: string) {
-    if (this.selectedCategorySlug !== slug) {
-      this.selectedCategorySlug = slug;
-      this.searchForm.reset();
-      this.selectedTagSlug = '';
-      this.currentPage = 1;
-      this.updateQueryParams();
-      this.getPosts();
+      this.navigateToRoute(route);
     }
   }
 
   onPostClick(slug: string) {
     // Kiểm tra tính hợp lệ của slug
     if (!slug || typeof slug !== 'string' || slug.trim() === '') {
-      console.error('Invalid slug');
-      alert('Slug không hợp lệ. Vui lòng thử lại.');
+      this.toast.warning('Invalid slug');
       return;
     }
 
     // Kiểm tra trạng thái của ứng dụng (ví dụ: không có yêu cầu HTTP đang chờ xử lý)
     if (this.isRequestPending()) {
-      console.error('Request pending');
-      alert('Vui lòng đợi yêu cầu hiện tại hoàn thành.');
+      this.toast.warning('Vui lòng đợi yêu cầu hiện tại hoàn thành.');
       return;
     }
-
     // Nếu tất cả các điều kiện đều thỏa mãn, thực hiện điều hướng
-    this.router.navigate([`/blog/${slug}`]);
+    this.navigateToRoute([`/blog/${slug}`]);
   }
 
   isRequestPending(): boolean {
@@ -203,22 +293,13 @@ export class BlogComponent implements OnInit, OnDestroy {
     return isPending;
   }
 
-  updateQueryParams(): void {
-    let url = '/blog';
-    const keyword = this.formatKeyword(this.searchForm.get('keyword')?.value || '');
-    const categorySlug = this.selectedCategorySlug;
-
-    url = this.buildUrl(url, keyword, categorySlug);
-
-    this.router.navigate([url], {
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-      skipLocationChange: false,
-    });
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
   }
 
   limitWords(event: any, maxWords: number, maxChars: number) {
-    let value = event.target.value;
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
 
     let wordCount = value.trim().split(/\s+/).length;
     if (wordCount > maxWords) {
@@ -232,47 +313,54 @@ export class BlogComponent implements OnInit, OnDestroy {
     event.target.value = value;
   }
 
-  private updateFormAndSlug(keyword: string, categorySlug: string) {
-    if (keyword) {
-      this.searchForm.patchValue({ keyword });
-    } else if (categorySlug) {
-      this.selectedCategorySlug = categorySlug;
-    }
-  }
-
   private formatKeyword(keyword: string): string {
     return keyword.trim().replace(/\s+/g, '-');
   }
 
-  private buildUrl(baseUrl: string, keyword: string, categorySlug: string): string {
-    if (keyword) {
-      baseUrl += `/search/${keyword}`;
-    } else if (categorySlug) {
-      baseUrl += `/category/${categorySlug}`;
+  toggleClearIcon() {
+    const keywordControl = this.searchForm.get('keyword');
+    this.showClearIcon = !!(keywordControl && keywordControl.value.length > 0);
+  }
+
+  resetSearch() {
+    this.searchForm.reset();
+    this.showClearIcon = false;
+    this.navigateToRoute(['/blog']);
+  }
+
+  trackByPost(index: number, post: Post): number {
+    return post.id; // Giả sử mỗi bài viết có thuộc tính id duy nhất
+  }
+
+  private updateFormValues(values: { [key: string]: any }) {
+    this.searchForm.patchValue(values);
+  }
+
+  private animateArticles() {
+    if (this.articleCards && this.articleCards.length > 0) {
+      this.articleCards.forEach((articleCard, index) => {
+        gsap.from(articleCard.nativeElement, {
+          opacity: 0,
+          y: 20,
+          duration: 0.5,
+          delay: index * 0.1,
+          ease: 'power1.out',
+        });
+      });
     }
-
-    if (this.currentPage > 1) {
-      baseUrl += `/page/${this.currentPage}`;
-    }
-
-    return baseUrl;
   }
 
-  private saveState() {
-    this.blogStateService.setCurrentCategory(this.selectedCategorySlug);
-    this.blogStateService.setCurrentKeyword(this.searchForm.get('keyword')?.value || '');
-    this.blogStateService.setCurrentPage(this.currentPage);
+  private navigateToRoute(route: any[]) {
+    this.router.navigate(route);
   }
 
-  private restoreState() {
-    this.selectedCategorySlug = this.blogStateService.getCurrentCategory();
-    this.searchForm.patchValue({
-      keyword: this.blogStateService.getCurrentKeyword(),
-    });
-    this.currentPage = this.blogStateService.getCurrentPage();
-  }
-
-  trackByFn(_index: number, post: Post) {
-    return post.id;
+  private updateMetaTags() {
+    this.titleService.setTitle('PI VINA DANANG - BLOG');
+    this.metaService.updateTag({ name: 'description', content: 'This is the blog page of My Website.' });
+    this.metaService.updateTag({ name: 'keywords', content: 'blog, articles, posts' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Blog - My Website' });
+    this.metaService.updateTag({ property: 'og:description', content: 'This is the blog page of My Website.' });
+    this.metaService.updateTag({ property: 'og:image', content: 'URL_TO_YOUR_IMAGE' });
+    this.metaService.updateTag({ property: 'og:url', content: this.router.url });
   }
 }

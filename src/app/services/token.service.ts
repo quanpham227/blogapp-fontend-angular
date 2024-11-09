@@ -48,6 +48,12 @@ export class TokenService {
             },
           });
         }),
+        catchError((error) => {
+          this.loggingService.logError('Error when refreshing token', error);
+          this.authService.logout();
+          this.handleNavigation();
+          return of(null);
+        }),
       );
   }
   private handleNavigation() {

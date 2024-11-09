@@ -1,6 +1,5 @@
-<!-- <ngx-spinner type="ball-climbing-dot">
-  <p class="text-white">Loading...</p>
-</ngx-spinner> -->
 <ngx-loading-bar [height]="'3px'" [color]="'red'"></ngx-loading-bar>
 <app-toastr></app-toastr>
-<router-outlet></router-outlet>
+<div [@routeAnimations]="prepareRoute(outlet)">
+  <router-outlet #outlet="outlet"></router-outlet>
+</div>

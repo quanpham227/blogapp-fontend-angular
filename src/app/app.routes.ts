@@ -5,26 +5,10 @@ import { RegisterComponent } from './components/register/register.component';
 import { WebLayoutComponent } from './components/layouts/web-layout/web-layout.component';
 import { AuthLayoutComponent } from './components/layouts/auth-layout/auth-layout.component';
 import { AdminLayoutComponent } from './components/layouts/admin-layout/admin-layout.component';
-import { DashboardAdminComponent } from './components/admin/dashboard/dashboard.admin.component';
-import { ClientAdminComponent } from './components/admin/client/client.admin.component';
-import { CategoryAdminComponent } from './components/admin/category/category.admin.component';
-import { PostAdminComponent } from './components/admin/post/post.admin.component';
-import { SlideAdminComponent } from './components/admin/slide/slide.admin.component';
-import { MediaAdminComponent } from './components/admin/media/media.admin.component';
-import { EmailAdminComponent } from './components/admin/email/email.admin.component';
-import { ProfileAdminComponent } from './components/admin/profile/profile.admin.component';
-import { ContactAdminComponent } from './components/admin/contact/contact.admin.component';
 import { NotfoundAdminComponent } from './components/admin/notfound/notfound.admin.component';
-import { CategoryAddOrUpdateAdminComponent } from './components/admin/category-form/category-add-or-update.admin.component';
-import { ClientAddOrUpdateAdminComponent } from './components/admin/client-form/client-add-or-update.admin.component';
-import { CommentAdminComponent } from './components/admin/comment/comment.admin.component';
-import { AboutAdminComponent } from './components/admin/about/about-admin.component';
-import { InsertPostAdminComponent } from './components/admin/insert-post/insert-post.admin.component';
-import { UpdatePostAdminComponent } from './components/admin/update-post/update-post.admin..component';
 import { AdminGuardFn } from './guards/admin.guard';
 import { AuthGuardFn } from './guards/auth.guard';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { AchievementAdminComponent } from './components/admin/achievement/admin-achievement.component';
 
 export const routes: Routes = [
   {
@@ -34,43 +18,60 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./components/home/home.component').then((m) => m.HomeComponent),
+        data: { animation: 'HomePage' },
       },
       {
         path: 'blog',
         loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+        data: { animation: 'BlogPage' },
+      },
+      {
+        path: 'blog/page/:page',
+        loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+        data: { animation: 'BlogPage' },
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
       },
       {
         path: 'blog/category/:categorySlug',
         loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        data: { animation: 'BlogPage' },
       },
       {
         path: 'blog/category/:categorySlug/page/:page',
         loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
-        runGuardsAndResolvers: 'paramsChange',
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        data: { animation: 'BlogPage' },
       },
       {
         path: 'blog/search/:keyword',
         loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        data: { animation: 'BlogPage' },
       },
       {
         path: 'blog/search/:keyword/page/:page',
         loadComponent: () => import('./components/blog/blog.component').then((m) => m.BlogComponent),
-        runGuardsAndResolvers: 'paramsChange',
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+        data: { animation: 'BlogPage' },
       },
       {
         path: 'blog/:slug',
         loadComponent: () =>
           import('./components/blog-detail/blog-detail.component').then((m) => m.BlogDetailComponent),
+        data: { animation: 'BlogDetailPage' },
       },
       {
         path: 'post-preview',
         loadComponent: () =>
           import('./components/post-preview/post-preview.admin.component').then((m) => m.PostPreviewAdminComponent),
+        data: { animation: 'PostPreviewPage' },
       },
       {
         path: 'user-profile',
         loadComponent: () =>
           import('./components/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
+        data: { animation: 'UserProfilePage' },
         canActivate: [AuthGuardFn],
       },
     ],
@@ -88,31 +89,104 @@ export const routes: Routes = [
     component: AdminLayoutComponent,
     canActivate: [AdminGuardFn],
     children: [
-      { path: 'dashboard', component: DashboardAdminComponent },
-      { path: 'clients', component: ClientAdminComponent },
-      { path: 'about', component: AboutAdminComponent },
-      { path: 'categories', component: CategoryAdminComponent },
-      { path: 'posts', component: PostAdminComponent },
-      { path: 'add-post', component: InsertPostAdminComponent },
-      { path: 'post-edit/:id', component: UpdatePostAdminComponent },
-      { path: 'slides', component: SlideAdminComponent },
-      { path: 'media', component: MediaAdminComponent },
-      { path: 'emails', component: EmailAdminComponent },
-      { path: 'profile', component: ProfileAdminComponent },
-      { path: 'contact', component: ContactAdminComponent },
-      { path: '404', component: NotfoundAdminComponent },
-      { path: 'category-add', component: CategoryAddOrUpdateAdminComponent },
       {
-        path: 'category-edit/:id',
-        component: CategoryAddOrUpdateAdminComponent,
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./components/admin/achievement/admin-achievement.component').then((m) => m.AchievementAdminComponent),
       },
-      { path: 'client-add', component: ClientAddOrUpdateAdminComponent },
-      { path: 'client-edit/:id', component: ClientAddOrUpdateAdminComponent },
-      { path: 'comments', component: CommentAdminComponent },
+      {
+        path: 'clients',
+        loadComponent: () =>
+          import('./components/admin/client/client.admin.component').then((m) => m.ClientAdminComponent),
+        data: { animation: 'ClientPage' },
+      },
+      {
+        path: 'about',
+        loadComponent: () =>
+          import('./components/admin/about/about-admin.component').then((m) => m.AboutAdminComponent),
+        data: { animation: 'AboutPage' },
+      },
+      {
+        path: 'categories',
+        loadComponent: () =>
+          import('./components/admin/category/category.admin.component').then((m) => m.CategoryAdminComponent),
+        data: { animation: 'CategoryPage' },
+      },
+      {
+        path: 'posts',
+        loadComponent: () => import('./components/admin/post/post.admin.component').then((m) => m.PostAdminComponent),
+        data: { animation: 'PostPage' },
+      },
+      {
+        path: 'add-post',
+        loadComponent: () =>
+          import('./components/admin/insert-post/insert-post.admin.component').then((m) => m.InsertPostAdminComponent),
+        data: { animation: 'InsertPostPage' },
+      },
+      {
+        path: 'post-edit/:id',
+        loadComponent: () =>
+          import('./components/admin/update-post/update-post.admin..component').then((m) => m.UpdatePostAdminComponent),
+        data: { animation: 'UpdatePostPage' },
+      },
+      {
+        path: 'slides',
+        loadComponent: () =>
+          import('./components/admin/slide/slide.admin.component').then((m) => m.SlideAdminComponent),
+        data: { animation: 'SlidePage' },
+      },
+      {
+        path: 'media',
+        loadComponent: () =>
+          import('./components/admin/media/media.admin.component').then((m) => m.MediaAdminComponent),
+        data: { animation: 'MediaPage' },
+      },
+      {
+        path: 'emails',
+        loadComponent: () =>
+          import('./components/admin/email/email.admin.component').then((m) => m.EmailAdminComponent),
+        data: { animation: 'EmailPage' },
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./components/admin/profile/profile.admin.component').then((m) => m.ProfileAdminComponent),
+        data: { animation: 'ProfilePage' },
+      },
+      {
+        path: 'contact',
+        loadComponent: () =>
+          import('./components/admin/contact/contact.admin.component').then((m) => m.ContactAdminComponent),
+        data: { animation: 'ContactPage' },
+      },
+      {
+        path: '404',
+        loadComponent: () =>
+          import('./components/admin/notfound/notfound.admin.component').then((m) => m.NotfoundAdminComponent),
+        data: { animation: 'NotFoundPage' },
+      },
+      {
+        path: 'comments',
+        loadComponent: () =>
+          import('./components/admin/comment/comment.admin.component').then((m) => m.CommentAdminComponent),
+        data: { animation: 'CommentPage' },
+      },
       {
         path: 'achievements',
         loadComponent: () =>
           import('./components/admin/achievement/admin-achievement.component').then((m) => m.AchievementAdminComponent),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./components/admin/user-management/user-management.component').then((m) => m.UserManagementComponent),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./components/admin/forgot-password/forgot-password.admin.component').then(
+            (m) => m.ForgotPasswordAdminComponent,
+          ),
       },
       { path: '**', component: NotfoundAdminComponent },
     ],

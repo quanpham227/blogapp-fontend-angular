@@ -1,8 +1,8 @@
-import { Component, OnInit, HostListener, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectionStrategy, Renderer2 } from '@angular/core';
 import { NgbPopover, NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
 import { UserResponse } from '../../responses/user/user.response';
 import { UserService } from '../../services/user.service';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -17,7 +17,6 @@ import { throttle } from 'lodash';
   styleUrls: ['./header.component.scss'],
   standalone: true,
   imports: [FormsModule, CommonModule, NgbPopover, RouterModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit {
   activeNavItem: number = 0;
@@ -29,6 +28,7 @@ export class HeaderComponent implements OnInit {
     private userService: UserService,
     private router: Router,
     private authService: AuthService,
+    private renderer: Renderer2,
   ) {}
 
   ngOnInit() {
@@ -41,6 +41,14 @@ export class HeaderComponent implements OnInit {
         console.error('Error fetching user data', err);
       },
     });
+
+    this.router.events.pipe(untilDestroyed(this)).subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.setActiveNavItemBasedOnUrl(event.urlAfterRedirects);
+      }
+    });
+
+    this.setActiveNavItemBasedOnUrl(this.router.url);
   }
 
   private checkUserStatus() {
@@ -53,6 +61,20 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  private setActiveNavItemBasedOnUrl(url: string) {
+    if (url.startsWith('/blog')) {
+      this.activeNavItem = 3;
+    } else if (url.startsWith('/about')) {
+      this.activeNavItem = 1;
+    } else if (url.startsWith('/clients')) {
+      this.activeNavItem = 2;
+    } else if (url.startsWith('/contact')) {
+      this.activeNavItem = 4;
+    } else {
+      this.activeNavItem = 0;
+    }
+  }
+
   @HostListener('window:scroll', [])
   onWindowScroll = throttle(() => {
     const topBar = document.getElementById('topbar');
@@ -60,12 +82,12 @@ export class HeaderComponent implements OnInit {
     const st = window.scrollY || document.documentElement.scrollTop;
     if (st > this.lastScrollTop) {
       // Cuộn xuống
-      topBar?.classList.add('topbar-hidden');
-      header?.classList.add('topbar-hidden');
+      this.renderer.addClass(topBar, 'topbar-hidden');
+      this.renderer.addClass(header, 'topbar-hidden');
     } else {
       // Cuộn lên
-      topBar?.classList.remove('topbar-hidden');
-      header?.classList.remove('topbar-hidden');
+      this.renderer.removeClass(topBar, 'topbar-hidden');
+      this.renderer.removeClass(header, 'topbar-hidden');
     }
     this.lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
   }, 200);
@@ -120,27 +142,34 @@ export class HeaderComponent implements OnInit {
     this.isPopoverOpen = false; // Close the popover after clicking an item
   }
 
-  /**
-   * Mobile nav toggle
-   */
   toggleMobileNav(event: Event) {
     const navbar = document.querySelector('#navbar') as HTMLElement;
-    navbar.classList.toggle('navbar-mobile');
+    if (navbar.classList.contains('navbar-mobile')) {
+      this.renderer.removeClass(navbar, 'navbar-mobile');
+    } else {
+      this.renderer.addClass(navbar, 'navbar-mobile');
+    }
     const target = event.target as HTMLElement;
-    target.classList.toggle('bi-list');
-    target.classList.toggle('bi-x');
+    if (target.classList.contains('bi-list')) {
+      this.renderer.removeClass(target, 'bi-list');
+      this.renderer.addClass(target, 'bi-x');
+    } else {
+      this.renderer.removeClass(target, 'bi-x');
+      this.renderer.addClass(target, 'bi-list');
+    }
   }
 
-  /**
-   * Mobile nav dropdowns activate
-   */
   toggleDropdown(event: Event) {
     const navbar = document.querySelector('#navbar') as HTMLElement;
     if (navbar.classList.contains('navbar-mobile')) {
       event.preventDefault();
       const target = event.target as HTMLElement;
       const nextElement = target.nextElementSibling as HTMLElement;
-      nextElement.classList.toggle('dropdown-active');
+      if (nextElement.classList.contains('dropdown-active')) {
+        this.renderer.removeClass(nextElement, 'dropdown-active');
+      } else {
+        this.renderer.addClass(nextElement, 'dropdown-active');
+      }
     }
   }
 }

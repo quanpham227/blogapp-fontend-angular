@@ -1,71 +1,155 @@
-.recent-posts .post-box {
-  transition: 0.3s;
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
+.recent-posts {
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
 
-.recent-posts .post-box .post-img {
-  overflow: hidden;
-  position: relative;
-}
+  &__header {
+    text-align: center;
+    padding: 30px 0;
+    position: relative;
 
-.recent-posts .post-box .post-img img {
-  transition: 0.5s;
-}
+    &-span {
+      position: absolute;
+      top: 50px;
+      color: #f3f5f5;
+      left: 0;
+      right: 0;
+      z-index: 1;
+      font-weight: 700;
+      font-size: 52px;
+      text-transform: uppercase;
+      line-height: 0;
+    }
 
-.recent-posts .post-box .meta {
-  margin-top: 15px;
-}
+    &-heading {
+      top: 20px;
+      font-size: 32px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      padding-bottom: 0;
+      color: #354144;
+      position: relative;
+      z-index: 2;
+    }
+  }
 
-.recent-posts .post-box .meta .post-date {
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--color-primary);
-}
+  &__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 
-.recent-posts .post-box .meta .post-author {
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--color-secondary);
-}
+  &__item {
+    flex: 1 1 calc(25% - 1rem);
+    max-width: calc(25% - 1rem);
+    box-sizing: border-box;
 
-.recent-posts .post-box .post-title {
-  font-size: 18px;
-  color: var(--color-secondary);
-  font-weight: 700;
-  margin: 15px 0 0 0;
-  position: relative;
-  transition: 0.3s;
-}
+    @media (max-width: 768px) {
+      flex: 1 1 calc(50% - 1rem);
+      max-width: calc(50% - 1rem);
+    }
 
-.recent-posts .post-box p {
-  margin: 15px 0 0 0;
-  color: rgba(27, 47, 69, 0.7);
-}
+    @media (max-width: 576px) {
+      flex: 1 1 100%;
+      max-width: 100%;
+    }
+  }
 
-.recent-posts .post-box .readmore {
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  line-height: 1;
-  transition: 0.3s;
-  margin-top: 15px;
-  cursor: pointer;
-}
+  &__post-box {
+    transition: 0.3s;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
 
-.recent-posts .post-box .readmore i {
-  line-height: 0;
-  margin-left: 4px;
-  font-size: 18px;
-}
+  &__post-img {
+    overflow: hidden;
+    position: relative;
 
-.recent-posts .post-box:hover .post-title {
-  color: var(--color-primary);
-}
+    img {
+      width: 100%;
+      height: auto;
+      transition: transform 0.5s;
+    }
+  }
 
-.recent-posts .post-box:hover .post-img img {
-  transform: scale(1.1);
+  &__meta {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+
+    time {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--color-primary);
+    }
+
+    .recent-posts__post-author {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--color-secondary);
+      margin-left: 0.5rem;
+    }
+  }
+
+  &__post-title {
+    font-size: 1.125rem;
+    color: var(--color-secondary);
+    font-weight: 700;
+    margin: 1rem 0 0 0;
+    position: relative;
+    transition: color 0.3s;
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+
+  &__post-excerpt {
+    margin: 1rem 0 0 0;
+    color: rgba(27, 47, 69, 0.7);
+  }
+
+  &__readmore {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    line-height: 1;
+    transition: color 0.3s;
+    margin-top: 1rem;
+    cursor: pointer;
+    color: rgb(31, 113, 202);
+
+    &:hover {
+      color: var(--color-primary);
+    }
+
+    i {
+      line-height: 0;
+      margin-left: 0.25rem;
+      font-size: 1rem;
+    }
+  }
+
+  &__post-box:hover {
+    .recent-posts__post-title {
+      color: var(--color-primary);
+    }
+
+    .recent-posts__post-img img {
+      transform: scale(1.1);
+    }
+  }
+
+  &__no-posts {
+    flex: 1 1 100%;
+    text-align: center;
+    padding: 1rem;
+  }
 }

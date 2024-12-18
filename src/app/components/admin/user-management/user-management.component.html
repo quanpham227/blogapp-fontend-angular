@@ -1,127 +1,92 @@
-<div class="dashboard-container">
-  <div class="header-section">
-    <h1>User Management Dashboard</h1>
-    <button class="add-user-btn" (click)="openAddUserModal()">Add New User</button>
+<div class="users-admin">
+  <div class="users-admin__header">
+    <h1 class="users-admin__title">User Management Dashboard</h1>
+    <a [routerLink]="['/register']">
+      <button class="users-admin__add-user-btn">Add New User</button>
+    </a>
   </div>
 
-  <div class="search-section">
-    <input type="text" [(ngModel)]="searchTerm" placeholder="Search users..." (input)="filterUsers()" />
-    <select [(ngModel)]="filterRole" (change)="filterUsers()">
+  <div class="users-admin__filters" fxLayout="row" fxLayoutGap="5px">
+    <div class="users-admin__search" fxFlex="70">
+      <i class="fas fa-search users-admin__search-icon"></i>
+      <input
+        type="text"
+        class="users-admin__search-input"
+        placeholder="Search users..."
+        [(ngModel)]="keyword"
+        (keyup.enter)="onSearchEnter($event)"
+        (blur)="onBlurSearch()"
+      />
+      <i class="fas fa-times users-admin__search-clear" (click)="clearSearch($event)" *ngIf="showClearIcon"></i>
+    </div>
+
+    <select class="users-admin__filter-select" (change)="onStatusChange($event)" fxFlex="15">
+      <option [value]="userStatus.All">All Statuses</option>
+      <option [value]="userStatus.Active">Active</option>
+      <option [value]="userStatus.Inactive">Inactive</option>
+    </select>
+    <select class="users-admin__filter-select" (change)="onRoleChange($event)" fxFlex="15">
       <option value="">All Roles</option>
-      <option value="admin">Admin</option>
-      <option value="user">User</option>
-      <option value="manager">Manager</option>
+      <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
     </select>
   </div>
 
-  <div class="table-responsive">
-    <table>
-      <thead>
-        <tr>
-          <th (click)="sort('id')">
-            ID
-            <span class="sort-icon">↕</span>
-          </th>
-          <th (click)="sort('name')">
-            Name
-            <span class="sort-icon">↕</span>
-          </th>
-          <th (click)="sort('email')">
-            Email
-            <span class="sort-icon">↕</span>
-          </th>
-          <th (click)="sort('status')">
-            Status
-            <span class="sort-icon">↕</span>
-          </th>
-          <th (click)="sort('role')">
-            Role
-            <span class="sort-icon">↕</span>
-          </th>
-          <th>Actions</th>
+  <div class="users-admin__table-responsive">
+    <table class="users-admin__table" *ngIf="users.length > 0">
+      <thead class="users-admin__table-head">
+        <tr class="users-admin__table-row">
+          <th class="users-admin__table-header">Name</th>
+          <th class="users-admin__table-header">Email</th>
+          <th class="users-admin__table-header">Phone</th>
+          <th class="users-admin__table-header">Status</th>
+          <th class="users-admin__table-header">Role</th>
+          <th class="users-admin__table-header">Actions</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let user of paginatedUsers">
-          <td>{{ user.id }}</td>
-          <td>{{ user.name }}</td>
-          <td>{{ user.email }}</td>
-          <td>
-            <label class="switch" [attr.aria-label]="'Toggle status for ' + user.name">
-              <input type="checkbox" [checked]="user.status === 'active'" (change)="toggleStatus(user)" />
-              <span class="slider round"></span>
-            </label>
-          </td>
-          <td>
-            <select
-              [(ngModel)]="user.role"
-              (change)="updateUserRole(user)"
-              [attr.aria-label]="'Select role for ' + user.name"
+      <tbody class="users-admin__table-body">
+        <tr *ngFor="let user of users; trackBy: trackByUserId" class="users-admin__table-row">
+          <td class="users-admin__table-cell">{{ user.fullName }}</td>
+          <td class="users-admin__table-cell">{{ user.email }}</td>
+          <td class="users-admin__table-cell">{{ user.phoneNumber }}</td>
+          <td class="users-admin__table-cell">
+            <span
+              [ngClass]="{
+                'users-admin__status--active': user.isActive === true,
+                'users-admin__status--inactive': user.isActive === false,
+              }"
             >
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-              <option value="manager">Manager</option>
-            </select>
+              {{ user.isActive ? 'Active' : 'Inactive' }}
+            </span>
           </td>
-          <td class="action-buttons">
-            <button (click)="editUser(user)" aria-label="Edit user">Edit</button>
-            <button (click)="deleteUser(user)" class="delete-btn" aria-label="Delete user">Delete</button>
+          <td class="users-admin__table-cell">{{ user.role.name }}</td>
+
+          <td class="users-admin__table-cell users-admin__action-buttons">
+            <button class="users-admin__edit-btn" matTooltip="Edit" aria-label="Edit user" (click)="editUser(user)">Edit</button>
+            <button
+              class="users-admin__action-btn"
+              [ngClass]="user.isActive ? 'users-admin__block-btn' : 'users-admin__enable-btn'"
+              matTooltip="{{ user.isActive ? 'Block' : 'Enable' }}"
+              (click)="blockOrEnableUser(user.id, !user.isActive)"
+            >
+              {{ user.isActive ? 'Block' : 'Enable' }}
+            </button>
+            <button class="users-admin__action-btn users-admin__delete-btn" matTooltip="Delete" (click)="deleteUser(user.id)">
+              Delete
+            </button>
           </td>
         </tr>
       </tbody>
     </table>
-  </div>
-
-  <div class="pagination">
-    <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Previous</button>
-    <span>Page {{ currentPage }} of {{ totalPages }}</span>
-    <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
-  </div>
-
-  <div class="modal" [class.show]="showModal" role="dialog" aria-modal="true">
-    <div class="modal-content">
-      <h2>{{ editMode ? 'Edit User' : 'Add New User' }}</h2>
-      <form [formGroup]="userForm" (ngSubmit)="submitForm()">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input id="name" type="text" formControlName="name" required />
-          <div class="error" *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched">
-            Name is required
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input id="email" type="email" formControlName="email" required />
-          <div class="error" *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
-            Please enter a valid email
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="role">Role</label>
-          <select id="role" formControlName="role" required>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" [disabled]="userForm.invalid">{{ editMode ? 'Update' : 'Add' }} User</button>
-          <button type="button" (click)="closeModal()">Cancel</button>
-        </div>
-      </form>
+    <div class="users-admin__no-data" *ngIf="users.length === 0">
+      <p>No users found.</p>
     </div>
   </div>
 
-  <div class="confirmation-dialog" *ngIf="showConfirmDialog" role="alertdialog">
-    <div class="dialog-content">
-      <p>Are you sure you want to delete this user?</p>
-      <div class="dialog-actions">
-        <button (click)="confirmDelete()">Yes, Delete</button>
-        <button (click)="cancelDelete()">Cancel</button>
-      </div>
-    </div>
+  <div class="users-admin__pagination" *ngIf="users.length > 0">
+    <app-custom-pagination
+      [totalPages]="totalPages"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)"
+    ></app-custom-pagination>
   </div>
 </div>

@@ -3,7 +3,7 @@
   --------------------------------------------------------------*/
 .sidebar-admin {
   position: fixed;
-  top: 30px;
+  top: 50px;
   left: 0;
   bottom: 0;
   width: 270px;
@@ -15,61 +15,63 @@
   scrollbar-color: #aab7cf transparent;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
   background-color: rgb(35, 40, 46);
-  &.toggle-sidebar {
+
+  &--hidden {
     left: -270px;
   }
-  &.collapsed-menu {
+
+  &--collapsed {
     width: 50px; /* Thu gọn sidebar */
 
-    .sidebar-nav .nav-link {
-      justify-content: center;
-      padding: 5px 0;
+    .sidebar-admin__nav {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
 
-    .sidebar-nav .nav-link span {
+    .sidebar-admin__nav-item {
+      width: 100%;
+    }
+
+    .sidebar-admin__nav-link {
+      justify-content: center;
+      padding: 14.5px 0; /* Giữ nguyên khoảng cách */
+    }
+
+    .sidebar-admin__nav-link span {
       display: none;
     }
 
-    .sidebar-nav .nav-content {
+    .sidebar-admin__nav-content {
       padding-left: 0;
       padding: 5px 0 0 0;
     }
   }
+
   @media (max-width: 768px) {
     left: -270px; /* Ẩn sidebar khi kích thước màn hình nhỏ hơn 768px */
-    &.open {
+    &--open {
       display: block;
       left: 0;
     }
   }
-  .sidebar-nav {
+
+  &__nav {
     padding: 0;
     margin: 0;
     list-style: none;
     margin-top: 20px;
     cursor: pointer;
 
-    li {
-      padding: 0;
-      margin: 0;
-      list-style: none;
+    &-item {
+      margin-bottom: 5px;
     }
 
-    .nav-item {
-      margin-bottom: 15px;
-    }
-
-    .nav-heading {
-      text-transform: uppercase;
-      color: #899bbd;
-      margin: 10px 0 5px 15px;
-    }
-
-    .nav-link {
+    &-link {
       display: flex;
       align-items: center;
-      transition: 0.3;
-      padding: 5px 0;
+      transition: 0.3s;
+      padding: 13px 0;
       margin: 0;
       width: 100%;
       color: rgb(208, 209, 210);
@@ -79,7 +81,8 @@
       &:hover {
         color: rgb(1, 185, 235);
       }
-      &.active {
+
+      &--active {
         background-color: rgb(1, 115, 169);
         color: rgb(255, 255, 255);
       }
@@ -96,11 +99,11 @@
       }
 
       &:hover::before,
-      &.active::before {
+      &--active::before {
         background-color: rgb(1, 185, 235);
       }
 
-      &.active::after {
+      &--active::after {
         content: '';
         position: absolute;
         top: 50%;
@@ -110,35 +113,37 @@
         border-width: 6px 8px 8px 0;
         border-right-color: rgb(246, 247, 247);
       }
+
       i {
         font-size: 18px;
         margin-right: 10px;
         margin-left: 15px;
         color: rgb(157, 166, 174);
       }
-      &.active i {
+
+      &--active i {
         color: rgb(255, 255, 255);
       }
+
       &:hover i {
         color: rgb(1, 185, 235);
       }
     }
 
-    .nav-content {
+    &-content {
       padding: 5px 0 0 0;
       margin: 0;
       list-style: none;
       background-color: rgb(50, 55, 59);
       display: none;
 
-      &.show {
+      &--show {
         display: block;
       }
 
-      a {
+      &-link {
         display: flex;
         align-items: center;
-        font-family: Arial, sans-serif;
         color: rgb(157, 166, 174);
         transition: 0.3s;
         padding: 5px 0;
@@ -149,7 +154,7 @@
           color: rgb(1, 185, 235);
         }
 
-        &.active {
+        &--active {
           color: rgb(255, 255, 255);
         }
 
@@ -165,7 +170,7 @@
         }
 
         &:hover::before,
-        &.active::before {
+        &--active::before {
           background-color: rgb(1, 185, 235);
         }
 

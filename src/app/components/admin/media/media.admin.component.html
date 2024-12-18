@@ -1,282 +1,146 @@
-<div class="media container mt-3">
-  <header
-    class="media-header d-flex justify-content-between align-items-center"
-  >
-    <div>
-      <h1 class="title">Media</h1>
-      <p class="text-muted">
-        Quản lý các tập tin trên blog của bạn, bao gồm ảnh, video, tài liệu.
-      </p>
-    </div>
-  </header>
-
-  <!-- Filter bar -->
-  <div
-    class="media-filter-bar d-flex justify-content-between align-items-center"
-  >
-    <!-- Button Group -->
-    <div class="media-source-dropdown">
-      <button
-        type="button"
-        class="btn btn-light dropdown-toggle"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        <i class="fas fa-image"></i>
-      </button>
-    </div>
-
-    <!-- Navigation and Search Container -->
-    <div class="media-nav-search-container">
-      <!-- Navigation for categories -->
-      <div class="media-categories-nav">
-        <ul class="nav nav-pills">
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              [class.active]="selectedObjectType === ''"
-              (click)="filterMedia('')"
-            >
-              Tất cả
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              [class.active]="selectedObjectType === 'posts'"
-              (click)="filterMedia('posts')"
-            >
-              Bài viết
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              [class.active]="selectedObjectType === 'clients'"
-              (click)="filterMedia('clients')"
-            >
-              Khách hàng
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              [class.active]="selectedObjectType === 'slides'"
-              (click)="filterMedia('slides')"
-            >
-              Slides
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              [class.active]="selectedObjectType === 'user_profile'"
-              (click)="filterMedia('user_profile')"
-            >
-              User Profile
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              class="nav-link"
-              [class.active]="selectedObjectType === 'unused'"
-              (click)="filterMedia('unused')"
-            >
-              Unused
-            </button>
-          </li>
-        </ul>
+<div class="admin-media">
+  <div class="admin-media__header">
+    <h2 class="admin-media__title">Media</h2>
+    <p class="admin-media__description">Quản lý các tập tin trên blog của bạn, bao gồm ảnh, video, tài liệu.</p>
+  </div>
+  <div class="admin-media__filter-upload">
+    <div class="admin-media__filter-bar">
+      <div class="admin-media__dropdown" *ngIf="isMobileView">
+        <button type="button" class="admin-media__dropdown-button" (click)="toggleDropdown()">
+          <i class="admin-media__dropdown-icon fas fa-bars"></i>
+        </button>
+        <div class="admin-media__dropdown-content" *ngIf="isDropdownOpen">
+          <a
+            *ngFor="let type of objectTypes"
+            class="admin-media__dropdown-link"
+            [class.active]="selectedObjectType === type.value"
+            (click)="filterMedia(type.value)"
+          >
+            {{ type.label }}
+          </a>
+        </div>
       </div>
 
-      <!-- Search Icon -->
-      <div class="media-search-icon" (click)="toggleSearch()">
-        <i class="fas fa-search"></i>
-      </div>
-      <div class="media-search-input" #searchInput>
+      <!-- Navigation and Search Container -->
+      <div class="admin-media__nav-search">
+        <!-- Navigation for categories -->
+        <div class="admin-media__nav-panel" *ngIf="!isMobileView">
+          <ul class="admin-media__tabs-list">
+            <li class="admin-media__nav-tab" *ngFor="let type of objectTypes">
+              <a
+                class="admin-media__nav-link"
+                [class.active]="selectedObjectType === type.value"
+                (click)="filterMedia(type.value)"
+              >
+                {{ type.label }}
+              </a>
+            </li>
+          </ul>
+        </div>
+        <i
+          class="admin-media__search-icon fas"
+          [ngClass]="isSearchActive ? 'fa-times' : 'fa-search'"
+          matTooltip="Tìm kiếm"
+          (click)="toggleSearch()"
+        ></i>
+
+        <!-- Input Search Field -->
         <input
           type="text"
-          class="form-control"
+          class="admin-media__search-field"
+          [ngClass]="{ active: isSearchActive }"
           placeholder="Tìm kiếm hình ảnh..."
           aria-label="Search"
           (input)="onSearch($event)"
+          #searchInput
         />
       </div>
-    </div>
 
-    <!-- Storage Info -->
-    <div class="media-storage-info d-flex align-items-center">
-      <div class="progress-bar is-compact">
-        <div
-          aria-valuemax="100"
-          aria-valuemin="0"
-          aria-valuenow="0"
-          aria-label="progress bar"
-          class="progress-bar__progress"
-          role="progressbar"
-          [style.width.%]="(totalFileSize / (1 * 1024 * 1024)) * 100"
-        ></div>
+      <!-- Storage Info -->
+      <div class="admin-media__storage-info">
+        <mat-progress-bar
+          class="admin-media__plan-storage-bar"
+          mode="determinate"
+          [value]="(totalFileSizes / (100 * 1024 * 1024 * 1024)) * 100"
+          aria-label="Storage usage progress bar"
+        ></mat-progress-bar>
+        <span class="admin-media__plan-storage-label">
+          Đã dùng {{ (totalFileSizes / (1024 * 1024)).toFixed(2) }} MB ({{
+            ((totalFileSizes / (100 * 1024 * 1024 * 1024)) * 100).toFixed(2)
+          }}%)
+        </span>
       </div>
-      <span class="plan-storage__storage-label">
-        Đã dùng {{ (totalFileSize / (1024 * 1024)).toFixed(2) }} MB
-      </span>
+    </div>
+
+    <div class="admin-media__upload-bar">
+      <div class="admin-media__upload-controls">
+        <!-- Nút tải lên thay bằng input file và label -->
+        <label for="fileInput" class="admin-media__btn-upload" (click)="checkUploadType($event)">
+          <i class="fas fa-upload"></i>
+          Tải lên
+        </label>
+
+        <!-- Input file ẩn nhưng được kích hoạt khi nhấn vào label -->
+        <input type="file" id="fileInput" (change)="onFileChange($event)" style="display: none" />
+      </div>
+      <div class="admin-media__object-type">
+        <select class="admin-media__select" [(ngModel)]="uploadType" required>
+          <option value="" disabled selected>Chọn loại ảnh</option>
+          <option *ngFor="let type of getFilteredObjectTypes()" [value]="type.value">{{ type.label }}</option>
+        </select>
+      </div>
+      <div class="admin-media__action" *ngIf="selectedImages.length > 0">
+        <button class="admin-media__action-btn" (click)="openConfirmDialog()" matTooltip="Xóa hình ảnh">
+          <i class="fas fa-trash admin-media__action-remove"></i>
+        </button>
+        <button class="admin-media__action-btn" (click)="unSelectAll()" matTooltip="Bỏ chọn tất cả">
+          <i class="fas fa-times-circle admin-media__action-unselect"></i>
+        </button>
+        <button class="admin-media__action-btn" (click)="viewSelectImage()" matTooltip="Xem chi tiết hình ảnh">
+          <i class="fa-regular fa-eye admin-media__action-view"></i>
+        </button>
+      </div>
+      <div class="admin-media__slider">
+        <i class="admin-media__slider-icon--small fas fa-image"></i>
+        <input type="range" class="admin-media__slider-range" min="1" max="100" />
+        <i class="admin-media__slider-icon--large fas fa-image"></i>
+      </div>
     </div>
   </div>
-  <!-- Upload and Slider -->
-  <div class="media-upload-bar fixed-top">
-    <div class="d-flex justify-content-start align-items-end">
-      <!-- Nút tải lên thay bằng input file và label -->
-      <label for="fileInput" class="btn btn-upload">
-        <i class="fas fa-upload"></i>
-      </label>
-
-      <!-- Input file ẩn nhưng được kích hoạt khi nhấn vào label -->
-      <input
-        type="file"
-        id="fileInput"
-        (change)="onFileChange($event)"
-        style="display: none"
-      />
-    </div>
-    <div class="object-type">
-      <select class="form-select" [(ngModel)]="uploadType" required>
-        <option value="" disabled selected>Chọn loại ảnh</option>
-        <option value="posts">Bài viết</option>
-        <option value="clients">Khách hàng</option>
-        <option value="slides">Slides</option>
-        <option value="user_profile">User Profile</option>
-      </select>
-    </div>
-    <div class="action" *ngIf="selectedImages.length > 0">
-      <button class="btn btn-edit" (click)="viewSelectedImages(content)">
-        <i class="fa-solid fa-eye-slash"></i>
-      </button>
-      <button class="btn btn-remove" (click)="openConfirmModal()">
-        <i class="fas fa-trash"></i>
-      </button>
-      <button class="btn btn-unselect" (click)="unSelectAll()">
-        <i class="fas fa-times-circle"></i>
-      </button>
-    </div>
-    <div class="slider-container d-flex align-items-center">
-      <i class="bi bi-file-image small-icon"></i>
-      <input type="range" class="form-range" min="1" max="100" />
-      <i class="bi bi-file-image large-icon"></i>
-    </div>
-  </div>
-
-  <div class="media-images mt-3">
-    <div class="row row-cols-6 g-2">
-      <div
-        class="col"
-        *ngFor="let image of images"
+  <div class="admin-media__content">
+    <mat-grid-list cols="6" rowHeight="150px" gutterSize="10px">
+      <mat-grid-tile
+        *ngFor="let image of images; trackBy: trackByImageId"
         (click)="toggleSelectImage(image)"
+        class="admin-media__image-item"
       >
-        <div class="image-card" [class.selected]="isSelected(image)">
+        <mat-card class="admin-media__image-card" [class.selected]="isSelected(image)" title="{{ image.fileName }}">
           <img
-            [appLazyLoad]="image.image_url"
-            [transitionDuration]="'3s'"
-            alt="{{ image.file_name }}"
-            alt="Image"
-            class="img-fluid"
+            [appLazyLoad]="image.imageUrl"
+            [transitionDuration]="'5s'"
+            alt="{{ image.fileName }}"
+            class="admin-media__image"
             [class.temporary]="image.isTemporary"
+            (error)="onImageError($event)"
           />
-          <div class="spinner" *ngIf="image.isUploading">
+          <div class="admin-media__uploading-spinner" *ngIf="image.isUploading">
             <i class="fas fa-spinner fa-spin"></i>
           </div>
-          <div class="selected-index" *ngIf="isSelected(image)">
-            {{ getSelectedIndex(image) }}
+          <div class="admin-media__selected-check" *ngIf="isSelected(image)">
+            <i class="fas fa-check"></i>
+            <!-- Dấu tích khi chọn -->
           </div>
-        </div>
-      </div>
+        </mat-card>
+      </mat-grid-tile>
+    </mat-grid-list>
+
+    <!-- Phần tử đánh dấu cuối danh sách -->
+    <div #scrollAnchor></div>
+
+    <!-- Hiển thị biểu tượng xoay vòng khi đang xóa -->
+    <div *ngIf="isDeleting" class="admin-media__deleting-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      Đang xóa ảnh...
     </div>
-  </div>
-  <!-- Hiển thị biểu tượng xoay vòng khi đang xóa -->
-  <div *ngIf="isDeleting" class="deleting-spinner">
-    <i class="fas fa-spinner fa-spin"></i> Đang xóa ảnh...
-  </div>
-  <div class="d-flex justify-content-center mt-3">
-    <button class="btn load-more" (click)="loadMoreImages()">Tải thêm</button>
   </div>
 </div>
-<!-- Modal -->
-<ng-template #content let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title">Thông tin hình ảnh</h4>
-  </div>
-  <div class="modal-body">
-    <div class="row">
-      <!-- Cột hiển thị hình ảnh -->
-      <div class="col-md-7">
-        <div class="image-preview">
-          <img
-            [src]="selectedImage?.image_url"
-            class="img-fluid rounded"
-            alt="Image preview"
-          />
-        </div>
-      </div>
-      <div class="col-md-5">
-        <!-- Cột thông tin chi tiết -->
-        <div class="image-details">
-          <div class="mb-3">
-            <label class="form-label" for="file-name">Tên tệp</label>
-            <input
-              type="text"
-              class="form-control"
-              id="file-name"
-              [value]="selectedImage?.file_name"
-              readonly
-            />
-          </div>
-
-          <div class="mb-3 d-flex align-items-center">
-            <label class="form-label me-2" for="image_url">URL</label>
-            <input
-              type="text"
-              class="form-control me-2"
-              id="image_url"
-              [value]="selectedImage?.image_url"
-              readonly
-            />
-            <button
-              class="btn btn-outline-secondary copy-url"
-              (click)="copyUrl()"
-            >
-              copy
-            </button>
-          </div>
-          <!-- Thông tin thêm về file -->
-          <p class="image-type">
-            <strong>Định dạng:</strong> {{ selectedImage?.file_type }}
-          </p>
-          <p class="image-size">
-            <strong>Dung lượng:</strong>
-            {{ selectedImage?.file_size | number }} KB
-          </p>
-          <p class="image-object-type">
-            <strong>Loại đối tượng:</strong>
-            {{ selectedImage?.object_type }}
-          </p>
-          <p class="image-is-used">
-            <strong>Is_Used:</strong>
-            {{ selectedImage?.is_used }}
-          </p>
-          <p class="image-usage_count">
-            <strong>Usage_Count:</strong>
-            {{ selectedImage?.usage_count }}
-          </p>
-          <p class="image-date">
-            <strong>Ngày tải lên:</strong>
-            {{ selectedImage?.created_at | date: "dd/MM/yyyy " }}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="modal.dismiss()">
-      Xong
-    </button>
-  </div>
-</ng-template>

@@ -2,11 +2,11 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 export class RegisterDTO {
   @IsString()
   @IsNotEmpty()
-  fullname: string;
+  fullName: string;
 
   @IsString()
   @IsNotEmpty()
-  phone_number: string;
+  phoneNumber: string;
 
   @IsString()
   @IsEmail()
@@ -18,23 +18,23 @@ export class RegisterDTO {
 
   @IsString()
   @IsNotEmpty()
-  retype_password: string;
+  retypePassword: string;
 
-  facebook_account_id: string = '';
+  facebookAccountId: string = '';
 
-  google_account_id: string = '';
+  googleAccountId: string = '';
 
   @IsString()
-  role_id: number = 2;
+  roleId: number = 2;
 
   constructor(data: any) {
-    this.fullname = data.fullname;
-    this.phone_number = data.phone_number;
+    this.fullName = data.fullname;
+    this.phoneNumber = data.phone_number;
     this.email = data.email;
     this.password = data.password;
-    this.retype_password = data.retype_password;
-    this.facebook_account_id = data.facebook_account_id || '';
-    this.google_account_id = data.google_account_id || '';
-    this.role_id = data.role_id || 2;
+    this.retypePassword = data.retype_password;
+    this.facebookAccountId = data.facebook_account_id || '';
+    this.googleAccountId = data.google_account_id || '';
+    this.roleId = data.role_id || 2;
   }
 }

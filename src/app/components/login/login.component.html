@@ -1,12 +1,9 @@
-<ngx-spinner type="ball-climbing-dot">
-  <p class="text-white">Loading...</p>
-</ngx-spinner>
 <div class="login login--container">
   <div class="login__wrapper">
     <div class="login__row">
       <div class="login__col">
         <div class="login__form">
-          <h2 class="login__header">Welcome Back</h2>
+          <h2 class="login__header">PI VINA DANANG</h2>
           <form [formGroup]="loginForm" (ngSubmit)="login()">
             <div class="login__form-group">
               <label for="email" class="login__label" aria-label="Email address">Email</label>
@@ -17,6 +14,7 @@
                 placeholder="Enter your email"
                 aria-describedby="emailError"
                 class="login__input"
+                autocomplete="username"
               />
               <div
                 *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
@@ -39,7 +37,10 @@
                   placeholder="Enter your password"
                   aria-describedby="passwordError"
                   class="login__input"
+                  type="password"
+                  autocomplete="current-password"
                 />
+
                 <button
                   type="button"
                   class="login__toggle-password"
@@ -56,14 +57,13 @@
                 role="alert"
               >
                 <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
-                <span *ngIf="loginForm.get('password')?.errors?.['minlength']">
-                  Password must be at least 8 characters
-                </span>
+                <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 8 characters</span>
               </div>
             </div>
 
-            <a class="login__forgot-password">Forgot Password?</a>
-
+            <div class="login__forgot-password">
+              <a (click)="navigateToResetPassword()">Forgot Password?</a>
+            </div>
             <button type="submit" class="login__button" [disabled]="loginForm.invalid || isLoading" aria-label="Login">
               <span *ngIf="!isLoading">Login</span>
               <div *ngIf="isLoading" class="spinner"></div>
@@ -92,9 +92,7 @@
 
             <div class="login__register-section">
               <p>Don't have an account?</p>
-              <button type="button" class="login__register-button" (click)="navigateToRegister()" aria-label="Register">
-                Register
-              </button>
+              <button type="button" class="login__register-button" (click)="navigateToRegister()" aria-label="Register">Register</button>
             </div>
           </form>
         </div>

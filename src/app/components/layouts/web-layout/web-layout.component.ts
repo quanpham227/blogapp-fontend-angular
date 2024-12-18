@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../header/header.component';
 import { FooterComponent } from '../../footer/footer.component';
+import { TopbarComponent } from '../../topbar/topbar.component';
 
 @Component({
   selector: 'app-web-layout',
@@ -11,6 +12,6 @@ import { FooterComponent } from '../../footer/footer.component';
   styleUrls: ['./web-layout.component.scss'],
   standalone: true,
 
-  imports: [RouterModule, CommonModule, FormsModule, HeaderComponent, FooterComponent],
+  imports: [RouterModule, CommonModule, FormsModule, TopbarComponent, HeaderComponent, FooterComponent],
 })
 export class WebLayoutComponent {}

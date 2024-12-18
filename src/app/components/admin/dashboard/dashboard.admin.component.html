@@ -1,6 +1,88 @@
-<div class="container mt-4">
-  <button (click)="showSuccess()">showSucess</button>
-  <button (click)="showError()">showError</button>
-  <button (click)="showInfo()">showInfo</button>
-  <button (click)="showWarning()">showWarning</button>
+<div class="dashboard-admin" [ngClass]="{ 'dashboard-admin--dark-theme': isDarkMode }">
+  <div class="dashboard-admin__header">
+    <h1 class="dashboard-admin__title">Blog Analytics Dashboard</h1>
+    <div class="dashboard-admin__theme-toggle">
+      <mat-slide-toggle [(ngModel)]="isDarkMode" (change)="toggleTheme()">Dark Mode</mat-slide-toggle>
+    </div>
+  </div>
+
+  <div class="dashboard-admin__stats-grid">
+    <mat-card class="dashboard-admin__stat-card">
+      <mat-card-content>
+        <h3 class="dashboard-admin__stat-title">Total Page Views</h3>
+        <div *ngIf="pageViewsChart.series[0]?.data?.length">
+          <apx-chart
+            [series]="pageViewsChart.series"
+            [chart]="pageViewsChart.chart"
+            [xaxis]="pageViewsChart.xaxis"
+            [title]="pageViewsChart.title"
+          ></apx-chart>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="dashboard-admin__stat-card">
+      <mat-card-content>
+        <h3 class="dashboard-admin__stat-title">User Engagement</h3>
+        <div *ngIf="engagementChart.series.length">
+          <apx-chart
+            [series]="engagementChart.series"
+            [chart]="engagementChart.chart"
+            [labels]="engagementChart.labels"
+            [title]="engagementChart.title"
+          ></apx-chart>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="dashboard-admin__stat-card">
+      <mat-card-content>
+        <h3 class="dashboard-admin__stat-title">Comments Analysis</h3>
+        <div *ngIf="commentsChart.series[0]?.data?.length">
+          <apx-chart
+            [series]="commentsChart.series"
+            [chart]="commentsChart.chart"
+            [xaxis]="commentsChart.xaxis"
+            [title]="commentsChart.title"
+          ></apx-chart>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="dashboard-admin__widgets-container">
+    <mat-card class="dashboard-admin__widget">
+      <mat-card-header>
+        <mat-card-title class="dashboard-admin__widget-title">Recent Posts</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list role="list">
+          <mat-list-item *ngFor="let post of recentPosts" role="listitem">
+            <span class="dashboard-admin__post-title" matListItemTitle>{{ post.title }}</span>
+            <span class="dashboard-admin__post-views" matListItemLine>Views: {{ post.viewCount }}</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="dashboard-admin__widget">
+      <mat-card-header>
+        <mat-card-title class="dashboard-admin__widget-title">Quick Stats</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="dashboard-admin__quick-stat">
+          <span>Total Posts</span>
+          <strong>{{ totalPosts }}</strong>
+        </div>
+        <div class="dashboard-admin__quick-stat">
+          <span>Active Users</span>
+          <strong>{{ activeUsers }}</strong>
+        </div>
+        <div class="dashboard-admin__quick-stat">
+          <span>Comments Today</span>
+          <strong>{{ todayComments }}</strong>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { SuccessHandlerService } from './success-handler.service';
 import { map, tap } from 'rxjs/operators';
 import { convertToCamelCase, convertToSnakeCase } from '../utils/case-converter';
+import { SnackbarService } from './snackbar.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ export class AboutService {
   constructor(
     private http: HttpClient,
     private successHandlerService: SuccessHandlerService,
+    private snackBarService: SnackbarService,
   ) {}
 
   getAbout(): Observable<ApiResponse<About>> {
@@ -33,6 +35,6 @@ export class AboutService {
     const snakeCaseAbout = convertToSnakeCase(about);
     return this.http
       .put<ApiResponse<About>>(`${this.apiAbout}/${id}`, snakeCaseAbout)
-      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
+      .pipe(tap((response) => this.snackBarService.success(response.message)));
   }
 }

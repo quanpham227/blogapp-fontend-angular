@@ -45,7 +45,7 @@ $facebook-color: #1877f2;
   &__header {
     text-align: center;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-size: 28px;
   }
 
@@ -69,6 +69,7 @@ $facebook-color: #1877f2;
     font-size: 16px;
     transition: all 0.3s ease;
     border-radius: 0;
+    margin-bottom: 10px;
 
     &:focus {
       border-color: $input-focus-border-color;
@@ -97,6 +98,7 @@ $facebook-color: #1877f2;
     font-size: 12px;
     margin: 5px;
     position: absolute;
+    bottom: -20px;
   }
 
   &__terms-section {

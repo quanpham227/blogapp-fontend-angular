@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { NgbModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ApiResponse } from '../../models/response';
@@ -20,8 +19,7 @@ import { PostService } from '../../services/post.service';
 import { Post } from '../../models/post';
 import { HttpStatusService } from '../../services/http-status.service';
 import { PostListResponse } from '../../responses/post/post-list-response';
-import { isEqual } from 'lodash';
-import { ToasterService } from '../../services/toaster.service';
+import isEqual from 'lodash-es/isEqual';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { combineLatest, Subscription } from 'rxjs';
 import { BlogStateService } from '../../services/blog-state.service';
@@ -29,7 +27,9 @@ import { gsap } from 'gsap';
 import { LazyLoadDirective } from '../../directives/lazy-load.directive';
 import { distinctUntilChanged, tap, catchError, map } from 'rxjs/operators';
 import { Title, Meta } from '@angular/platform-browser';
-import { NgxSpinnerModule } from 'ngx-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { SnackbarService } from '../../services/snackbar.service';
+import { CustomPaginationComponent } from '../common/custom-pagination/custom-pagination.component';
 
 @UntilDestroy()
 @Component({
@@ -41,12 +41,11 @@ import { NgxSpinnerModule } from 'ngx-spinner';
   imports: [
     FormsModule,
     CommonModule,
-    NgbPaginationModule,
+    MatPaginatorModule,
+    CustomPaginationComponent,
     ReactiveFormsModule,
-    NgbModule,
     NgSelectModule,
     LazyLoadDirective,
-    NgxSpinnerModule,
   ],
 })
 export class BlogComponent implements OnInit {
@@ -71,11 +70,11 @@ export class BlogComponent implements OnInit {
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private httpStatusService: HttpStatusService,
-    private toast: ToasterService,
     private cdr: ChangeDetectorRef,
     private blogStateService: BlogStateService,
     private titleService: Title,
     private metaService: Meta,
+    private snackBarService: SnackbarService,
   ) {
     this.searchForm = this.fb.group({
       keyword: [''],
@@ -251,7 +250,9 @@ export class BlogComponent implements OnInit {
     if (page !== this.currentPage && page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
       this.blogStateService.setCurrentPage(page);
+
       const { keyword, categorySlug } = this.searchForm.value;
+
       const route =
         page === 1
           ? categorySlug
@@ -272,13 +273,13 @@ export class BlogComponent implements OnInit {
   onPostClick(slug: string) {
     // Kiểm tra tính hợp lệ của slug
     if (!slug || typeof slug !== 'string' || slug.trim() === '') {
-      this.toast.warning('Invalid slug');
+      this.snackBarService.show('Invalid slug');
       return;
     }
 
     // Kiểm tra trạng thái của ứng dụng (ví dụ: không có yêu cầu HTTP đang chờ xử lý)
     if (this.isRequestPending()) {
-      this.toast.warning('Vui lòng đợi yêu cầu hiện tại hoàn thành.');
+      this.snackBarService.show('Vui lòng đợi yêu cầu hiện tại hoàn thành.');
       return;
     }
     // Nếu tất cả các điều kiện đều thỏa mãn, thực hiện điều hướng
@@ -297,20 +298,19 @@ export class BlogComponent implements OnInit {
     this.showDropdown = !this.showDropdown;
   }
 
-  limitWords(event: any, maxWords: number, maxChars: number) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value;
+  limitWords(event: any, maxWords: number, maxChars: number): void {
+    let input = event.target.value;
+    let words = input.split(/\s+/).filter(Boolean); // Split input into words and remove extra spaces
+    let truncatedWords: string[] = [];
+    let charCount = 0;
 
-    let wordCount = value.trim().split(/\s+/).length;
-    if (wordCount > maxWords) {
-      value = value.trim().split(/\s+/).slice(0, maxWords).join(' ');
+    for (let word of words) {
+      if (truncatedWords.length >= maxWords || charCount + word.length > maxChars) break;
+      truncatedWords.push(word);
+      charCount += word.length + 1; // Add 1 for space
     }
 
-    if (value.length > maxChars) {
-      value = value.slice(0, maxChars);
-    }
-
-    event.target.value = value;
+    event.target.value = truncatedWords.join(' ').trim();
   }
 
   private formatKeyword(keyword: string): string {
@@ -323,11 +323,15 @@ export class BlogComponent implements OnInit {
   }
 
   resetSearch() {
-    this.searchForm.reset();
+    this.searchForm.reset({
+      keyword: '',
+      categorySlug: null,
+      selectedCategoryName: '',
+      page: 1,
+    });
     this.showClearIcon = false;
     this.navigateToRoute(['/blog']);
   }
-
   trackByPost(index: number, post: Post): number {
     return post.id; // Giả sử mỗi bài viết có thuộc tính id duy nhất
   }

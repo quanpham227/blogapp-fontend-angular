@@ -1,0 +1,165 @@
+<div class="admin-select-dialog">
+  <div class="admin-select-dialog__header">
+    <div class="admin-select-dialog__filter-bar">
+      <div class="admin-select-dialog__dropdown" *ngIf="isMobileView">
+        <button type="button" class="admin-select-dialog__dropdown-button" (click)="toggleDropdown()">
+          <i class="admin-select-dialog__dropdown-icon fas fa-bars"></i>
+        </button>
+        <div class="admin-select-dialog__dropdown-content" *ngIf="isDropdownOpen">
+          <a
+            *ngFor="let type of objectTypes"
+            class="admin-select-dialog__dropdown-link"
+            [class.active]="selectedObjectType === type.value"
+            (click)="filterMedia(type.value)"
+          >
+            {{ type.label }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Navigation and Search Container -->
+      <div class="admin-select-dialog__nav-search">
+        <!-- Navigation for categories -->
+        <div class="admin-select-dialog__nav-panel" *ngIf="!isMobileView">
+          <ul class="admin-select-dialog__tabs-list">
+            <li class="admin-select-dialog__nav-tab" *ngFor="let type of objectTypes">
+              <a
+                class="admin-select-dialog__nav-link"
+                [class.active]="selectedObjectType === type.value"
+                (click)="filterMedia(type.value)"
+              >
+                {{ type.label }}
+              </a>
+            </li>
+          </ul>
+        </div>
+        <i
+          class="admin-select-dialog__search-icon fas"
+          [ngClass]="isSearchActive ? 'fa-times' : 'fa-search'"
+          matTooltip="Tìm kiếm"
+          (click)="toggleSearch()"
+        ></i>
+
+        <!-- Input Search Field -->
+        <input
+          type="text"
+          class="admin-select-dialog__search-field"
+          [ngClass]="{ active: isSearchActive }"
+          placeholder="Tìm kiếm hình ảnh..."
+          aria-label="Search"
+          (input)="onSearch($event)"
+          #searchInput
+        />
+      </div>
+
+      <!-- Storage Info -->
+      <div class="admin-select-dialog__storage-info">
+        <mat-progress-bar
+          class="admin-select-dialog__plan-storage-bar"
+          mode="determinate"
+          [value]="(totalFileSizes / (100 * 1024 * 1024 * 1024)) * 100"
+          aria-label="Storage usage progress bar"
+        ></mat-progress-bar>
+        <span class="admin-select-dialog__plan-storage-label">
+          Đã dùng {{ (totalFileSizes / (1024 * 1024)).toFixed(2) }} MB ({{
+            ((totalFileSizes / (100 * 1024 * 1024 * 1024)) * 100).toFixed(2)
+          }}%)
+        </span>
+      </div>
+    </div>
+
+    <div class="admin-select-dialog__upload-bar">
+      <div class="admin-select-dialog__upload-controls">
+        <!-- Nút tải lên thay bằng input file và label -->
+        <label for="fileInput" class="admin-select-dialog__btn-upload" (click)="checkUploadType($event)">
+          <i class="fas fa-upload"></i>
+          Tải lên
+        </label>
+
+        <!-- Input file ẩn nhưng được kích hoạt khi nhấn vào label -->
+        <input type="file" id="fileInput" (change)="onFileChange($event)" style="display: none" />
+      </div>
+      <div class="admin-select-dialog__object-type">
+        <select class="admin-select-dialog__select" [(ngModel)]="uploadType" required>
+          <option value="" disabled selected>Chọn loại ảnh</option>
+          <option *ngFor="let type of getFilteredObjectTypes()" [value]="type.value">{{ type.label }}</option>
+        </select>
+      </div>
+      <div class="admin-select-dialog__action" *ngIf="selectedImages.length > 0">
+        <button class="admin-select-dialog__action-btn" (click)="openConfirmDialog()" matTooltip="Xóa hình ảnh">
+          <i class="fas fa-trash admin-select-dialog__action-remove"></i>
+        </button>
+        <button class="admin-select-dialog__action-btn" (click)="unSelectAll()" matTooltip="Bỏ chọn tất cả">
+          <i class="fas fa-times-circle admin-select-dialog__action-unselect"></i>
+        </button>
+        <button class="admin-select-dialog__action-btn" (click)="viewSelectImage()" matTooltip="Xem chi tiết hình ảnh">
+          <i class="fa-regular fa-eye admin-select-dialog__action-view"></i>
+        </button>
+      </div>
+      <div class="admin-select-dialog__slider">
+        <i class="admin-select-dialog__slider-icon--small fas fa-image"></i>
+        <input type="range" class="admin-select-dialog__slider-range" min="1" max="100" />
+        <i class="admin-select-dialog__slider-icon--large fas fa-image"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-select-dialog__content">
+    <div class="admin-select-dialog__images-scroll">
+      <mat-grid-list cols="6" rowHeight="150px" gutterSize="10px">
+        <mat-grid-tile
+          *ngFor="let image of images; trackBy: trackByImageId"
+          (click)="toggleSelectImage(image)"
+          class="admin-select-dialog__image-item"
+        >
+          <mat-card
+            class="admin-select-dialog__image-card"
+            [class.selected]="isSelected(image)"
+            title="{{ image.fileName }}"
+          >
+            <img
+              [appLazyLoad]="image.imageUrl"
+              [transitionDuration]="'5s'"
+              alt="{{ image.fileName }}"
+              class="admin-select-dialog__image"
+              [class.temporary]="image.isTemporary"
+              (error)="onImageError($event)"
+            />
+            <div class="admin-select-dialog__uploading-spinner" *ngIf="image.isUploading">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <div class="admin-select-dialog__selected-check" *ngIf="isSelected(image)">
+              <i class="fas fa-check"></i>
+              <!-- Dấu tích khi chọn -->
+            </div>
+          </mat-card>
+        </mat-grid-tile>
+      </mat-grid-list>
+      <div #scrollAnchor style="height: 1px"></div>
+    </div>
+    <!-- Hiển thị biểu tượng xoay vòng khi đang xóa -->
+    <div *ngIf="isDeleting" class="admin-select-dialog__deleting-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      Đang xóa ảnh...
+    </div>
+  </div>
+
+  <div class="admin-select-dialog__footer">
+    <button
+      mat-button
+      class="admin-select-dialog__footer-button admin-select-dialog__footer-button--cancel"
+      (click)="closeModal()"
+    >
+      Hủy
+    </button>
+    <button
+      mat-button
+      class="admin-select-dialog__footer-button admin-select-dialog__footer-button--insert"
+      [disabled]="!selectedImages.length"
+      [ngClass]="{ active: selectedImages.length > 0 }"
+      (click)="insertSelectedImage()"
+    >
+      Chèn
+    </button>
+  </div>
+</div>

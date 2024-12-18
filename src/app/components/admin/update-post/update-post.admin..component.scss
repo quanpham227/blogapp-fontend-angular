@@ -1,655 +1,139 @@
-.col-8-5 {
-  flex: 0 0 70.833333%;
-  max-width: 70.833333%;
-}
-
-.col-3-5 {
-  flex: 0 0 29.166667%;
-  max-width: 29.166667%;
-}
 .admin-update-post {
-  padding: 5px 20px 5px 10px;
-  font-family: "Roboto", sans-serif;
-  .admin-update-post__loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    .admin-update-post__loading-spinner {
-      text-align: center;
-      .loading-spinner .fa-spinner {
-        font-size: 24px;
-        margin-right: 10px;
+  padding: 20px 10px;
+  margin: 0 auto;
+
+  .main {
+    &__title {
+      width: 100%;
+      margin-bottom: 15px;
+      border-radius: 3px;
+      border: solid 1px #d1d1d1;
+      padding: 10px;
+      &:focus {
+        border: 1.5px solid rgb(18, 94, 150);
+        outline: none;
       }
+    }
+    &__editor {
+      border: solid 1px #d1d1d1;
     }
   }
 
-  .admin-update-post__header {
-    margin-bottom: 20px;
-    .admin-update-post__header-title {
-      font-family: "Roboto", sans-serif;
-      font-size: 23px;
-      font-weight: 400;
-      margin: 0;
-      line-height: 1.3;
-    }
-  }
-  .admin-update-post__main {
-    .admin-update-post__content {
-      .admin-update-post__title {
-        width: 100%;
-        font-family: "Roboto", sans-serif;
-        font-size: 20px;
-        font-weight: 400;
-        margin-bottom: 15px;
-        height: 38px;
-        border-radius: 3px;
-        border: 1px solid rgb(140, 143, 148);
-        padding-left: 10px; /* Thêm khoảng cách cho chữ placeholder */
-        &:focus {
-          border: 2px solid rgb(18, 94, 150);
-          outline: none;
-        }
-      }
-      .admin-update-post__comment {
-        width: 100%;
-        font-family: "Roboto", sans-serif;
-        font-size: 15px;
-        font-weight: 300;
-        border-radius: 0;
-        margin-bottom: 20px;
-        margin-top: 20px;
-
-        .admin-update-post__comment-header {
-          height: 35px;
-          background-color: #ffffff;
-
-          .admin-update-post__comment-title {
-            font-family: "Roboto", sans-serif;
-            font-size: 15px;
-            font-weight: 500;
-            margin: 0;
-            color: #3b3a3d;
-            width: 80%;
-          }
-          .admin-update-post__comment-controls {
-            color: #787c82;
-            display: flex;
-            justify-content: end;
-            width: 20%;
-
-            i {
-              font-size: 15px;
-              margin-right: 10px;
-              cursor: pointer;
-            }
-          }
-        }
-
-        .admin-update-post__comment-body {
-          padding: 5px 0px;
-          .row {
-            margin-left: 0;
-            margin-right: 0;
-
-            &.even {
-              background-color: #f5f8f7; // Màu nền cho các hàng chẵn
-            }
-
-            &.odd {
-              background-color: #ffffff; // Màu nền cho các hàng lẻ
-            }
-          }
-          .admin-update-post__add-comment--show {
-            font-family: "Roboto", sans-serif;
-            font-size: 14px;
-            font-weight: 100;
-            margin: 5px;
-            height: 30px;
-            border-radius: 3px;
-            border: 1px solid #2271b1;
-            background-color: #f6f7f7;
-            color: #2271b1;
-            &:hover {
-              background-color: #b6b4c0;
-            }
-          }
-          .admin-update-post__comment-input-section {
-            border-bottom: 1px solid #d3d3d3;
-            padding: 0;
-            margin-bottom: 5px;
-            width: 100%;
-            .admin-update-post__textarea {
-              width: calc(100% - 10px);
-              padding: 5px;
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 300;
-              margin: 5px 5px 5px 5px;
-              height: 100px;
-              border: 1px solid rgb(140, 143, 148);
-              border-radius: 0px;
-              border: 1px solid rgb(140, 143, 148);
-              &:focus {
-                border: 2px solid rgb(18, 94, 150);
-                outline: none;
-              }
-            }
-            .admin-update-post__input-actions {
-              .admin-update-post__add-coment--send {
-                font-family: "Roboto", sans-serif;
-                font-size: 14px;
-                font-weight: 100;
-                height: 30px;
-                border-radius: 3px;
-                margin: 5px;
-                border: 1px solid #2271b1;
-                background-color: #f6f7f7;
-                color: #2271b1;
-                &:hover {
-                  background-color: #b6b4c0;
-                }
-              }
-              .admin-update-post__add-coment--cancel {
-                font-family: "Roboto", sans-serif;
-                font-size: 14px;
-                font-weight: 100;
-                margin: 5px;
-                height: 30px;
-                border-radius: 3px;
-                border: 1px solid #2271b1;
-                background-color: #f6f7f7;
-                color: #2271b1;
-                &:hover {
-                  background-color: #b6b4c0;
-                }
-              }
-            }
-          }
-          .admin-update-post__comment-author {
-            display: flex;
-            align-items: center;
-
-            .admin-update-post__author-avatar {
-              margin-left: 5px;
-              img {
-                width: 35px;
-                height: 35px;
-                border-radius: 50%;
-              }
-            }
-
-            .admin-update-post__author-info {
-              display: flex;
-              flex-direction: column;
-              margin-left: 10px;
-              font-family: "Roboto", sans-serif;
-              font-size: 13px;
-
-              .admin-update-post__author-name {
-                margin-bottom: 5px;
-                font-weight: 400;
-                font-size: 12px;
-                color: #53575f;
-              }
-              .admin-update-post__author-email {
-                font-weight: 100;
-                font-size: 12px;
-                color: #4a73a1;
-              }
-            }
-          }
-
-          .admin-update-post__comment-content {
-            font-family: "Roboto", sans-serif;
-            font-size: 14px;
-            font-weight: 100;
-            p {
-              margin-top: 10px;
-              margin-bottom: 10px;
-              margin-right: 10px;
-              font-size: 14px;
-              color: #333;
-            }
-
-            .admin-update-post__comment-actions {
-              visibility: hidden; // Ẩn các liên kết
-
-              a {
-                color: #007bff;
-                text-decoration: none;
-                margin-right: 15px;
-                cursor: pointer;
-                position: relative;
-
-                &::after {
-                  content: "|";
-                  position: absolute;
-                  right: -10px; // Điều chỉnh khoảng cách giữa các ký tự
-                  color: #000; // Màu của ký tự ngăn cách
-                }
-
-                &:last-child::after {
-                  content: ""; // Ẩn ký tự ngăn cách cho phần tử cuối cùng
-                }
-
-                &.admin-update-post__comment-actions--reply {
-                  color: #007bff;
-                }
-
-                &.admin-update-post__comment-actions--edit {
-                  color: #28a745;
-                }
-
-                &.admin-update-post__comment-actions--trash {
-                  color: #dc3545;
-                }
-              }
-            }
-
-            .admin-update-post__comment-content:hover
-              .admin-update-post__comment-actions {
-              visibility: visible; // Hiển thị các liên kết khi hover vào phần tử cha
-            }
-            &:hover .admin-update-post__comment-actions {
-              visibility: visible; // Hiển thị các liên kết khi hover vào phần tử cha
-            }
-          }
-          .admin-update-post__reply-input-section {
-            border-bottom: 1px solid #d3d3d3;
-            padding: 0;
-            margin-bottom: 5px;
-            width: 100%;
-            .admin-update-post__textarea {
-              width: calc(100% - 10px);
-              padding: 5px;
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 300;
-              margin: 5px 5px 5px 5px;
-              height: 100px;
-              border: 1px solid rgb(140, 143, 148);
-              border-radius: 0px;
-              border: 1px solid rgb(140, 143, 148);
-              &:focus {
-                border: 2px solid rgb(18, 94, 150);
-                outline: none;
-              }
-            }
-            .admin-update-post__input-actions {
-              .admin-update-post__reply--send {
-                font-family: "Roboto", sans-serif;
-                font-size: 14px;
-                font-weight: 100;
-                height: 30px;
-                border-radius: 3px;
-                margin: 5px;
-                border: 1px solid #2271b1;
-                background-color: #f6f7f7;
-                color: #2271b1;
-                &:hover {
-                  background-color: #b6b4c0;
-                }
-              }
-              .admin-update-post__reply--cancel {
-                font-family: "Roboto", sans-serif;
-                font-size: 14px;
-                font-weight: 100;
-                margin: 5px;
-                height: 30px;
-                border-radius: 3px;
-                border: 1px solid #2271b1;
-                background-color: #f6f7f7;
-                color: #2271b1;
-                &:hover {
-                  background-color: #b6b4c0;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  .admin-update-post__sidebar {
+  .sidebar {
     padding: 0;
     margin: 0;
-    border-radius: 0px;
-    width: 100%; /* Đảm bảo sidebar chiếm hết chiều rộng */
-
-    .admin-update-post__category {
+    border-radius: 0;
+    width: 100%;
+    &__category {
       width: 100%;
       border-radius: 0;
       margin-bottom: 20px;
-
-      .admin-update-post__category-header {
+      border: solid 1px #d1d1d1;
+      &-header {
         height: 35px;
         background-color: #ffffff;
-
-        .admin-update-post__category-title {
-          font-family: "Roboto", sans-serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 10px;
+        .sidebar__category-header-title {
           font-size: 15px;
           font-weight: 500;
           margin: 0;
           color: #3b3a3d;
-          width: 80%;
         }
-        .admin-update-post__category-controls {
+        .sidebar__category-header-controls {
           color: #787c82;
           display: flex;
-          justify-content: space-between;
-          width: 20%;
+          margin-left: auto; /* Pushes the controls to the right */
+          gap: 10px; /* Adds space between the icons */
         }
       }
-      .admin-update-post__category-body {
-        padding: 5px;
-        .admin-update-post__category-tabs {
-          margin-bottom: 0;
-          .admin-update-post__category-tab {
-            list-style: none;
-            padding: 5px 10px;
-            border-radius: 0;
-            font-size: 14px;
-            font-family: "Roboto", sans-serif;
-            color: #377dc0;
-            &:not(.active) {
-              border-bottom: 2px solid transparent; /* Viền trong suốt khi không active */
+      &-body {
+        background-color: #fff;
+        .category__tabs {
+          display: flex;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          border-bottom: 1px solid #ccc;
+          &-tab {
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition:
+              background-color 0.3s ease,
+              color 0.3s ease;
+            padding: 0;
+            &:hover {
+              background-color: #f0f0f0;
             }
+            &.active {
+              background-color: #e5ecf3;
+
+              .category__tabs-link {
+                color: rgb(0, 0, 0);
+                border-bottom: 2px solid #377dc0;
+              }
+            }
+          }
+          &-link {
+            display: block;
+            padding: 5px 15px;
+            text-decoration: none;
+            color: #377dc0;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+
+            &:not(.active) {
+              border-bottom: 2px solid transparent;
+            }
+
             &.active {
               color: #2b6dad;
             }
           }
         }
-        .admin-update-post__category-content {
-          .admin-update-post__category-pane {
-            .admin-update-post__category-list {
-              list-style: none; /* Bỏ dấu chấm tròn của ul */
-              padding: 0; /* Bỏ khoảng cách padding */
-              border: none; /* Bỏ border của ul */
-
-              .admin-update-post__category-item {
-                border: none;
-                margin-bottom: 5px;
-                margin-left: 20px;
-
-                .admin-update-post__checkbox {
-                  display: inline-flex;
-                  align-items: center;
-                  cursor: pointer;
-                  position: relative;
-                  font-family: "Roboto", sans-serif;
-                  font-size: 13px;
-                }
-
-                .admin-update-post__checkbox input[type="radio"] {
-                  /* Ẩn checkbox mặc định */
-                  appearance: none;
-                  -webkit-appearance: none;
-                  width: 1rem;
-                  height: 1rem;
-                  background-color: #fff;
-                  border: 1px solid #8c8f94;
-                  border-radius: 4px;
-                  color: #50575e;
-                  position: relative;
-                  margin-right: 10px;
-                  cursor: pointer;
-                  display: inline-block;
-                  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-                  transition: 0.05s border-color ease-in-out;
-                }
-
-                .admin-update-post__checkbox input[type="radio"]:checked {
-                  background-color: #fff;
-                  border: 2px solid #266eb1; /* Màu viền khi được chọn */
-                }
-
-                .admin-update-post__checkbox
-                  input[type="radio"]:checked::after {
-                  /* Dấu tích bằng Font Awesome */
-                  content: "\f00c"; /* Mã Unicode của icon fa-check */
-                  font-family: "Font Awesome 6 Free"; /* Font của Font Awesome */
-                  font-weight: 900; /* Font Awesome yêu cầu sử dụng font-weight */
-                  position: absolute;
-                  top: 50%;
-                  left: 50%;
-                  transform: translate(-50%, -50%); /* Căn giữa dấu tích */
-                  color: #266eb1; /* Màu sắc của dấu tích */
-                  font-size: 12px; /* Kích thước của icon */
-                }
-
-                .admin-update-post__checkbox input[type="radio"]:focus {
-                  outline: none;
-                  border-color: #266eb1;
-                }
-              }
-            }
+        .category__content {
+          padding: 10px 0;
+          &-list {
+            list-style: none;
+            padding: 0;
+            border: none;
           }
-          .admin-update-post__add-category {
-            margin: 0 10px;
-            .admin-update-post__add-category-btn {
-              font-size: 14px;
-              font-family: "Roboto", sans-serif;
-              color: #377dc0;
-            }
-            .admin-update-post__add-category-input {
-              width: 100%;
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 300;
-              margin-bottom: 15px;
-              height: 30px;
-              border-radius: 3px;
-              border: 1px solid rgb(140, 143, 148);
-              padding-left: 10px; /* Thêm khoảng cách cho chữ placeholder */
-              &:focus {
-                border: 2px solid rgb(18, 94, 150);
-                outline: none;
-              }
-            }
-            .admin-update-post__add-category-select {
-              display: flex;
-              width: 100%;
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 300;
-              line-height: 30px;
-              margin-bottom: 15px;
-              height: 30px;
-              border-radius: 3px;
-              justify-content: "center";
-              border: 1px solid rgb(140, 143, 148);
-              &:focus {
-                border: 2px solid rgb(18, 94, 150);
-                outline: none;
-              }
-            }
-            .admin-update-post__add-category-submit {
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 100;
-              margin-bottom: 15px;
-              height: 30px;
-              border-radius: 3px;
-              border: 1px solid #2271b1;
-              background-color: #f6f7f7;
-              color: #2271b1;
-              &:hover {
-                background-color: #b6b4c0;
-              }
-            }
-          }
-        }
-      }
-    }
-    .admin-update-post__publish {
-      margin-bottom: 20px;
-      width: 100%;
-      border-radius: 0;
-      .admin-update-post__publish-header {
-        height: 35px;
-        background-color: #ffffff;
-
-        .admin-update-post__publish-title {
-          font-family: "Roboto", sans-serif;
-          font-size: 14px;
-          font-weight: 500;
-          margin: 0;
-          color: #3b3a3d;
-          width: 80%;
-        }
-        .admin-update-post__publish-controls {
-          color: #787c82;
-          display: flex;
-          justify-content: space-between;
-          width: 20%;
-        }
-      }
-      .admin-update-post__publish-body {
-        font-weight: 300;
-        padding: 5px;
-        .admin-update-post__actions {
-          display: flex;
-          justify-content: end;
-          margin: 10px;
-          .admin-update-post__button-draft,
-          .admin-update-post__button-preview {
-            font-family: "Roboto", sans-serif;
-            font-size: 15px;
-            font-weight: 100;
+          &-item {
+            border: none;
             margin-bottom: 5px;
-            height: 30px;
-            border-radius: 3px;
-            border: 1px solid #2271b1;
-            background-color: #f6f7f7;
-            color: #2271b1;
-            &:hover {
-              background-color: #b6b4c0;
-            }
+            margin-left: 10px;
           }
-        }
-        .admin-update-post__publish-details {
-          display: flex;
-          flex-direction: column;
-          margin: 5px 0 5px 0;
-
-          .admin-update-post__publish-status,
-          .admin-update-post__publish-visibility,
-          .admin-update-post__publish-revision,
-          .admin-update-post__publish-vcount,
-          .admin-update-post__publish-schedule {
-            font-size: 14px;
-            font-family: "Roboto", sans-serif;
-            margin: 7px 10px;
-            display: flex;
+          &-label {
+            display: inline-flex;
             align-items: center;
-
-            i {
-              width: 20px; /* Đặt kích thước cố định cho icon */
-              text-align: center; /* Căn giữa icon */
-              margin-right: 10px; /* Khoảng cách giữa icon và văn bản */
-              font-size: 16px; /* Kích thước của icon */
-              color: #8e8d90; /* Màu sắc cho icon */
-            }
-
-            strong {
-              font-weight: 400; /* Làm đậm văn bản "Trạng thái", "Chế độ xem", "Bản thảo", "Đăng" */
-            }
-
-            span {
-              font-weight: 600; /* Giảm độ đậm cho các phần này */
-            }
-
-            a {
-              color: #1a5697;
-              text-decoration: underline;
-              cursor: pointer;
-              font-weight: 400;
-              margin-left: 5px;
-            }
+            cursor: pointer;
+            position: relative;
+            font-size: 13px;
           }
+          &-radio {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1rem;
+            height: 1rem;
+            background-color: #fff;
+            border: 1px solid #8c8f94;
+            border-radius: 4px;
+            color: #50575e;
+            position: relative;
+            margin-right: 10px;
+            cursor: pointer;
+            display: inline-block;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: 0.05s border-color ease-in-out;
 
-          .edit-container {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-
-            select {
-              display: flex;
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 300;
-              line-height: 30px;
-              height: 30px;
-              border-radius: 3px;
-              justify-content: "center";
-              border: 1px solid rgb(140, 143, 148);
-              &:focus {
-                border: 2px solid rgb(18, 94, 150);
-                outline: none;
-              }
-            }
-
-            button {
-              font-family: "Roboto", sans-serif;
-              font-size: 15px;
-              font-weight: 100;
-              height: 30px;
-              border-radius: 3px;
-              border: 1px solid #2271b1;
-              background-color: #f6f7f7;
-              margin-left: 5px;
-              color: #2271b1;
-              &:hover {
-                background-color: #b6b4c0;
-              }
-            }
-
-            a {
-              color: #1a5697;
-              text-decoration: underline;
-              cursor: pointer;
-              font-weight: 400;
-            }
-          }
-
-          .radio-group {
-            display: flex;
-            align-items: center;
-            margin-left: 5px;
-            font-family: "Roboto", sans-serif;
-            font-weight: 100;
-
-            input[type="radio"] {
-              appearance: none;
-              -webkit-appearance: none;
-              width: 1rem;
-              height: 1rem;
-              padding: 0;
+            &:checked {
               background-color: #fff;
-              border: 1px solid #8c8f94;
-              border-radius: 4px;
-              color: #50575e;
-              position: relative;
-              margin: 0px 5px 0px 0px;
-              cursor: pointer;
-              display: inline-block;
-              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-              transition: 0.05s border-color ease-in-out;
+              border: 2px solid #266eb1;
 
-              &:checked {
-                background-color: #fff;
-                border: 2px solid #266eb1;
-              }
-              &:checked::after {
-                content: "\f00c";
-                font-family: "Font Awesome 6 Free";
+              &::after {
+                content: '\f00c';
+                font-family: 'Font Awesome 6 Free';
                 font-weight: 900;
                 position: absolute;
                 top: 50%;
@@ -658,40 +142,222 @@
                 color: #266eb1;
                 font-size: 12px;
               }
-              &:focus {
-                outline: none;
-                border-color: #266eb1;
+            }
+
+            &:focus {
+              outline: none;
+              border-color: #266eb1;
+            }
+          }
+          &-add {
+            margin: 0 10px;
+            position: relative;
+            .category__add-btn {
+              font-size: 14px;
+              color: #377dc0;
+              margin-bottom: 10px;
+            }
+            .category__add-input-wrapper {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              position: relative;
+              margin-bottom: 15px;
+
+              .category__add-input {
+                width: 100%;
+                font-size: 15px;
+                font-weight: 300;
+                height: 30px;
+                border-radius: 3px;
+                border: 1px solid rgb(140, 143, 148);
+                padding-left: 10px;
+                &:focus {
+                  border: 2px solid rgb(18, 94, 150);
+                  outline: none;
+                }
+              }
+
+              .category__add-error-wrapper {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 100%;
+                text-align: center;
+                pointer-events: none; /* Prevents the error message from blocking interactions with the input */
               }
             }
 
-            label {
-              margin-right: 10px;
-              font-size: 16px;
-              color: #333;
+            .category__add-select {
+              display: flex;
+              width: 100%;
+              font-size: 15px;
+              font-weight: 300;
+              line-height: 30px;
+              margin-bottom: 15px;
+              height: 30px;
+              border-radius: 3px;
+              justify-content: center;
+              border: 1px solid rgb(140, 143, 148);
+              &:focus {
+                border: 2px solid rgb(18, 94, 150);
+                outline: none;
+              }
+            }
+
+            .category__add-submit {
+              font-size: 15px;
+              font-weight: 100;
+              margin-bottom: 15px;
+              height: 30px;
+              border-radius: 3px;
+              border: 1px solid #2271b1;
+              background-color: #f6f7f7;
+              color: #2271b1;
+              &:hover {
+                background-color: #b6b4c0;
+              }
+            }
+
+            .category__add-error {
+              font-size: 12px;
+              color: red;
             }
           }
         }
       }
-      .admin-update-post__publish-footer {
-        .admin-update-post__button-remove {
-          font-size: 14px;
+    }
+    &__publish {
+      margin-bottom: 20px;
+      width: 100%;
+      border-radius: 0;
+      border: solid 1px #d1d1d1;
+      background-color: #ffffff;
+      &-header {
+        height: 35px;
+        background-color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 10px;
+        border-bottom: 1px solid #d1d1d1;
+        .sidebar__publish-header-title {
+          font-size: 15px;
+          font-weight: 500;
           margin: 0;
-          padding: 0;
-          font-family: "Roboto", sans-serif;
-          color: #c86b72;
+          color: #3b3a3d;
         }
-        .admin-update-post__button-publish {
-          font-family: "Roboto", sans-serif;
-          font-size: 14px;
-          font-weight: 100;
+        .sidebar__publish-header-controls {
+          color: #787c82;
+          display: flex;
+          margin-left: auto; /* Pushes the controls to the right */
+          gap: 10px; /* Adds space between the icons */
+        }
+      }
+      &-body {
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        .publish__status,
+        .publish__visibility,
+        .publish__revision {
+          margin: 10px 10px;
+          display: flex;
+          align-items: center;
+          i {
+            width: 20px; /* Đặt kích thước cố định cho icon */
+            text-align: center; /* Căn giữa icon */
+            margin-right: 10px; /* Khoảng cách giữa icon và văn bản */
+            font-size: 16px; /* Kích thước của icon */
+            color: #8e8d90; /* Màu sắc cho icon */
+            cursor: pointer;
+          }
+
+          strong {
+            font-weight: 400; /* Làm đậm văn bản "Trạng thái", "Chế độ xem", "Bản thảo", "Đăng" */
+          }
+
+          span {
+            font-weight: 500;
+          }
+
+          a {
+            color: #1a5697;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 400;
+            margin-left: 5px;
+          }
+          &-edit {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+          }
+          &-select {
+            padding: 5px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            min-width: 100px;
+            margin-right: 5px;
+          }
+          &-button {
+            padding: 5px 5px;
+            font-size: 12px;
+            background-color: #377dc0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            &:hover {
+              background-color: #2b6dad;
+            }
+          }
+          &-cancel {
+            font-size: 12px;
+            color: #377dc0;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+
+            &:hover {
+              color: #2b6dad;
+              text-decoration: underline;
+            }
+          }
+          &-radio {
+            margin: 0;
+            padding: 0;
+          }
+          &-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+          }
+          &-label {
+            font-size: 12px;
+            margin: 5px;
+          }
+        }
+      }
+      &-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-top: 1px solid #d1d1d1;
+        .sidebar__publish-submit {
           margin-bottom: 5px;
-          height: 30px;
+          padding: 5px 10px;
           border-radius: 0px;
           border: 1px solid #2271b1;
           background-color: #2370b0;
           color: #ffffff;
           margin-right: 5px;
           float: right;
+          text-align: center;
+
           transition:
             opacity 0.3s,
             background-color 0.3s; // Thêm hiệu ứng chuyển đổi
@@ -708,259 +374,280 @@
         }
       }
     }
-    .admin-update-post__tags {
+    &__tags {
       margin-bottom: 20px;
       width: 100%;
       border-radius: 0;
-      .admin-update-post__tags-header {
+      border: solid 1px #d1d1d1;
+      background-color: #ffffff;
+      &-header {
         height: 35px;
         background-color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 10px;
+        border-bottom: 1px solid #d1d1d1;
 
-        .admin-update-post__tags-title {
-          font-family: "Roboto", sans-serif;
-          font-size: 14px;
+        .sidebar__tags-header-title {
+          font-size: 15px;
           font-weight: 500;
           margin: 0;
           color: #3b3a3d;
-          width: 80%;
         }
-        .admin-update-post__tags-controls {
+        .sidebar__tags-header-controls {
           color: #787c82;
           display: flex;
-          justify-content: space-between;
-          width: 20%;
+          margin-left: auto; /* Pushes the controls to the right */
+          gap: 10px; /* Adds space between the icons */
         }
       }
-      .admin-update-post__tags-body {
-        font-weight: 300;
-        padding: 5px;
 
-        .admin-update-post__tags-input-group {
+      &-body {
+        padding: 5px;
+        .sidebar__tags-controls {
           display: flex;
-          text-align: center;
-          margin-top: 10px;
-          .admin-update-post__tags-input {
-            width: 100%;
-            font-family: "Roboto", sans-serif;
-            font-size: 15px;
-            font-weight: 300;
-            margin-bottom: 15px;
-            margin-right: 10px;
-            height: 30px;
-            border-radius: 3px;
-            border: 1px solid rgb(140, 143, 148);
-            padding-left: 10px; /* Thêm khoảng cách cho chữ placeholder */
-            &:focus {
-              border: 2px solid rgb(18, 94, 150);
-              outline: none;
-            }
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 10px;
+
+          .tags__controls-input {
+            flex: 1;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
           }
-          .admin-update-post__button-add-tag {
-            font-family: "Roboto", sans-serif;
-            font-size: 15px;
-            font-weight: 100;
-            margin-bottom: 15px;
-            height: 30px;
-            border-radius: 3px;
-            border: 1px solid #2271b1;
-            background-color: #f6f7f7;
-            color: #2271b1;
+
+          .tags__controls-button {
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: #377dc0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
             &:hover {
-              background-color: #b6b4c0;
+              background-color: #2b6dad;
+            }
+
+            &:disabled {
+              background-color: #ccc;
+              cursor: not-allowed;
             }
           }
         }
-        .admin-update-post__span-tags {
-          margin: 5px 5px 5px 10px;
+
+        .sidebar__tags-error {
+          margin-top: 10px;
+          padding: 10px;
+          background-color: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+          border-radius: 4px;
+          font-size: 14px;
         }
-        .admin-update-post__tags-list {
+
+        .sidebar__tags-span {
+          font-size: 14px;
+          margin-bottom: 10px;
+        }
+
+        .sidebar__tags-list {
           display: flex;
           flex-wrap: wrap;
           gap: 5px;
+          margin-bottom: 10px;
 
-          .admin-update-post__tag {
-            font-family: "Roboto", sans-serif;
-            font-size: 15px;
-            display: inline-flex;
+          .sidebar__tags-tag {
+            background-color: #e0e0e0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
             align-items: center;
-            font-weight: 100;
-            color: #242628;
-            border-radius: 20px;
+            gap: 5px;
 
-            cursor: pointer;
-          }
-          .admin-update-post__tag i {
-            margin-left: 10px;
-            cursor: pointer;
-          }
-
-          .admin-update-post__tag i:hover {
-            color: #ff6347;
+            i {
+              cursor: pointer;
+              color: #ff0000;
+            }
           }
         }
-        .admin-update-post__popular-tags {
-          margin: 5px 5px 5px 10px;
+
+        .sidebar__tags-popular {
+          font-size: 14px;
+          color: #377dc0;
+          text-decoration: none;
+          cursor: pointer;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
+        .sidebar__tags-warning {
+          margin-top: 10px;
+          padding: 10px;
+          background-color: #fff3cd;
+          color: #856404;
+          border: 1px solid #ffeeba;
+          border-radius: 4px;
+          font-size: 14px;
         }
       }
     }
-    .admin-update-post__favorite {
+    &__favorite {
       margin-bottom: 20px;
       width: 100%;
       border-radius: 0;
-      .admin-update-post__favorite-header {
+      border: solid 1px #d1d1d1;
+      background-color: #ffffff;
+      &-header {
         height: 35px;
         background-color: #ffffff;
-
-        .admin-update-post__favorite-title {
-          font-family: "Roboto", sans-serif;
-          font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 10px;
+        border-bottom: 1px solid #d1d1d1;
+        .sidebar__favorite-header-title {
+          font-size: 15px;
           font-weight: 500;
           margin: 0;
           color: #3b3a3d;
-          width: 80%;
         }
-        .admin-update-post__favorite-controls {
+        .sidebar__favorite-header-controls {
           color: #787c82;
           display: flex;
-          justify-content: space-between;
-          width: 20%;
+          margin-left: auto; /* Pushes the controls to the right */
+          gap: 10px; /* Adds space between the icons */
         }
       }
-      .admin-update-post__favorite-body {
-        margin-top: 10px;
+      &-body {
+        padding: 5px;
+      }
+      &-list {
+        list-style: none;
         padding: 0;
-        font-weight: 300;
-        .admin-update-post__favorite-list {
-          list-style: none; /* Bỏ dấu chấm tròn của ul */
-          padding: 0; /* Bỏ khoảng cách padding */
-          border: none; /* Bỏ border của ul */
+        margin: 0;
+      }
+      &-item {
+        margin-bottom: 10px;
 
-          .admin-update-post__favorite-item {
-            border: none;
-            margin-bottom: 5px;
-            margin-left: 20px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      &-checkbox {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
 
-            .admin-update-post__checkbox {
-              display: inline-flex;
-              align-items: center;
-              cursor: pointer;
-              font-size: 16px;
-              position: relative;
-              font-family: "Roboto", sans-serif;
-              font-size: 14px;
-            }
+        input[type='checkbox'] {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 1rem;
+          height: 1rem;
+          background-color: #fff;
+          border: 1px solid #8c8f94;
+          border-radius: 4px;
+          color: #50575e;
+          position: relative;
+          margin-right: 10px;
+          cursor: pointer;
+          display: inline-block;
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+          transition: 0.05s border-color ease-in-out;
+        }
+        input[type='checkbox']:checked {
+          background-color: #fff;
+          border: 2px solid #266eb1; /* Màu viền khi được chọn */
+        }
 
-            .admin-update-post__checkbox input[type="checkbox"] {
-              /* Ẩn checkbox mặc định */
-              appearance: none;
-              -webkit-appearance: none;
-              width: 1rem;
-              height: 1rem;
-              background-color: #fff;
-              border: 1px solid #8c8f94;
-              border-radius: 4px;
-              color: #50575e;
-              position: relative;
-              margin-right: 10px;
-              cursor: pointer;
-              display: inline-block;
-              box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-              transition: 0.05s border-color ease-in-out;
-            }
+        input[type='checkbox']:checked::after {
+          /* Dấu tích bằng Font Awesome */
+          content: '\f00c'; /* Mã Unicode của icon fa-check */
+          font-family: 'Font Awesome 6 Free'; /* Font của Font Awesome */
+          font-weight: 900; /* Font Awesome yêu cầu sử dụng font-weight */
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%); /* Căn giữa dấu tích */
+          color: #266eb1; /* Màu sắc của dấu tích */
+          font-size: 12px; /* Kích thước của icon */
+        }
 
-            .admin-update-post__checkbox input[type="checkbox"]:checked {
-              background-color: #fff;
-              border: 2px solid #266eb1; /* Màu viền khi được chọn */
-            }
-
-            .admin-update-post__checkbox input[type="checkbox"]:checked::after {
-              /* Dấu tích bằng Font Awesome */
-              content: "\f00c"; /* Mã Unicode của icon fa-check */
-              font-family: "Font Awesome 6 Free"; /* Font của Font Awesome */
-              font-weight: 900; /* Font Awesome yêu cầu sử dụng font-weight */
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%); /* Căn giữa dấu tích */
-              color: #266eb1; /* Màu sắc của dấu tích */
-              font-size: 12px; /* Kích thước của icon */
-            }
-
-            .admin-update-post__checkbox input[type="checkbox"]:focus {
-              outline: none;
-              border-color: #266eb1;
-            }
-          }
+        input[type='checkbox']:focus {
+          outline: none;
+          border-color: #266eb1;
         }
       }
     }
-    .admin-update-post__thumbnail {
-      margin-top: 20px;
+    &__thumbnail {
+      margin-bottom: 20px;
       width: 100%;
       border-radius: 0;
-      .admin-update-post__thumbnail-header {
+      border: solid 1px #d1d1d1;
+      background-color: #ffffff;
+      &-header {
         height: 35px;
         background-color: #ffffff;
-        .admin-update-post__thumbnail-title {
-          font-family: "Roboto", sans-serif;
-          font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0px 10px;
+        border-bottom: 1px solid #d1d1d1;
+        .sidebar__thumbnail-header-title {
+          font-size: 15px;
           font-weight: 500;
           margin: 0;
           color: #3b3a3d;
-          width: 80%;
         }
-        .admin-update-post__thumbnail-controls {
+        .sidebar__thumbnail-header-controls {
           color: #787c82;
           display: flex;
-          justify-content: space-between;
-          width: 20%;
+          margin-left: auto; /* Pushes the controls to the right */
+          gap: 10px; /* Adds space between the icons */
         }
       }
-      .admin-update-post__thumbnail-body {
-        font-weight: 300;
+      &-body {
         padding: 5px;
-        .admin-update-post__thumbnail-img {
-          max-width: 96%;
-          height: auto;
-          cursor: pointer;
-          border: 1px solid #ddd;
-          border-radius: 0px;
-          transition: transform 0.2s;
-          margin-left: 5px;
+      }
+      &-img {
+        max-width: 96%;
+        height: auto;
+        cursor: pointer;
+        border: 1px solid #ddd;
+        border-radius: 0px;
+        transition: transform 0.2s;
+        margin-left: 5px;
+        &:hover {
+          transform: scale(1.03);
+        }
+      }
 
-          &:hover {
-            transform: scale(1.03);
-          }
-        }
-        .admin-update-post__thumbnail-remove {
-          font-size: 14px;
-          font-family: "Roboto", sans-serif;
-          color: #c86b72;
-          cursor: pointer;
-        }
-        .admin-update-post__button-select-thumbnail {
-          font-size: 14px;
-          font-family: "Roboto", sans-serif;
-          color: #377dc0;
-        }
+      &-remove {
+        font-size: 14px;
+        color: #c86b72;
+        cursor: pointer;
+      }
+      &-button {
+        color: #377dc0;
       }
     }
   }
-  .admin-update-post__reply {
-    margin-left: 20px; /* Thụt vào so với bình luận cha */
-    background-color: #f9f9f9; /* Màu nền nhạt hơn */
-    border-left: 3px solid #ddd; /* Đường viền bên trái */
+}
+@media (max-width: 768px) {
+  .admin-update-post {
+    flex-direction: column; /* Chuyển hướng flex thành cột */
   }
-
-  .admin-update-post__reply .media-body h6 {
-    font-size: 0.9rem; /* Kích thước chữ nhỏ hơn */
+  .admin-update-post > div {
+    width: 100%; /* Đảm bảo cả main và sidebar chiếm toàn bộ chiều rộng */
   }
-
-  .admin-update-post__reply .media-body p {
-    font-size: 0.85rem; /* Kích thước chữ nhỏ hơn */
-  }
-
-  .admin-update-post__reply .media img {
-    width: 40px; /* Kích thước ảnh nhỏ hơn */
+  .main,
+  .sidebar {
+    width: 100%; /* Đảm bảo các phần tử bên trong cũng chiếm toàn bộ chiều rộng */
   }
 }

@@ -1,0 +1,213 @@
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  color: #000;
+  z-index: 999;
+  border-bottom: 2px solid #dad9d9;
+  transition: transform 0.5s;
+  height: 44px;
+
+  &.topbar-hidden {
+    transform: translateY(-100%);
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+    padding-left: 20px;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-right: 20px;
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+
+  &__contact {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    color: #000;
+    font-size: 1rem;
+    text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
+
+    &-icon {
+      margin-right: 8px;
+      color: rgb(3, 156, 211);
+
+      &:hover {
+        color: #0d76af;
+      }
+    }
+    &-email,
+    &-phone {
+      color: #000;
+      font-size: 1rem;
+      margin-right: 5px;
+      text-decoration: none;
+      &:hover {
+        text-decoration: none;
+        color: #0d76af;
+      }
+    }
+  }
+
+  &__social {
+    display: flex;
+    margin-right: 20px;
+
+    &-link {
+      color: #000;
+      font-size: 1.2rem;
+      margin-right: 5px;
+      text-decoration: none;
+
+      &:hover {
+        opacity: 0.7;
+      }
+      .topbar__link-facebook {
+        color: #3b5998;
+        margin-right: 10px;
+        font-size: 18px;
+
+        &:hover {
+          color: #042261;
+        }
+      }
+      .topbar__link-youtube {
+        font-size: 18px;
+        color: #cd201f;
+        &:hover {
+          color: #5b0202;
+        }
+      }
+    }
+  }
+
+  &__login {
+    position: relative;
+    padding-right: 30px;
+
+    &-link {
+      color: #000;
+      font-size: 1rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+
+      &:hover {
+        color: #079cec;
+      }
+
+      .topbar__icon {
+        margin-right: 8px;
+        color: #000;
+
+        &:hover {
+          color: #079cec;
+        }
+      }
+    }
+  }
+  &__login-user {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    color: #000;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    &:hover {
+      text-decoration: none;
+      color: #0d76af;
+    }
+  }
+  &__login-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    min-width: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+    opacity: 0;
+    transform: translateY(-10px);
+
+    &.open {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .topbar__menu-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar__menu-item {
+      padding: 12px 16px;
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+      transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+
+      &:hover {
+        background-color: #6ad7ef;
+        color: #fff;
+      }
+    }
+  }
+}
+
+// Media Queries for Responsive Design
+@media (max-width: 768px) {
+  .topbar__left {
+    display: none;
+  }
+
+  .topbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    height: 44px;
+  }
+
+  .topbar__contact,
+  .topbar__social,
+  .topbar__login {
+    margin: 0 10px;
+  }
+
+  .topbar__contact {
+    font-size: 0.9rem;
+  }
+
+  .topbar__social-link {
+    font-size: 1rem;
+  }
+
+  .topbar__login-link {
+    font-size: 0.9rem;
+  }
+}

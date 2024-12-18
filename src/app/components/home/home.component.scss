@@ -13,20 +13,24 @@
   height: 40px;
   border-radius: 4px;
   transition: all 0.4s;
-}
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 
-.back-to-top i {
-  font-size: 28px;
-  color: #fff;
-  line-height: 0;
-}
+  i {
+    font-size: 28px;
+    color: #fff;
+    line-height: 0;
+  }
 
-.back-to-top:hover {
-  background: #03d1fe;
-  color: #fff;
-}
+  &:hover {
+    background: #03d1fe;
+    color: #fff;
+  }
 
-.back-to-top.active {
-  visibility: visible;
-  opacity: 1;
+  &.active {
+    visibility: visible;
+    opacity: 1;
+  }
 }

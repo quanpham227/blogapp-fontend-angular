@@ -1,12 +1,9 @@
-<ngx-spinner type="ball-climbing-dot">
-  <p class="text-white">Loading...</p>
-</ngx-spinner>
 <div class="blog-detail" role="article">
   <div *ngIf="post">
     <header class="blog-detail__header">
       <h1 class="blog-detail__title">{{ post.title }}</h1>
       <div class="blog-detail__author-info">
-        <img [src]="post.profileImage" [alt]="post.authorName" class="blog-detail__author-avatar" />
+        <img [src]="post.profileImage" (error)="handleImageError($event)" [alt]="post.authorName" class="blog-detail__author-avatar" />
         <div class="blog-detail__author-details">
           <span class="blog-detail__author-name">{{ post.authorName }}</span>
           <span class="blog-detail__publish-date">{{ post.createdAt | date: 'mediumDate' }}</span>
@@ -33,16 +30,17 @@
       <div class="blog-detail__comments-list">
         <div *ngFor="let comment of rootComments$ | async; trackBy: trackByCommentId" class="blog-detail__comment-item">
           <div class="blog-detail__comment-header">
-            <img [src]="comment.profileImage" [alt]="comment.fullName" class="blog-detail__comment-avatar" />
+            <img
+              [src]="comment.profileImage"
+              (error)="handleImageError($event)"
+              [alt]="comment.fullName"
+              class="blog-detail__comment-avatar"
+            />
             <div class="blog-detail__comment-meta">
               <span class="blog-detail__username">{{ comment.fullName }}</span>
               <span class="blog-detail__timestamp">{{ comment.createdAt | date: 'short' }}</span>
             </div>
-            <i
-              (click)="toggleReplyForm(comment.id)"
-              class="fas fa-reply blog-detail__reply-icon"
-              aria-label="Reply"
-            ></i>
+            <i (click)="toggleReplyForm(comment.id)" class="fas fa-reply blog-detail__reply-icon" aria-label="Reply"></i>
           </div>
           <p class="blog-detail__comment-text">{{ comment.content }}</p>
 
@@ -56,12 +54,14 @@
           </div>
 
           <div class="blog-detail__replies" *ngIf="comment.replies && comment.replies.length > 0">
-            <div
-              *ngFor="let reply of comment.replies; let j = index; trackBy: trackByCommentId"
-              class="blog-detail__reply-item"
-            >
+            <div *ngFor="let reply of comment.replies; let j = index; trackBy: trackByCommentId" class="blog-detail__reply-item">
               <div class="blog-detail__comment-header">
-                <img [src]="reply.profileImage" [alt]="reply.fullName" class="blog-detail__comment-avatar" />
+                <img
+                  [src]="reply.profileImage"
+                  (error)="handleImageError($event)"
+                  [alt]="reply.fullName"
+                  class="blog-detail__comment-avatar"
+                />
                 <div class="blog-detail__comment-meta">
                   <span class="blog-detail__username">{{ reply.fullName }}</span>
                   <span class="blog-detail__timestamp">{{ reply.createdAt | date: 'short' }}</span>

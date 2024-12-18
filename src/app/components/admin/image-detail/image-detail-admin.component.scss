@@ -1,0 +1,170 @@
+.image-detail-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+
+  &__title {
+    margin: 0;
+    padding-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  mat-grid-list {
+    height: 100%;
+  }
+
+  mat-grid-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  &__info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    justify-content: center;
+    position: relative;
+
+    h2 {
+      margin-top: 0;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .image-url-field {
+      width: 100%;
+      display: flex;
+      align-items: center;
+
+      i {
+        font-size: 24px;
+        color: #555;
+        cursor: pointer;
+        transition:
+          color 0.3s,
+          transform 0.3s;
+
+        &:hover {
+          color: #1976d2;
+          transform: scale(1.2);
+        }
+      }
+    }
+
+    .close-button {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
+
+    &__title {
+      font-size: 20px;
+    }
+
+    mat-grid-list {
+      display: block;
+    }
+
+    mat-grid-tile {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    &__info {
+      padding: 10px;
+
+      h2 {
+        font-size: 18px;
+      }
+
+      p {
+        font-size: 12px;
+      }
+
+      .image-url-field {
+        flex-direction: column;
+        align-items: flex-start;
+
+        input {
+          width: 100%;
+        }
+
+        i {
+          font-size: 20px;
+        }
+      }
+
+      .close-button {
+        position: static;
+        margin-top: 10px;
+        align-self: flex-end;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    &__title {
+      font-size: 18px;
+    }
+
+    mat-grid-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    mat-grid-tile {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    &__info {
+      padding: 10px;
+
+      h2 {
+        font-size: 16px;
+      }
+
+      p {
+        font-size: 10px;
+      }
+
+      .image-url-field {
+        flex-direction: column;
+        align-items: flex-start;
+
+        input {
+          font-size: 12px;
+        }
+
+        i {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}

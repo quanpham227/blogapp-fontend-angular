@@ -1,144 +1,255 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
-interface Comment {
-  id: number;
-  userName: string;
-  userAvatar: string;
-  content: string;
-  date: Date;
-  status: string;
-}
+import { CommentResponse } from '../../../models/comment';
+import { CommentStatus } from '../../../enums/comment-status.enum';
+import { debounceTime, distinctUntilChanged, Subject, BehaviorSubject } from 'rxjs';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { SnackbarService } from '../../../services/snackbar.service';
+import { CommentService } from '../../../services/comment.service';
+import { CommentEnumService } from '../../../utils/comment-enum.service';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import isEqual from 'lodash-es/isEqual';
+import { CommentListResponse } from '../../../responses/comment/comment-list-response';
+import { ApiResponse } from '../../../models/response';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
+import { CustomPaginationComponent } from '../../common/custom-pagination/custom-pagination.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { AuthService } from '../../../services/auth.service';
+
+@UntilDestroy()
 @Component({
   selector: 'comment-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, CommonModule, RouterModule, FlexLayoutModule, CustomPaginationComponent],
   templateUrl: './comment.admin.component.html',
-  styleUrl: './comment.admin.component.scss',
-  animations: [
-    trigger('modalAnimation', [
-      transition(':enter', [style({ opacity: 0 }), animate('300ms', style({ opacity: 1 }))]),
-      transition(':leave', [animate('300ms', style({ opacity: 0 }))]),
-    ]),
-    trigger('notificationAnimation', [
-      transition(':enter', [
-        style({ transform: 'translateY(100%)', opacity: 0 }),
-        animate('300ms', style({ transform: 'translateY(0)', opacity: 1 })),
-      ]),
-      transition(':leave', [animate('300ms', style({ transform: 'translateY(100%)', opacity: 0 }))]),
-    ]),
-  ],
+  styleUrls: ['./comment.admin.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CommentAdminComponent {
-  comments: Comment[] = [
-    {
-      id: 1,
-      userName: 'John Doe',
-      userAvatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36',
-      content: 'This is a great post! Very informative.',
-      date: new Date(),
-      status: 'pending',
-    },
-    {
-      id: 2,
-      userName: 'Jane Smith',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-      content: 'Thanks for sharing this valuable information.',
-      date: new Date(),
-      status: 'approved',
-    },
-  ];
+export class CommentAdminComponent implements OnInit {
+  comments: CommentResponse[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 6;
+  totalPages: number = 0;
+  visiblePages: number[] = [];
+  keyword: string = '';
+  status: CommentStatus | '' = '';
+  private searchSubject: Subject<string> = new Subject();
+  private pageChangeSubject: Subject<number> = new Subject();
+  private statusChangeSubject: Subject<CommentStatus | ''> = new Subject();
+  private commentsCache: BehaviorSubject<CommentResponse[]> = new BehaviorSubject<CommentResponse[]>([]);
+  dialogRef: MatDialogRef<any> | null = null;
+  showClearIcon: boolean = false;
 
-  filteredComments: Comment[] = [];
-  filterStatus: string = 'all';
-  searchTerm: string = '';
-  showEditModal: boolean = false;
-  showDeleteModal: boolean = false;
-  editingComment: any = {};
-  deleteCommentId: number | null = null;
-  notification = {
-    show: false,
-    message: '',
-    type: 'success',
-  };
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private snackBar: SnackbarService,
+    private commentService: CommentService,
+    private commentEnumService: CommentEnumService,
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+  ) {}
+
+  CommentStatus = this.commentEnumService.getCommentStatus();
 
   ngOnInit(): void {
-    this.filteredComments = [...this.comments];
-  }
+    this.route.queryParams.pipe(untilDestroyed(this)).subscribe((params) => {
+      this.keyword = params['keyword'] || '';
+      this.currentPage = +params['page'] || 1;
+      this.status = params['status'] || '';
+      this.showClearIcon = this.keyword.length > 0;
+      this.getComments();
+    });
 
-  filterComments(): void {
-    this.filteredComments = this.comments.filter((comment) => {
-      const matchesStatus = this.filterStatus === 'all' || comment.status === this.filterStatus;
-      const matchesSearch =
-        comment.content.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        comment.userName.toLowerCase().includes(this.searchTerm.toLowerCase());
-      return matchesStatus && matchesSearch;
+    this.searchSubject.pipe(debounceTime(300), untilDestroyed(this)).subscribe((keyword) => {
+      this.keyword = keyword;
+      this.updateUrl();
+      this.getComments();
+    });
+
+    this.pageChangeSubject.pipe(debounceTime(300), distinctUntilChanged(), untilDestroyed(this)).subscribe((page) => {
+      this.currentPage = page;
+      this.updateUrl();
+      this.getComments();
+    });
+
+    this.statusChangeSubject.pipe(debounceTime(300), distinctUntilChanged(), untilDestroyed(this)).subscribe((status) => {
+      this.status = status;
+      this.currentPage = 1;
+      this.updateUrl();
+      this.getComments();
     });
   }
 
-  searchComments(): void {
-    this.filterComments();
+  getComments() {
+    this.commentService
+      .getComments(this.keyword, this.currentPage - 1, this.itemsPerPage, this.status)
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+      )
+      .subscribe({
+        next: (response: ApiResponse<CommentListResponse>) => {
+          if (response.status === 'OK' && response.data) {
+            const newComments = response.data.comments;
+            if (!isEqual(this.comments, newComments)) {
+              this.comments = newComments;
+              this.commentsCache.next(newComments);
+              this.totalPages = response.data.totalPages;
+              this.cdr.markForCheck();
+            }
+          }
+        },
+        error: (err) => {
+          this.snackBar.show('Failed to load comments');
+        },
+      });
   }
 
-  approveComment(comment: Comment): void {
-    comment.status = 'approved';
-    this.showNotification('Comment approved successfully', 'success');
-  }
-
-  rejectComment(comment: Comment): void {
-    comment.status = 'rejected';
-    this.showNotification('Comment rejected', 'info');
-  }
-
-  editComment(comment: Comment): void {
-    this.editingComment = { ...comment };
-    this.showEditModal = true;
-  }
-
-  updateComment(): void {
-    const index = this.comments.findIndex((c) => c.id === this.editingComment.id);
-    if (index !== -1) {
-      this.comments[index] = { ...this.editingComment };
-      this.filterComments();
-      this.closeEditModal();
-      this.showNotification('Comment updated successfully', 'success');
+  onPageChange(page: number) {
+    if (page !== this.currentPage && page >= 1 && page <= this.totalPages) {
+      this.pageChangeSubject.next(page);
     }
   }
 
-  deleteComment(comment: Comment): void {
-    this.deleteCommentId = comment.id;
-    this.showDeleteModal = true;
+  onSearchEnter(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.keyword = target.value;
+    this.searchSubject.next(this.keyword);
+    this.showClearIcon = this.keyword.length > 0;
   }
 
-  confirmDelete(): void {
-    if (this.deleteCommentId) {
-      this.comments = this.comments.filter((c) => c.id !== this.deleteCommentId);
-      this.filterComments();
-      this.closeDeleteModal();
-      this.showNotification('Comment deleted successfully', 'success');
+  clearSearch(event: Event): void {
+    this.keyword = '';
+    this.showClearIcon = false;
+    const input = (event.target as HTMLElement).parentElement?.querySelector('.comment-management__search-input') as HTMLInputElement;
+    if (input) {
+      input.value = '';
+      input.focus();
+      this.onSearchEnter({ target: input } as unknown as Event);
+    }
+    this.currentPage = 1;
+    this.updateUrl();
+    this.getComments();
+  }
+
+  onFocusSearch(event: Event): void {
+    this.showClearIcon = this.keyword.length > 0;
+  }
+
+  onBlurSearch(event: Event): void {
+    if (this.keyword.length === 0) {
+      this.showClearIcon = false;
     }
   }
 
-  closeEditModal(): void {
-    this.showEditModal = false;
-    this.editingComment = {};
+  onStatusChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.statusChangeSubject.next(selectElement.value as CommentStatus | '');
   }
 
-  closeDeleteModal(): void {
-    this.showDeleteModal = false;
-    this.deleteCommentId = null;
-  }
-
-  showNotification(message: string, type: string): void {
-    this.notification = {
-      show: true,
-      message,
-      type,
+  updateCommentStatus(id: number, status: CommentStatus): void {
+    if (id === null) {
+      this.snackBar.show('Invalid comment ID');
+      return;
+    }
+    const dialogData: ConfirmDialogData = {
+      title: 'Confirm Action',
+      message: `Are you sure you want to ${status.toLowerCase()} this comment?`,
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
     };
 
-    setTimeout(() => {
-      this.notification.show = false;
-    }, 3000);
+    import('../shared/confirm-dialog/confirm-dialog.component').then(({ ConfirmDialogComponent }) => {
+      this.dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: dialogData,
+      });
+      this.handleDialogResponseUpdateCommentStatus(this.dialogRef, id, status);
+    });
+  }
+
+  private handleDialogResponseUpdateCommentStatus(
+    dialogRef: MatDialogRef<ConfirmDialogComponent>,
+    id: number,
+    status: CommentStatus,
+  ): void {
+    dialogRef
+      .afterClosed()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (result) => {
+          if (result) {
+            this.commentService
+              .updateStatus(id, status)
+              .pipe(untilDestroyed(this))
+              .subscribe({
+                next: (response: ApiResponse<void>) => {
+                  if (response.status === 'OK') {
+                    this.getComments();
+                    this.cdr.markForCheck();
+                  }
+                },
+                error: (err) => {
+                  this.snackBar.show('Failed to update comment status');
+                },
+              });
+          }
+        },
+      });
+  }
+
+  trackByCommentId(index: number, comment: CommentResponse): number {
+    return comment.id;
+  }
+
+  updateUrl(): void {
+    const currentParams = this.route.snapshot.queryParams;
+    const queryParams = {
+      keyword: this.keyword || undefined,
+      page: this.currentPage > 1 ? this.currentPage : undefined,
+      status: this.status || undefined,
+    };
+    if (!isEqual(currentParams, queryParams)) {
+      this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
+    }
+  }
+
+  toLowerCase(): string {
+    return this.keyword.toLowerCase();
+  }
+
+  handleImageError(event: any): void {
+    event.target.src = 'assets/images/user-profile-default.jpeg';
+  }
+
+  async editComment(comment: any): Promise<void> {
+    const dialogModule = await import('../update-comment/update-comment-admin.component');
+    const dialogRef = this.dialog.open(dialogModule.UpdateCommentAdminComponent, {
+      width: '600px',
+      data: { comment },
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        const updateCommentDTO = {
+          userId: result.userId,
+          content: result.content,
+        };
+        this.commentService.editComment(result.id, updateCommentDTO).subscribe({
+          next: (response) => {
+            if (response.status === 'OK') {
+              this.getComments();
+              this.cdr.markForCheck();
+            }
+          },
+          error: (err) => {
+            this.snackBar.show('Failed to update comment');
+          },
+        });
+      }
+    });
   }
 }

@@ -45,10 +45,17 @@ export class AchievementService {
     }
     return response;
   }
-  getAchievements(): Observable<ApiResponse<Achievement[]>> {
-    return this.http.get<ApiResponse<Achievement[]>>(this.apiAchievement).pipe(map(this.convertResponse.bind(this)));
+  getAchievementsForAdmin(): Observable<ApiResponse<Achievement[]>> {
+    return this.http
+      .get<ApiResponse<Achievement[]>>(`${this.apiAchievement}/admin`)
+      .pipe(map(this.convertResponse.bind(this)));
   }
 
+  getActiveAchievementsForUser(): Observable<ApiResponse<Achievement[]>> {
+    return this.http
+      .get<ApiResponse<Achievement[]>>(`${this.apiAchievement}/user`)
+      .pipe(map(this.convertResponse.bind(this)));
+  }
   updateAchievement(id: number, achievement: Achievement): Observable<ApiResponse<Achievement>> {
     const payload = this.convertToServerFormat(achievement);
     return this.http.put<ApiResponse<Achievement>>(`${this.apiAchievement}/${id}`, payload).pipe(

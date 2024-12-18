@@ -1,8 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, tap, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators'; // Import catchError
-
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { RegisterDTO } from '../../app/dtos/user/register.dto';
 import { environment } from '../../environments/environment';
 import { UserResponse } from '../../app/responses/user/user.response';
@@ -11,18 +10,25 @@ import { DOCUMENT } from '@angular/common';
 import { Router } from '@angular/router';
 import { LoginDTO } from '../dtos/user/login.dto';
 import { AuthService } from './auth.service';
-import { LoggingService } from './logging.service';
+import { convertToCamelCase, convertToSnakeCase } from '../utils/case-converter';
 import { SuccessHandlerService } from './success-handler.service';
 import { ApiResponse } from '../models/response';
+import { User } from '../models/user';
+import { UserListResponse } from '../responses/user/uses-list-response';
+import { UpdateUserByAdminDTO } from '../dtos/user/update.user.admin';
+import { SnackbarService } from './snackbar.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private apiRegister = `${environment.apiBaseUrl}/users/register`;
-  private apiLogin = `${environment.apiBaseUrl}/users/login`;
   private apiLogout = `${environment.apiBaseUrl}/users/logout`;
   private apiUserDetail = `${environment.apiBaseUrl}/users/details`;
+  private apiUsers = `${environment.apiBaseUrl}/users`;
+  private apiBlockUser = `${environment.apiBaseUrl}/users/block`;
+  private apiUpdateUserByAdmin = `${environment.apiBaseUrl}/users/admin/update`;
+
   localStorage?: Storage;
 
   private apiConfig = {
@@ -39,8 +45,8 @@ export class UserService {
     private http: HttpClient,
     private router: Router,
     private authService: AuthService,
-    private loggingService: LoggingService,
     private successHandlerService: SuccessHandlerService,
+    private snackbarService: SnackbarService,
     @Inject(DOCUMENT) private document: Document,
   ) {
     this.localStorage = this.document.defaultView?.localStorage;
@@ -55,52 +61,138 @@ export class UserService {
   }
 
   register(registerDTO: RegisterDTO): Observable<any> {
-    return this.http.post(this.apiRegister, registerDTO, this.apiConfig);
-  }
-  login(loginDTO: LoginDTO): Observable<any> {
-    return this.http.post(this.apiLogin, loginDTO, {
-      ...this.apiConfig,
-      withCredentials: true,
-    });
+    const snakeCaseDTO = convertToSnakeCase(registerDTO);
+    return this.http.post(this.apiRegister, snakeCaseDTO, this.apiConfig);
   }
 
-  getUserDetail(token: string): Observable<UserResponse> {
+  getUserDetail(token: string): Observable<ApiResponse<UserResponse>> {
     this.checkTokenValidity();
+    return this.http
+      .post<ApiResponse<UserResponse>>(
+        this.apiUserDetail,
+        {},
+        {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          }),
+        },
+      )
+      .pipe(
+        map((response) => ({
+          ...response,
+          data: convertToCamelCase(response.data),
+        })),
+      );
+  }
 
-    return this.http.post<UserResponse>(
-      this.apiUserDetail,
-      {},
-      {
+  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<any> {
+    this.checkTokenValidity();
+    const userResponse = this.authService.getUser();
+    const snakeCaseDTO = convertToSnakeCase(updateUserDTO);
+    return this.http
+      .put(`${this.apiUserDetail}/${userResponse?.id}`, snakeCaseDTO, {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         }),
-      },
-    );
+      })
+      .pipe(
+        map((response) => convertToCamelCase(response)),
+        tap((response) => this.successHandlerService.handleApiResponse(response)),
+      );
   }
-  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<any> {
+  updateUserByAdmin(token: string, userId: number, updateUserByAdminDTO: UpdateUserByAdminDTO): Observable<ApiResponse<User>> {
     this.checkTokenValidity();
-
-    const userResponse = this.authService.getUser();
-
-    return this.http.put(`${this.apiUserDetail}/${userResponse?.id}`, updateUserDTO, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      }),
-    });
+    const snakeCaseDTO = convertToSnakeCase(updateUserByAdminDTO);
+    return this.http
+      .put(`${this.apiUpdateUserByAdmin}/${userId}`, snakeCaseDTO, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        }),
+      })
+      .pipe(
+        map((response) => convertToCamelCase(response)),
+        tap((response) => this.successHandlerService.handleApiResponse(response)),
+      );
   }
 
   logout() {
     this.http.post<ApiResponse<void>>(this.apiLogout, {}, { withCredentials: true }).subscribe({
       next: (response: ApiResponse<void>) => {
         const user = this.authService.getUser();
-        const isAdmin = user?.role.name === 'ADMIN';
+        const isAdminOrModerator = this.authService.isAdminOrModerator();
         this.authService.logout(); // Gọi phương thức logout từ AuthService
-        this.router.navigate([isAdmin ? '/login' : '/']).then(() => {});
-        this.successHandlerService.handleApiResponse(response);
+        this.router.navigate([isAdminOrModerator ? '/login' : '/']).then(() => {});
+        this.snackbarService.show(response.message);
       },
       error: (error) => {},
     });
+  }
+  findAllUsers(
+    keyword: string = '',
+    status: boolean | null = null,
+    roleId: number,
+    page: number = 0,
+    limit: number = 10,
+  ): Observable<ApiResponse<UserListResponse>> {
+    let params = new HttpParams()
+      .set('keyword', keyword)
+      .set('status', status !== null ? status.toString() : '')
+      .set('roleId', roleId)
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    return this.http.get<ApiResponse<UserListResponse>>(this.apiUsers, { params }).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data.users = response.data.users.map((user) => convertToCamelCase(user));
+        }
+        return response;
+      }),
+    );
+  }
+  blockOrEnableUser(userId: number, active: boolean): Observable<ApiResponse<void>> {
+    const url = `${this.apiBlockUser}/${userId}/${active ? 1 : 0}`;
+    return this.http
+      .put<ApiResponse<void>>(url, {}, this.apiConfig)
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
+  }
+  saveUserResponseToLocalStorage(userResponse?: UserResponse) {
+    try {
+      if (userResponse == null || !userResponse) {
+        return;
+      }
+      const userResponseJSON = JSON.stringify(userResponse);
+      this.localStorage?.setItem('user', userResponseJSON);
+    } catch (error) {
+      this.snackbarService.show('Error saving user response to local storage:');
+    }
+  }
+  getUserResponseFromLocalStorage(): UserResponse | null {
+    try {
+      const userResponseJSON = this.localStorage?.getItem('user');
+      if (userResponseJSON == null || userResponseJSON == undefined) {
+        return null;
+      }
+      const userResponse = JSON.parse(userResponseJSON!);
+      return userResponse;
+    } catch (error) {
+      this.snackbarService.show('Error retrieving user response from local storage:');
+      return null;
+    }
+  }
+  removeUserFromLocalStorage(): void {
+    try {
+      this.localStorage?.removeItem('user');
+    } catch (error) {
+      this.snackbarService.show('Error removing user data from local storage:');
+    }
+  }
+  deleteUser(userId: number): Observable<ApiResponse<void>> {
+    return this.http
+      .delete<ApiResponse<any>>(`${this.apiUsers}/${userId}`)
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

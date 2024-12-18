@@ -1,4 +1,6 @@
-import { camelCase, snakeCase, mapKeys } from 'lodash';
+import camelCase from 'lodash-es/camelCase';
+import snakeCase from 'lodash-es/snakeCase';
+import mapKeys from 'lodash-es/mapKeys';
 
 export function convertToCamelCase(data: any): any {
   if (Array.isArray(data)) {

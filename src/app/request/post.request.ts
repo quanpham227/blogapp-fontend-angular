@@ -5,9 +5,9 @@ import { TagRequest } from './tags.request';
 export interface PostRequest {
   title: string;
   content: string;
-  category_id: number;
+  categoryId: number;
   thumbnail: String;
-  public_id: String;
+  publicId: String;
   status: PostStatus;
   visibility: PostVisibility;
   tags: TagRequest[];

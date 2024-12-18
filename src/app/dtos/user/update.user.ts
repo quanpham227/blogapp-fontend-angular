@@ -1,13 +1,13 @@
 export class UpdateUserDTO {
-  fullname: string;
-  phone_number: string;
+  fullName: string;
+  phoneNumber: string;
   password: string;
-  retype_password: string;
+  retypePassword: string;
 
   constructor(data: any) {
-    this.fullname = data.fullname;
-    this.phone_number = data.phone_number;
+    this.fullName = data.fullName;
+    this.phoneNumber = data.phoneNumber;
     this.password = data.password;
-    this.retype_password = data.retype_password;
+    this.retypePassword = data.retypePassword;
   }
 }

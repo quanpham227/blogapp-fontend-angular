@@ -1,0 +1,28 @@
+.custom-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.custom-pagination button {
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  border: none;
+  border-radius: 50%;
+  text-align: center;
+  background-color: transparent;
+  color: #555;
+  cursor: pointer;
+}
+
+.custom-pagination button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.custom-pagination button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}

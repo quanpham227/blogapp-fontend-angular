@@ -71,12 +71,7 @@
             aria-describedby="passwordError"
             class="register__input"
           />
-          <button
-            type="button"
-            class="register__toggle-password"
-            (click)="togglePassword()"
-            aria-label="Toggle password visibility"
-          >
+          <button type="button" class="register__toggle-password" (click)="togglePassword()" aria-label="Toggle password visibility">
             <i class="fas" [class.fa-eye-slash]="showPassword" [class.fa-eye]="!showPassword"></i>
           </button>
         </div>
@@ -87,12 +82,9 @@
           role="alert"
         >
           <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
-          <span *ngIf="registerForm.get('password')?.errors?.['minlength']">
-            Password must be at least 8 characters
-          </span>
+          <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 8 characters</span>
           <span *ngIf="registerForm.get('password')?.errors?.['pattern']">
-            Password must contain at least one uppercase letter, one lowercase letter, one number, and one special
-            character
+            Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character
           </span>
         </div>
       </div>
@@ -133,47 +125,15 @@
           I agree to the
           <a target="_blank" class="register__terms-link">Terms and Conditions</a>
         </label>
-        <div
-          *ngIf="registerForm.get('terms')?.touched && registerForm.get('terms')?.invalid"
-          class="register__error-message"
-        >
+        <div *ngIf="registerForm.get('terms')?.touched && registerForm.get('terms')?.invalid" class="register__error-message">
           You must accept the terms and conditions
         </div>
       </div>
 
-      <button
-        type="submit"
-        class="register__button"
-        [disabled]="registerForm.invalid || isLoading"
-        aria-label="Register"
-      >
+      <button type="submit" class="register__button" [disabled]="registerForm.invalid || isLoading" aria-label="Register">
         <span *ngIf="!isLoading">Register</span>
         <div *ngIf="isLoading" class="register__spinner"></div>
       </button>
-
-      <div class="register__social-register">
-        <p class="register__social-text">Or register with</p>
-        <div class="register__social-buttons">
-          <button
-            type="button"
-            class="register__social-button register__social-button--google"
-            (click)="registerWithGoogle()"
-            aria-label="Register with Google"
-          >
-            <i class="fab fa-google"></i>
-            Google
-          </button>
-          <button
-            type="button"
-            class="register__social-button register__social-button--facebook"
-            (click)="registerWithFacebook()"
-            aria-label="Register with Facebook"
-          >
-            <i class="fab fa-facebook-f"></i>
-            Facebook
-          </button>
-        </div>
-      </div>
 
       <div class="register__login-section">
         <p class="register__login-text">Already have an account?</p>

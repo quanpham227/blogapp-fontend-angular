@@ -1,84 +1,46 @@
-<div class="contact">
-  <div class="row gy-4">
-    <div class="col-xl-6">
-      <div class="row">
-        <div class="col-lg-6">
-          <div class="info-box card">
-            <i class="bi bi-geo-alt"></i>
-            <h3>Address</h3>
-            <p>
-              A108 Adam Street,
-              <br />
-              New York, NY 535022
-            </p>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="info-box card">
-            <i class="bi bi-telephone"></i>
-            <h3>Call Us</h3>
-            <p>
-              +1 5589 55488 55
-              <br />
-              +1 6678 254445 41
-            </p>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="info-box card">
-            <i class="bi bi-envelope"></i>
-            <h3>Email Us</h3>
-            <p>
-              info&#64;example.com
-              <br />
-              contact&#64;example.com
-            </p>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="info-box card">
-            <i class="bi bi-clock"></i>
-            <h3>Open Hours</h3>
-            <p>
-              Monday - Friday
-              <br />
-              9:00AM - 05:00PM
-            </p>
-          </div>
+<div class="contact-container">
+  <div class="form-wrapper">
+    <h2>Contact Administration</h2>
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+      <div class="form-group">
+        <label for="name" aria-label="Full Name">Full Name</label>
+        <input type="text" id="name" formControlName="name" aria-required="true" />
+        <div class="error-message" *ngIf="contactForm.get('name')?.touched && contactForm.get('name')?.errors?.['required']">
+          Name is required
         </div>
       </div>
-    </div>
 
-    <div class="col-xl-6">
-      <div class="card p-4">
-        <form action="forms/contact.php" method="post" class="php-email-form">
-          <div class="row gy-4">
-            <div class="col-md-6">
-              <input type="text" name="name" class="form-control" placeholder="Your Name" required />
-            </div>
-
-            <div class="col-md-6">
-              <input type="email" class="form-control" name="email" placeholder="Your Email" required />
-            </div>
-
-            <div class="col-md-12">
-              <input type="text" class="form-control" name="subject" placeholder="Subject" required />
-            </div>
-
-            <div class="col-md-12">
-              <textarea class="form-control" name="message" rows="6" placeholder="Message" required></textarea>
-            </div>
-
-            <div class="col-md-12 text-center">
-              <div class="loading">Loading</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Your message has been sent. Thank you!</div>
-
-              <button type="submit">Send Message</button>
-            </div>
-          </div>
-        </form>
+      <div class="form-group">
+        <label for="email" aria-label="Email Address">Email Address</label>
+        <input type="email" id="email" formControlName="email" aria-required="true" />
+        <div class="error-message" *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.errors?.['required']">
+          Email is required
+        </div>
+        <div class="error-message" *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.errors?.['email']">
+          Please enter a valid email
+        </div>
       </div>
-    </div>
+
+      <div class="form-group">
+        <label for="subject" aria-label="Subject">Subject</label>
+        <input type="text" id="subject" formControlName="subject" aria-required="true" />
+        <div class="error-message" *ngIf="contactForm.get('subject')?.touched && contactForm.get('subject')?.errors?.['required']">
+          Subject is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="message" aria-label="Message">Message</label>
+        <textarea id="message" formControlName="message" rows="3" aria-required="true"></textarea>
+        <div class="error-message" *ngIf="contactForm.get('message')?.touched && contactForm.get('message')?.errors?.['required']">
+          Message is required
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="contactForm.invalid || isSubmitting" class="submit-btn">
+        <span *ngIf="!isSubmitting">Send Message</span>
+        <div *ngIf="isSubmitting" class="spinner"></div>
+      </button>
+    </form>
   </div>
 </div>

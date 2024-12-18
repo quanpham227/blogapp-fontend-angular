@@ -5,6 +5,7 @@ import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { TokenService } from '../services/token.service';
+import { SnackbarService } from '../services/snackbar.service';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
@@ -15,6 +16,7 @@ export class TokenInterceptor implements HttpInterceptor {
     private authService: AuthService,
     private tokenService: TokenService,
     private router: Router,
+    private snackbarService: SnackbarService,
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -28,19 +30,13 @@ export class TokenInterceptor implements HttpInterceptor {
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 && token && this.authService.isTokenExpired(token)) {
-          // Xử lý khi token hết hạn và cần làm mới
           return this.handle401Error(authReq, next);
         } else if (error.status === 403) {
-          // Xử lý khi không có quyền truy cập (Forbidden)
-          console.error('Access forbidden: You do not have permission to access this resource.');
-          this.router.navigate(['/forbidden']); // Bạn có thể tạo trang forbidden để hiển thị thông báo lỗi
+          this.snackbarService.show('You do not have permission to access this resource.');
+          this.router.navigate(['/forbidden']);
         } else if (error.status === 0) {
-          // Xử lý khi có lỗi kết nối mạng (Network error)
-          console.error('Network error: Please check your internet connection.');
-          alert('There seems to be a problem with your network. Please try again.');
+          this.snackbarService.show('There seems to be a problem with your network. Please try again.');
         }
-
-        // Nếu không có lỗi nào trong số trên, tiếp tục trả về lỗi
         return throwError(() => error);
       }),
     );
@@ -50,28 +46,27 @@ export class TokenInterceptor implements HttpInterceptor {
     if (!this.isRefreshing) {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
-      console.log('Token expired, attempting to refresh token');
+      this.snackbarService.show('Token expired, attempting to refresh token');
 
       if (!this.authService.hasRefreshToken()) {
         this.isRefreshing = false;
         this.authService.clearAuthData();
-        this.handleNavigation();
+        this.authService.handleNavigation(this.router.url);
         return EMPTY;
       }
 
       return this.tokenService.refreshToken().pipe(
         switchMap((response: any) => {
           this.isRefreshing = false;
-          const clonedRequest = this.addToken(request, response.data.token);
-          this.refreshTokenSubject.next(response.data.token);
-          console.log('Token refreshed successfully');
-          return next.handle(clonedRequest);
+          const newToken = response.data.token;
+          this.authService.setAccessToken(newToken);
+          this.refreshTokenSubject.next(newToken);
+          return next.handle(this.addToken(request, newToken));
         }),
         catchError((err) => {
           this.isRefreshing = false;
           this.authService.clearAuthData();
-          this.handleNavigation();
-          console.error('Error refreshing token:', err);
+          this.authService.handleNavigation(this.router.url);
           return throwError(() => err);
         }),
       );
@@ -79,10 +74,7 @@ export class TokenInterceptor implements HttpInterceptor {
       return this.refreshTokenSubject.pipe(
         filter((token) => token != null),
         take(1),
-        switchMap((token) => {
-          const clonedRequest = this.addToken(request, token);
-          return next.handle(clonedRequest);
-        }),
+        switchMap((token) => next.handle(this.addToken(request, token))),
       );
     }
   }
@@ -93,16 +85,5 @@ export class TokenInterceptor implements HttpInterceptor {
         Authorization: `Bearer ${token}`,
       },
     });
-  }
-
-  private handleNavigation() {
-    const currentUrl = this.router.url;
-    if (currentUrl.startsWith('/admin')) {
-      this.router.navigate(['/login']);
-    } else if (currentUrl.startsWith('/login')) {
-      // Giữ nguyên trang đăng nhập
-    } else {
-      // Giữ nguyên trang hiện tại (trang chủ hoặc các trang khác)
-    }
   }
 }

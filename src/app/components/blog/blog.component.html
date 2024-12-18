@@ -1,6 +1,3 @@
-<ngx-spinner type="ball-climbing-dot">
-  <p class="text-white">Loading...</p>
-</ngx-spinner>
 <div class="blog">
   <div class="blog__banner-content">
     <div class="blog__content-wrapper">
@@ -30,7 +27,7 @@
           </div>
         </div>
 
-        <nav class="blog__category-nav">
+        <div class="blog__category-nav">
           <ng-select
             [items]="categories"
             bindLabel="name"
@@ -40,11 +37,8 @@
             (change)="onCategorySelect($event)"
             [clearable]="true"
             (clear)="clearCategory()"
-            (mouseenter)="ngSelect.open()"
-            (mouseleave)="ngSelect.close()"
-            #ngSelect
           ></ng-select>
-        </nav>
+        </div>
       </div>
     </div>
 
@@ -52,7 +46,7 @@
       <div *ngIf="articles.length > 0; else noResults" class="blog__articles-grid">
         <div *ngFor="let article of articles; trackBy: trackByPost" class="blog__article-card" #articleCard>
           <div class="blog__article-image">
-            <img [appLazyLoad]="article.thumbnailUrl" [transitionDuration]="'0.5s'" [alt]="article.title" />
+            <img [appLazyLoad]="article.thumbnailUrl" [transitionDuration]="'3s'" [alt]="article.title" />
           </div>
           <div class="blog__article-content">
             <h2 class="blog__article-title" (click)="onPostClick(article.slug)">{{ article.title }}</h2>
@@ -82,18 +76,11 @@
       </ng-template>
     </div>
     <div class="blog__articles-pagination">
-      <span class="blog__pagination-links">
-        <ngb-pagination
-          [collectionSize]="totalPages * itemsPerPage"
-          [pageSize]="itemsPerPage"
-          [page]="currentPage"
-          (pageChange)="onPageChange($event)"
-          [maxSize]="5"
-          [rotate]="true"
-          [ellipses]="true"
-          [boundaryLinks]="true"
-        ></ngb-pagination>
-      </span>
+      <app-custom-pagination
+        [totalPages]="totalPages"
+        [currentPage]="currentPage"
+        (pageChange)="onPageChange($event)"
+      ></app-custom-pagination>
     </div>
   </div>
 </div>

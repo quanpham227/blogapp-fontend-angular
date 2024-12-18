@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SidebarAdminService } from '../../../../services/sidebar.admin.service';
@@ -26,7 +26,6 @@ export class SidebarAdminComponent implements OnInit {
   constructor(
     private router: Router,
     private sidebarService: SidebarAdminService,
-    @Inject(DOCUMENT) private document: Document,
   ) {}
 
   ngOnInit() {
@@ -51,6 +50,9 @@ export class SidebarAdminComponent implements OnInit {
   showAdminComponent(componentName: string): void {
     this.activeComponent = componentName;
     this.router.navigate([`/admin/${componentName}`]);
+    if (window.innerWidth < 768) {
+      this.sidebarService.toggleSidebarVisibility();
+    }
   }
 
   toggleNav(nav: string, firstSubComponent: string) {

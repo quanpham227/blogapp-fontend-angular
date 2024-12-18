@@ -1,17 +1,17 @@
 <!-- ======= Clients Section ======= -->
 <section id="clients" class="clients">
-  <div class="container" data-aos="zoom-in">
-    <div class="section-title">
-      <span>CLIENTS</span>
-      <h2>KHÁCH HÀNG</h2>
+  <div class="clients__container" data-aos="zoom-in">
+    <div class="clients__section-title">
+      <span class="clients__section-title--span">CLIENTS</span>
+      <h2 class="clients__section-title--heading">KHÁCH HÀNG</h2>
     </div>
-    <div class="clients-slider swiper">
-      <div class="swiper-wrapper align-items-center">
-        <div class="swiper-slide" *ngFor="let client of clients">
-          <img [src]="client.logo" class="img-fluid" [alt]="client.name" />
+    <div class="clients__slider swiper">
+      <div class="clients__swiper-wrapper swiper-wrapper">
+        <div class="clients__swiper-slide swiper-slide" *ngFor="let client of clients">
+          <img [src]="client.logo" class="clients__img img-fluid" [alt]="client.name" />
         </div>
       </div>
-      <div class="swiper-pagination"></div>
+      <div class="clients__swiper-pagination swiper-pagination"></div>
     </div>
   </div>
 </section>

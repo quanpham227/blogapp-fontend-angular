@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  ActivatedRouteSnapshot,
-  RouterStateSnapshot,
-  CanActivateFn,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, CanActivateFn } from '@angular/router';
 import { Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
@@ -18,30 +14,21 @@ export class AdminGuard {
     private authService: AuthService,
   ) {}
 
-  canActivate(
-    next: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot,
-  ): boolean {
-    console.log('Current route:', next.routeConfig?.path); // Log route hiện tại
+  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    console.log('Current route:', next.routeConfig?.path);
 
-    // Cho phép truy cập vào các route login và register mà không cần kiểm tra token
-    const isPublicRoute =
-      next.routeConfig?.path === 'login' ||
-      next.routeConfig?.path === 'register';
+    const isPublicRoute = next.routeConfig?.path === 'login' || next.routeConfig?.path === 'register';
 
     if (isPublicRoute) {
       return true;
     }
 
-    // Kiểm tra token và quyền admin cho các route không công khai
     const token = this.authService.getAccessToken();
-    const isTokenExpired = token
-      ? this.authService.isTokenExpired(token)
-      : true;
+    const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
     const userResponse: UserResponse | null = this.authService.getUser();
-    const isAdmin = userResponse?.role?.name === 'ADMIN';
+    const isAdminOrModerator = userResponse?.role?.name === 'ADMIN' || userResponse?.role?.name === 'MODERATOR';
 
-    if (!isTokenExpired && isAdmin) {
+    if (!isTokenExpired && isAdminOrModerator) {
       return true;
     } else {
       this.router.navigate(['/login']);
@@ -50,9 +37,6 @@ export class AdminGuard {
   }
 }
 
-export const AdminGuardFn: CanActivateFn = (
-  next: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot,
-): boolean => {
+export const AdminGuardFn: CanActivateFn = (next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean => {
   return inject(AdminGuard).canActivate(next, state);
 };

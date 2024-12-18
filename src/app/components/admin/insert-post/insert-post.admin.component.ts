@@ -1,35 +1,54 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { TinymceEditorComponent } from '../../tinymce-editor/tinymce-editor.component';
 import { CommonModule } from '@angular/common';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ImageSelectModalAdminComponent } from '../shared/components/image-select-modal/image-select-modal.admin.component';
 import { CategoryService } from '../../../services/category.service';
 import { Category } from '../../../models/category';
 import { ApiResponse } from '../../../models/response';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CategoryRequest } from '../../../request/category.request';
-import { PostStatus } from '../../../enums/post-status.enum';
-import { PostVisibility } from '../../../enums/post-visibility.enum';
 import { maxTagsValidator, nonEmptyTagsValidator } from '../../../validators/validators';
 import { PostRequest } from '../../../request/post.request';
 import { PostService } from '../../../services/post.service';
 import { Post } from '../../../models/post';
 import { Router, NavigationExtras } from '@angular/router';
-import { ToasterService } from '../../../services/toaster.service';
-import { LoggingService } from '../../../services/logging.service';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
+import { ImageSelectDialogAdminComponent } from '../shared/image-select-dialog/image-select-dialog.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { BehaviorSubject } from 'rxjs';
+import { PostEnumService } from '../../../utils/post-enum.service';
+import { SnackbarService } from '../../../services/snackbar.service';
 
+@UntilDestroy()
 @Component({
   selector: 'app-insert-post-admin',
   standalone: true,
-  imports: [TinymceEditorComponent, CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    TinymceEditorComponent,
+    FlexLayoutModule,
+    MatTooltipModule,
+    MatSnackBarModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+  ],
   templateUrl: './insert-post.admin.component.html',
-  styleUrl: './insert-post.admin.component.scss',
+  styleUrls: ['./insert-post.admin.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InsertPostAdminComponent implements OnInit {
-  categories: Category[] = [];
-  topCategories: Category[] = [];
+  private categoriesSubject = new BehaviorSubject<Category[]>([]);
+  categories$ = this.categoriesSubject.asObservable();
+
+  private topCategoriesSubject = new BehaviorSubject<Category[]>([]);
+  topCategories$ = this.topCategoriesSubject.asObservable();
+
   postForm: FormGroup;
-  newCategoryNameControl: FormControl; // FormControl riêng cho newCategoryName
+  newCategoryNameControl: FormControl;
   showAddCategory: boolean = false;
   activeCategoryTab: string = 'all';
   isCategoryBodyVisible = true;
@@ -40,21 +59,18 @@ export class InsertPostAdminComponent implements OnInit {
   selectedThumbnailUrl: string | null = null;
   selectedPublicId: string | null = null;
   previousSelectedCategoryId: number | null = null;
-
-  isLoading = false;
-
   tagInputControl = new FormControl('', [Validators.required, Validators.minLength(3)]);
   tags: string[] = [];
-  maxTags = 5; // Giới hạn số lượng thẻ
-  tagLimitExceeded = false; // Biến để kiểm tra xem có vượt quá giới hạn không
+  maxTags = 5;
+  tagLimitExceeded = false;
 
-  status = PostStatus.Published;
-  visibility = PostVisibility.Public;
+  status = this.postEnumService.getPostStatus().Published;
+  visibility = this.postEnumService.getPostVisibility().Public;
   isEditingStatus = false;
   isEditingVisibility = false;
 
-  PostStatus = PostStatus;
-  PostVisibility = PostVisibility;
+  PostStatus = this.postEnumService.getPostStatus();
+  PostVisibility = this.postEnumService.getPostVisibility();
   cards: string[] = ['category', 'publish', 'tags', 'favorite', 'thumbnail'];
   cardVisibility: { [key: string]: boolean } = {
     category: true,
@@ -65,45 +81,44 @@ export class InsertPostAdminComponent implements OnInit {
   };
 
   constructor(
-    private modalService: NgbModal,
+    private dialog: MatDialog,
     private categoryService: CategoryService,
-    private toast: ToasterService,
     private fb: FormBuilder,
     private postService: PostService,
     private router: Router,
-    private loggingService: LoggingService,
+    private snackBarService: SnackbarService,
+    private cdr: ChangeDetectorRef,
+    private postEnumService: PostEnumService,
   ) {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
       content: ['', Validators.required],
       category: this.fb.group({
-        category_id: [null, Validators.required], // Đảm bảo rằng selectedCategoryId được khai báo ở đây
+        categoryId: [null, Validators.required],
       }),
-      status: [PostStatus.Published, Validators.required],
-      visibility: [PostVisibility.Public, Validators.required],
-      tags: [[], [nonEmptyTagsValidator(), maxTagsValidator(5)]], // Sử dụng các validator tùy chỉnh
-      thumbnail: [null, Validators.required], // Thêm thuộc tính thumbnail
-      public_id: [null], // Thêm thuộc tính public_id
+      status: [this.postEnumService.getPostStatus().Published, Validators.required],
+      visibility: [this.postEnumService.getPostVisibility().Public, Validators.required],
+      tags: [[], [nonEmptyTagsValidator(), maxTagsValidator(5)]],
+      thumbnail: [null, Validators.required],
+      publicId: [null, Validators.required],
     });
 
-    this.newCategoryNameControl = new FormControl('', [
-      Validators.required,
-      Validators.minLength(3),
-      Validators.maxLength(50),
-    ]);
+    this.newCategoryNameControl = new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]);
   }
 
   ngOnInit(): void {
-    this.getCategories();
-    this.getTopCategoriesByPostCount();
+    this.loadCategories();
+    this.loadTopCategories();
   }
 
   setActiveCategoryTab(tabName: string) {
     this.activeCategoryTab = tabName;
   }
+
   isCategoryTabActive(tabName: string): boolean {
     return this.activeCategoryTab === tabName;
   }
+
   toggleAddCategory() {
     this.showAddCategory = !this.showAddCategory;
   }
@@ -114,213 +129,237 @@ export class InsertPostAdminComponent implements OnInit {
 
   moveCardUp(index: number) {
     if (index > 0) {
-      // Hoán đổi vị trí của các card
-      const tempCard = this.cards[index - 1];
-      this.cards[index - 1] = this.cards[index];
-      this.cards[index] = tempCard;
-
-      // Hoán đổi trạng thái hiển thị của các card
-      const tempVisibility = this.cardVisibility[tempCard];
-      this.cardVisibility[tempCard] = this.cardVisibility[this.cards[index - 1]];
-      this.cardVisibility[this.cards[index - 1]] = tempVisibility;
+      this.swapCards(index, index - 1);
     }
   }
 
   moveCardDown(index: number) {
     if (index < this.cards.length - 1) {
-      // Hoán đổi vị trí của các card
-      const tempCard = this.cards[index + 1];
-      this.cards[index + 1] = this.cards[index];
-      this.cards[index] = tempCard;
-
-      // Hoán đổi trạng thái hiển thị của các card
-      const tempVisibility = this.cardVisibility[tempCard];
-      this.cardVisibility[tempCard] = this.cardVisibility[this.cards[index + 1]];
-      this.cardVisibility[this.cards[index + 1]] = tempVisibility;
+      this.swapCards(index, index + 1);
     }
   }
-  // Hàm thêm thẻ vào danh sách
-  addTag() {
-    const value = this.tagInputControl.value?.trim(); // Optional chaining để kiểm tra null
 
+  private swapCards(index1: number, index2: number) {
+    [this.cards[index1], this.cards[index2]] = [this.cards[index2], this.cards[index1]];
+    [this.cardVisibility[this.cards[index1]], this.cardVisibility[this.cards[index2]]] = [
+      this.cardVisibility[this.cards[index2]],
+      this.cardVisibility[this.cards[index1]],
+    ];
+  }
+
+  addTag() {
+    const maxTagLength = 20; // Số ký tự tối đa cho mỗi tag
+    const value = this.tagInputControl.value?.trim();
     if (value) {
       const newTags = value
         .split(',')
         .map((tag) => tag.trim())
-        .filter((tag) => tag); // Chỉ lấy các giá trị tag không rỗng
+        .filter((tag) => tag && tag.length <= maxTagLength); // Bỏ qua các tag vượt quá số ký tự cho phép
+
+      if (newTags.length < value.split(',').length) {
+        this.snackBarService.show(`Mỗi tag không được vượt quá ${maxTagLength} ký tự`);
+      }
 
       if (this.tags.length + newTags.length > this.maxTags) {
-        this.tagLimitExceeded = true; // Hiển thị cảnh báo
+        this.tagLimitExceeded = true;
       } else {
         this.tags.push(...newTags);
-        this.tagLimitExceeded = false; // Ẩn cảnh báo nếu thêm thành công
+        this.tagLimitExceeded = false;
         this.tagInputControl.reset();
-        this.postForm.get('tags')?.setValue(this.tags); // Cập nhật giá trị của tags trong FormGroup
+        this.postForm.get('tags')?.setValue(this.tags);
+        this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
       }
     }
   }
 
-  // Hàm xóa thẻ khỏi danh sách
   removeTag(index: number) {
     this.tags.splice(index, 1);
-    this.tagLimitExceeded = false; // Ẩn cảnh báo khi xóa thẻ
-    this.postForm.get('tags')?.setValue(this.tags); // Cập nhật giá trị của tags trong FormGroup
+    this.tagLimitExceeded = false;
+    this.postForm.get('tags')?.setValue(this.tags);
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 
-  // Phương thức để mở modal chọn ảnh
-  openImageModal(): void {
-    const modalRef = this.modalService.open(ImageSelectModalAdminComponent, {
-      centered: true,
-      backdrop: 'static',
-      keyboard: true,
-      windowClass: 'admin-image-modal',
-      size: 'lg',
+  openImageDialog(): void {
+    import('../shared/image-select-dialog/image-select-dialog.component').then(({ ImageSelectDialogAdminComponent }) => {
+      const dialogRef = this.dialog.open(ImageSelectDialogAdminComponent, {
+        width: '1000px',
+        disableClose: true,
+      });
+      this.handleDialogResponse(dialogRef);
     });
+  }
 
-    modalRef.result
-      .then((result) => {
-        if (result) {
-          this.selectedThumbnailUrl = result.url;
-          this.selectedPublicId = result.publicId;
-
-          // Check if values are correctly retrieved
-          if (this.selectedThumbnailUrl && this.selectedPublicId) {
-            this.postForm.patchValue({
-              thumbnail: this.selectedThumbnailUrl,
-              public_id: this.selectedPublicId,
-            });
-
-            // Force change detection
-            this.postForm.updateValueAndValidity();
-          } else {
-            this.toast.warning('Received values are undefined');
+  private handleDialogResponse(dialogRef: MatDialogRef<ImageSelectDialogAdminComponent>): void {
+    dialogRef
+      .afterClosed()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (result) => {
+          if (result) {
+            this.selectedThumbnailUrl = result.url;
+            this.selectedPublicId = result.publicId;
+            if (this.selectedThumbnailUrl && this.selectedPublicId) {
+              this.postForm.patchValue({
+                thumbnail: this.selectedThumbnailUrl,
+                publicId: this.selectedPublicId,
+              });
+              this.postForm.updateValueAndValidity();
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            } else {
+              this.snackBarService.show('An error occurred while selecting image');
+            }
           }
-        }
-      })
-      .catch((error) => {
-        this.toast.error('Modal dismissed with error:', error);
+        },
+        error: () => {
+          this.snackBarService.show('An error occurred while selecting image');
+        },
       });
   }
 
-  // Phương thức để xóa ảnh
   removeThumbnail() {
     this.selectedThumbnailUrl = null;
     this.selectedPublicId = null;
     this.postForm.patchValue({
       thumbnail: null,
-      public_id: null,
+      publicId: null,
     });
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
-  getCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (response: ApiResponse<Category[]>) => {
-        if (response.status === 'OK' && response.data) {
-          this.categories = response.data;
-        }
-      },
-    });
+
+  private loadCategories(forceReload: boolean = false): void {
+    if (!forceReload && this.categoriesSubject.value.length > 0) {
+      return; // Tránh gọi lại API nếu đã có dữ liệu và không cần cập nhật
+    }
+    this.categoryService
+      .getCategories()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Category[]>) => {
+          if (response.status === 'OK' && response.data) {
+            this.categoriesSubject.next(response.data);
+            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          }
+        },
+      });
   }
-  getTopCategoriesByPostCount(): void {
-    this.categoryService.getTopCategoriesByPostCount().subscribe({
-      next: (response: ApiResponse<Category[]>) => {
-        if (response.status === 'OK' && response.data) {
-          this.topCategories = response.data;
-        }
-      },
-    });
+
+  private loadTopCategories(forceReload: boolean = false): void {
+    if (!forceReload && this.categoriesSubject.value.length > 0) {
+      return; // Tránh gọi lại API nếu đã có dữ liệu và không cần cập nhật
+    }
+    this.categoryService
+      .getTopCategoriesByPostCount()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Category[]>) => {
+          if (response.status === 'OK' && response.data) {
+            this.topCategoriesSubject.next(response.data);
+            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          }
+        },
+      });
   }
+
   onCategoryChange(categoryId: number | null) {
-    const selectedCategoryIdControl = this.postForm.get('category.category_id');
+    const selectedCategoryIdControl = this.postForm.get('category.categoryId');
     if (this.previousSelectedCategoryId === categoryId) {
-      selectedCategoryIdControl?.setValue(null); // Bỏ chọn nếu giá trị giống nhau
+      selectedCategoryIdControl?.setValue(null);
       this.previousSelectedCategoryId = null;
     } else {
       selectedCategoryIdControl?.setValue(categoryId);
       this.previousSelectedCategoryId = categoryId;
     }
-    console.log('Selected Category ID:', categoryId);
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
+
   addCategory() {
     if (this.newCategoryNameControl.valid) {
       const categoryRequest: CategoryRequest = {
-        name: this.newCategoryNameControl.value.trim(), // Lấy giá trị từ FormControl
+        name: this.newCategoryNameControl.value.trim(),
         description: '',
       };
 
-      this.categoryService.insertCategory(categoryRequest).subscribe({
-        next: (response: ApiResponse<Category>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.getCategories();
-            this.getTopCategoriesByPostCount();
-            this.toggleAddCategory();
-            this.newCategoryNameControl.reset(); // Reset giá trị sau khi thêm
-          }
-        },
-      });
+      this.categoryService
+        .insertCategory(categoryRequest)
+        .pipe(untilDestroyed(this))
+        .subscribe({
+          next: (response: ApiResponse<Category>) => {
+            if (response.status === 'OK' || response.status === 'CREATED') {
+              this.loadCategories(true);
+              this.loadTopCategories(true);
+              this.toggleAddCategory();
+              this.newCategoryNameControl.reset();
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            }
+          },
+        });
     } else {
-      this.toast.warning('Vui lòng nhập tên chuyên mục hợp lệ');
+      this.snackBarService.show('Please enter a valid category name');
     }
   }
 
   onSubmitPost() {
     if (this.postForm.invalid) {
-      this.toast.warning('Vui lòng điền đầy đủ thông tin');
+      this.snackBarService.show('Please fill in all required fields');
       return;
     }
-    this.isLoading = true;
     const formValue = this.postForm.value;
-
-    // Chuyển đổi cấu trúc dữ liệu
     const postRequest: PostRequest = {
       ...formValue,
-      category_id: formValue.category.category_id,
+      categoryId: formValue.category.categoryId,
     };
 
-    this.postService.insertPost(postRequest).subscribe({
-      next: (response: ApiResponse<Post>) => {
-        if (response.status === 'CREATED' || response.status === 'OK') {
-          const navigationExtras: NavigationExtras = {
-            state: { message: response.message },
-          };
-          console.log('Navigation Extras:', navigationExtras); // Kiểm tra navigationExtras
-          setTimeout(() => {
-            this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
-              this.isLoading = false;
-            });
-          }, 3000); // Thời gian chờ 3 giây trước khi điều hướng
-        } else {
-          this.isLoading = false;
-        }
-      },
-      error: (error: any) => {
-        this.isLoading = false;
-      },
-    });
+    this.postService
+      .insertPost(postRequest)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Post>) => {
+          if (response.status === 'CREATED' || response.status === 'OK') {
+            const navigationExtras: NavigationExtras = {
+              state: { message: response.message },
+            };
+            setTimeout(() => {
+              this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
+                this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+              });
+            }, 3000);
+          } else {
+            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          }
+        },
+        error: () => {
+          this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+        },
+      });
   }
 
   startEditStatus() {
     this.isEditingStatus = true;
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 
   saveStatus() {
     this.isEditingStatus = false;
-    console.log('Updated Status:', this.status); // Thêm dòng này để kiểm tra giá trị cập nhật
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 
   cancelEditStatus() {
     this.isEditingStatus = false;
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 
   startEditVisibility() {
     this.isEditingVisibility = true;
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 
   saveVisibility() {
     this.isEditingVisibility = false;
-    console.log('Updated Visibility:', this.visibility); // Thêm dòng này để kiểm tra giá trị cập nhật
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 
   cancelEditVisibility() {
     this.isEditingVisibility = false;
+    this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
   }
 }

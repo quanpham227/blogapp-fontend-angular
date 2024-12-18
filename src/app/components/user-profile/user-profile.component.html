@@ -1,75 +1,118 @@
-<div class="user-profile d-flex justify-content-center align-items-center mt-4">
-  <div class="user-profile__card p-4 shadow-lg">
-    <h3 class="user-profile__title text-center mb-4">
-      Cập nhật thông tin người dùng
-    </h3>
-    <form [formGroup]="userProfileForm" class="user-profile__form">
-      <div class="user-profile__form-group mb-3">
-        <label for="fullname" class="user-profile__label form-label">Tên</label>
-        <input
-          type="text"
-          class="user-profile__input form-control"
-          id="fullname"
-          placeholder="Nhập tên của bạn"
-          formControlName="fullname"
-          [class.is-invalid]="
-            userProfileForm.get('fullname')!.invalid &&
-            userProfileForm.get('fullname')!.touched
-          "
+<div class="profile">
+  <div class="profile__container">
+    <div class="profile__header">
+      <h2 class="profile__title">Update Profile</h2>
+    </div>
+
+    <div class="profile__content">
+      <div class="profile__image">
+        <img
+          [src]="userImageUrl || defaultImage"
+          alt="Profile Picture"
+          (error)="handleImageError()"
+          class="profile__img"
         />
+        <button class="profile__change-photo" (click)="fileInput.click()">
+          <i class="fas fa-camera"></i>
+          Change Photo
+        </button>
+        <input #fileInput type="file" (change)="onFileSelect($event)" accept="image/*" style="display: none" />
       </div>
-      <div class="user-profile__form-group mb-3">
-        <label for="phone_number" class="user-profile__label form-label"
-          >Số điện thoại</label
-        >
-        <input
-          type="tel"
-          class="user-profile__input form-control"
-          id="phone_number"
-          placeholder="Nhập số điện thoại của bạn"
-          formControlName="phone_number"
-        />
-      </div>
-      <div class="user-profile__form-group mb-3">
-        <label for="password" class="user-profile__label form-label"
-          >Mật khẩu</label
-        >
-        <input
-          type="password"
-          class="user-profile__input form-control"
-          id="password"
-          placeholder="Nhập mật khẩu"
-          formControlName="password"
-          required
-          [class.is-invalid]="
-            userProfileForm.get('password')!.invalid &&
-            userProfileForm.get('password')!.touched
-          "
-        />
-      </div>
-      <div class="user-profile__form-group mb-3">
-        <label for="retype_password" class="user-profile__label form-label"
-          >Nhập lại mật khẩu</label
-        >
-        <input
-          type="password"
-          class="user-profile__input form-control"
-          id="retype_password"
-          placeholder="Nhập lại mật khẩu"
-          formControlName="retype_password"
-          [class.is-invalid]="
-            userProfileForm.get('retype_password')!.invalid &&
-            userProfileForm.get('retype_password')!.touched
-          "
-        />
-      </div>
-      <button
-        type="button"
-        class="user-profile__btn btn-primary w-100"
-        (click)="save()"
-      >
-        Cập nhật
-      </button>
-    </form>
+
+      <form [formGroup]="updateForm" (ngSubmit)="onSubmit()" class="profile__form">
+        <div class="profile__form-group">
+          <label for="fullName" class="profile__label">Full Name</label>
+          <input
+            type="text"
+            id="fullName"
+            formControlName="fullName"
+            placeholder="Enter your full name"
+            class="profile__input"
+          />
+          <div
+            class="profile__error-message"
+            *ngIf="updateForm.get('fullName')?.errors?.['required'] && updateForm.get('fullName')?.touched"
+          >
+            Name is required
+          </div>
+        </div>
+
+        <div class="profile__form-group">
+          <label for="phoneNumber" class="profile__label">Phone Number</label>
+          <input
+            type="tel"
+            id="phoneNumber"
+            formControlName="phoneNumber"
+            placeholder="Enter your phone number"
+            class="profile__input"
+          />
+          <div
+            class="profile__error-message"
+            *ngIf="updateForm.get('phoneNumber')?.errors?.['pattern'] && updateForm.get('phoneNumber')?.touched"
+          >
+            Please enter a valid phone number
+          </div>
+        </div>
+
+        <div class="profile__form-group">
+          <label for="password" class="profile__label">New Password</label>
+          <div class="profile__password-input">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="Enter new password"
+              class="profile__input"
+            />
+            <i
+              class="fas"
+              [class.fa-eye]="!showPassword"
+              [class.fa-eye-slash]="showPassword"
+              (click)="togglePassword()"
+            ></i>
+          </div>
+          <div
+            class="profile__error-message"
+            *ngIf="updateForm.get('password')?.errors?.['pattern'] && updateForm.get('password')?.touched"
+          >
+            Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special
+            character
+          </div>
+        </div>
+
+        <div class="profile__form-group">
+          <label for="retypePassword" class="profile__label">Confirm Password</label>
+          <div class="profile__password-input">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              id="retypePassword"
+              formControlName="retypePassword"
+              placeholder="Re-enter new password"
+              class="profile__input"
+            />
+            <i
+              class="fas"
+              [class.fa-eye]="!showConfirmPassword"
+              [class.fa-eye-slash]="showConfirmPassword"
+              (click)="toggleConfirmPassword()"
+            ></i>
+          </div>
+          <div
+            class="profile__error-message"
+            *ngIf="updateForm.errors?.['passwordMismatch'] && updateForm.get('retypePassword')?.touched"
+          >
+            Passwords do not match
+          </div>
+        </div>
+
+        <div class="profile__form-actions">
+          <button type="button" class="profile__cancel-btn" (click)="resetForm()">Cancel</button>
+          <button type="submit" class="profile__save-btn" [disabled]="updateForm.invalid || isSubmitting">
+            <span *ngIf="!isSubmitting">Save Changes</span>
+            <span *ngIf="isSubmitting" class="profile__spinner"></span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

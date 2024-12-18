@@ -3,172 +3,205 @@
   id="sidebar"
   class="sidebar-admin"
   [ngClass]="{
-    'collapsed-menu': isMenuCollapsed,
-    'toggle-sidebar': !isSidebarVisible,
-    open: isSidebarVisible,
+    'sidebar-admin--collapsed': isMenuCollapsed,
+    'sidebar-admin--hidden': !isSidebarVisible,
+    'sidebar-admin--open': isSidebarVisible,
   }"
 >
-  <ul class="sidebar-nav" id="sidebar-nav">
-    <li class="nav-item">
+  <ul class="sidebar-admin__nav">
+    <li class="sidebar-admin__nav-item">
       <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'dashboard' }"
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'dashboard' }"
         (click)="showAdminComponent('dashboard')"
       >
-        <i class="bi bi-house-fill"></i>
+        <i class="fas fa-home"></i>
         <span>Tổng quan</span>
       </a>
     </li>
     <!-- End Dashboard Nav -->
 
-    <!-- End Components Nav -->
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'slides' }" (click)="showAdminComponent('slides')">
-        <i class="bi bi-sliders"></i>
+    <li class="sidebar-admin__nav-item">
+      <a
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'slides' }"
+        (click)="showAdminComponent('slides')"
+      >
+        <i class="fas fa-sliders-h"></i>
         <span>Trình chiếu</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'about' }" (click)="showAdminComponent('about')">
-        <i class="fa-solid fa-info"></i>
+    <li class="sidebar-admin__nav-item">
+      <a
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'about' }"
+        (click)="showAdminComponent('about')"
+      >
+        <i class="fas fa-info-circle"></i>
         <span>Giới Thiệu</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'clients' }" (click)="showAdminComponent('clients')">
-        <i class="bi bi-person-vcard-fill"></i>
+    <li class="sidebar-admin__nav-item">
+      <a
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'clients' }"
+        (click)="showAdminComponent('clients')"
+      >
+        <i class="fas fa-user-friends"></i>
         <span>Khách hàng</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'emails' }" (click)="showAdminComponent('emails')">
-        <i class="bi bi-envelope-fill"></i>
+    <li class="sidebar-admin__nav-item">
+      <a
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'emails' }"
+        (click)="showAdminComponent('emails')"
+      >
+        <i class="fas fa-envelope"></i>
         <span>Hộp thư của tôi</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'media' }" (click)="showAdminComponent('media')">
-        <i class="bi bi-record-btn-fill"></i>
+    <li class="sidebar-admin__nav-item">
+      <a
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'media' }"
+        (click)="showAdminComponent('media')"
+      >
+        <i class="fas fa-photo-video"></i>
         <span>Media</span>
       </a>
     </li>
     <!-- End Forms Nav -->
 
-    <li class="nav-item">
+    <li class="sidebar-admin__nav-item">
       <a
-        class="nav-link"
+        class="sidebar-admin__nav-link"
         [ngClass]="{
-          active:
-            activeComponent === 'posts' ||
-            activeComponent === 'add-post' ||
-            activeComponent === 'categories' ||
-            activeComponent === 'tags',
+          'sidebar-admin__nav-link--active':
+            activeComponent === 'posts' || activeComponent === 'add-post' || activeComponent === 'categories' || activeComponent === 'tags',
         }"
         (click)="toggleNav('postNav', 'posts')"
       >
-        <i class="bi bi-pin-angle-fill"></i>
+        <i class="fas fa-thumbtack"></i>
         <span>Bài viết</span>
       </a>
-      <ul id="post-nav" class="nav-content" [ngClass]="{ show: navStates['postNav'] }">
+      <ul id="post-nav" class="sidebar-admin__nav-content" [ngClass]="{ 'sidebar-admin__nav-content--show': navStates['postNav'] }">
         <li>
-          <a [ngClass]="{ active: activeComponent === 'posts' }" (click)="showAdminComponent('posts')">
+          <a
+            class="sidebar-admin__nav-content-link"
+            [ngClass]="{ 'sidebar-admin__nav-content-link--active': activeComponent === 'posts' }"
+            (click)="showAdminComponent('posts')"
+          >
             <span>Tất cả bài viết</span>
           </a>
         </li>
         <li>
-          <a [ngClass]="{ active: activeComponent === 'add-post' }" (click)="showAdminComponent('add-post')">
+          <a
+            class="sidebar-admin__nav-content-link"
+            [ngClass]="{ 'sidebar-admin__nav-content-link--active': activeComponent === 'add-post' }"
+            (click)="showAdminComponent('add-post')"
+          >
             <span>Viết bài mới</span>
           </a>
         </li>
-
         <li>
-          <a [ngClass]="{ active: activeComponent === 'categories' }" (click)="showAdminComponent('categories')">
+          <a
+            class="sidebar-admin__nav-content-link"
+            [ngClass]="{ 'sidebar-admin__nav-content-link--active': activeComponent === 'categories' }"
+            (click)="showAdminComponent('categories')"
+          >
             <span>Chuyên mục</span>
           </a>
         </li>
         <li>
-          <a [ngClass]="{ active: activeComponent === 'tags' }" (click)="showAdminComponent('tags')">
+          <a
+            class="sidebar-admin__nav-content-link"
+            [ngClass]="{ 'sidebar-admin__nav-content-link--active': activeComponent === 'tags' }"
+            (click)="showAdminComponent('tags')"
+          >
             <span>Thẻ</span>
           </a>
         </li>
       </ul>
     </li>
 
-    <li class="nav-item">
+    <li class="sidebar-admin__nav-item">
       <a
-        class="nav-link"
-        [ngClass]="{ active: activeComponent === 'comments' }"
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'comments' }"
         (click)="showAdminComponent('comments')"
       >
-        <i class="bi bi-chat-right-quote-fill"></i>
+        <i class="fas fa-comments"></i>
         <span>Bình luận</span>
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="sidebar-admin__nav-item">
       <a
-        class="nav-link"
-        [ngClass]="{
-          active: activeComponent === 'achievements',
-        }"
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'achievements' }"
         (click)="showAdminComponent('achievements')"
       >
-        <i class="fa-solid fa-trophy"></i>
+        <i class="fas fa-trophy"></i>
         <span>Thành tựu</span>
       </a>
     </li>
 
-    <li class="nav-item">
+    <li class="sidebar-admin__nav-item">
       <a
-        class="nav-link"
+        class="sidebar-admin__nav-link"
         [ngClass]="{
-          active: activeComponent === 'users' || activeComponent === 'forgot-password' || activeComponent === 'profile',
+          'sidebar-admin__nav-link--active':
+            activeComponent === 'users' || activeComponent === 'forgot-password' || activeComponent === 'profile',
         }"
         (click)="toggleNav('userNav', 'users')"
       >
-        <i class="bi bi-person-fill"></i>
+        <i class="fas fa-users"></i>
         <span>Thành viên</span>
       </a>
-      <ul id="icons-nav" class="nav-content" [ngClass]="{ show: navStates['userNav'] }">
+      <ul id="user-nav" class="sidebar-admin__nav-content" [ngClass]="{ 'sidebar-admin__nav-content--show': navStates['userNav'] }">
         <li>
-          <a [ngClass]="{ active: activeComponent === 'users' }" (click)="showAdminComponent('users')">
+          <a
+            class="sidebar-admin__nav-content-link"
+            [ngClass]="{ 'sidebar-admin__nav-content-link--active': activeComponent === 'users' }"
+            (click)="showAdminComponent('users')"
+          >
             <span>Mọi người</span>
           </a>
         </li>
         <li>
           <a
-            [ngClass]="{ active: activeComponent === 'forgot-password' }"
-            (click)="showAdminComponent('forgot-password')"
+            class="sidebar-admin__nav-content-link"
+            [ngClass]="{ 'sidebar-admin__nav-content-link--active': activeComponent === 'profile' }"
+            (click)="showAdminComponent('profile')"
           >
-            <span>Quên mật khẩu</span>
-          </a>
-        </li>
-        <li>
-          <a [ngClass]="{ active: activeComponent === 'profile' }" (click)="showAdminComponent('profile')">
             <span>Hồ sơ</span>
           </a>
         </li>
       </ul>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" [ngClass]="{ active: activeComponent === 'contact' }" (click)="showAdminComponent('contact')">
-        <i class="bi bi-envelope-arrow-up-fill"></i>
+    <li class="sidebar-admin__nav-item">
+      <a
+        class="sidebar-admin__nav-link"
+        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'contact' }"
+        (click)="showAdminComponent('contact')"
+      >
+        <i class="fas fa-envelope-open-text"></i>
         <span>Liên hệ</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link">
-        <i class="bi bi-gear-fill"></i>
+    <li class="sidebar-admin__nav-item">
+      <a class="sidebar-admin__nav-link">
+        <i class="fas fa-cog"></i>
         <span>Cài đặt</span>
       </a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" (click)="toggleMenuCollapse()">
+    <li class="sidebar-admin__nav-item">
+      <a class="sidebar-admin__nav-link" (click)="toggleMenuCollapse()">
         <i class="fas fa-arrow-circle-left"></i>
         <span>Thu gọn menu</span>
       </a>
     </li>
-    <!-- End Profile Page Nav -->
   </ul>
 </div>
-<!-- End Sidebar-->
+<!-- End Sidebar -->

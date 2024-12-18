@@ -1,67 +1,73 @@
-<div class="admin client-page">
-  <div class="container mt-3">
-    <header class="mb-4">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="text-left">
-          <h1 class="title">Khách hàng</h1>
-          <p class="text-muted">
-            Create, edit, and manage the client on your site.
-          </p>
-        </div>
-      </div>
-    </header>
+<div class="admin-client">
+  <div class="admin-client__header">
+    <h2 class="admin-client__header-title">Client Management</h2>
+    <button class="admin-client__add-btn" (click)="openForm()">Add Client</button>
+  </div>
 
-    <div class="input-wrapper mb-3">
-      <div class="input-group">
-        <i class="bi bi-search"></i>
-        <input
-          type="search"
-          class="form-control search"
-          placeholder="Tìm kiếm..."
-          aria-label="Tìm kiếm"
-        />
-        <div class="button-container">
-          <button
-            class="btn btn-sm btn-primary custom-btn"
-            type="button"
-            (click)="addClient()"
-          >
-            Thêm khách hàng
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="list-category">
-      <div
-        class="list-category-item d-flex justify-content-between align-items-center"
-        *ngFor="let client of clients"
-      >
-        <div class="left-icon">
-          <i class="fas fa-folder"></i>
-        </div>
-        <p class="client-name">{{ client.name }}</p>
-        <div class="right-icon">
-          <i
-            class="bi bi-three-dots"
-            (click)="toggleMenu($event, client.id)"
-          ></i>
-          <div
-            class="options-menu"
-            *ngIf="menuVisible && selectedClientId === client.id"
-          >
-            <div class="option-item" (click)="editClient(client.id)">
-              <i class="bi bi-pencil"></i> Sửa
-            </div>
-            <div class="option-item" (click)="openDeleteModal(client.id)">
-              <i class="bi bi-trash"></i> Xóa
-            </div>
-            <div class="option-item">
-              <i class="bi bi-check-circle-fill"></i> Đặt làm mặc định
-            </div>
-          </div>
+  <!-- Grid View -->
+  <div class="admin-client__partners-grid">
+    <div *ngFor="let client of clients" class="admin-client__partner-card">
+      <img [src]="client.logo" [alt]="client.name" class="admin-client__card-logo" />
+      <div class="admin-client__card-content">
+        <h3>{{ client.name }}</h3>
+        <p>{{ truncate(client.description, 100) }}</p>
+        <div class="admin-client__card-actions">
+          <button (click)="openForm(client)" matTooltip="Edit" class="admin-client__edit-btn">Edit</button>
+          <button (click)="deleteClient(client.id)" matTooltip="Delete" class="admin-client__delete-btn">Delete</button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Add/Edit Modal -->
+  <ng-template #client>
+    <div class="admin-client__dialog">
+      <div class="admin-client__dialog-content">
+        <h3>{{ currentEditId ? 'Edit' : 'Add' }} Client</h3>
+        <form [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+          <div class="admin-client__form-group">
+            <label for="name">Title</label>
+            <input type="text" id="name" formControlName="name" />
+
+            <div
+              class="admin-client__error"
+              *ngIf="clientForm.get('name')?.invalid && (clientForm.get('name')?.dirty || clientForm.get('name')?.touched)"
+            >
+              <div *ngIf="clientForm.get('name')?.errors?.['required']">Name cannot be empty</div>
+              <div *ngIf="clientForm.get('name')?.errors?.['maxlength']">Name must be less than or equal to 50 characters</div>
+            </div>
+          </div>
+
+          <div class="admin-client__form-group">
+            <label for="description">Description</label>
+            <textarea id="description" formControlName="description"></textarea>
+            <div
+              *ngIf="
+                clientForm.get('description')?.invalid && (clientForm.get('description')?.dirty || clientForm.get('description')?.touched)
+              "
+            >
+              <div *ngIf="clientForm.get('description')?.errors?.['maxlength']">
+                Description must be less than or equal to 10000 characters
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-client__form-group">
+            <label for="logo">Logo*</label>
+            <div class="admin-client__logo-container">
+              <div class="admin-client__logo-preview" *ngIf="logoPreview">
+                <img [src]="logoPreview" alt="Logo preview" />
+              </div>
+              <button type="button" class="admin-client__select-btn" (click)="openImageSelectDialog()">Select Image</button>
+            </div>
+          </div>
+
+          <div class="admin-client__dialog-actions">
+            <button class="admin-client__btn-save" type="submit" [disabled]="clientForm.invalid">Save</button>
+            <button class="admin-client__btn-cancel" type="button" (click)="closeForm()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-template>
 </div>

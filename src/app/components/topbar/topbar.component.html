@@ -1,0 +1,42 @@
+<div class="topbar" id="topbar">
+  <div class="topbar__left">
+    <a class="topbar__contact">
+      <i class="fas fa-envelope topbar__contact-icon"></i>
+      <span class="topbar__contact-email">pidn-hr&#64;poongin.co.kr</span>
+    </a>
+    <a class="topbar__contact">
+      <i class="fas fa-phone topbar__contact-icon"></i>
+      <span class="topbar__contact-phone">(+84) 236 379 6756</span>
+    </a>
+  </div>
+
+  <div class="topbar__right">
+    <div class="topbar__social">
+      <a href="https://facebook.com" class="topbar__social-link" target="_blank">
+        <i class="fa-brands fa-facebook topbar__link-facebook"></i>
+      </a>
+      <a href="https://youtube.com" class="topbar__social-link" target="_blank">
+        <i class="fa-brands fa-youtube topbar__link-youtube"></i>
+      </a>
+    </div>
+    <div class="topbar__login">
+      <div *ngIf="userResponse; else loginLink">
+        <a class="topbar__login-user" (click)="toggleMenu($event)">
+          {{ userResponse.fullName }}
+        </a>
+        <div class="topbar__login-menu" [ngClass]="{ open: isMenuOpen }" aria-haspopup="true" aria-expanded="true">
+          <div class="topbar__menu-list">
+            <a class="topbar__menu-item" (click)="handleItemClick(0)">Tài khoản của tôi</a>
+            <a class="topbar__menu-item" (click)="handleItemClick(1)">Đăng xuất</a>
+          </div>
+        </div>
+      </div>
+      <ng-template #loginLink>
+        <a class="topbar__login-link" routerLink="/login">
+          <i class="fas fa-sign-in-alt topbar__icon"></i>
+          Đăng nhập
+        </a>
+      </ng-template>
+    </div>
+  </div>
+</div>

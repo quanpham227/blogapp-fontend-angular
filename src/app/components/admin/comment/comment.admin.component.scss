@@ -2,133 +2,204 @@
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-}
 
-.header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 
-.filters {
-  display: flex;
-  gap: 20px;
-}
+    &__title {
+      font-size: 24px;
+      color: #333;
+    }
+  }
+  &__filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  &__filters-search {
+    display: flex;
+    align-items: center;
+    position: relative;
+    text-align: center;
 
-select,
-.search-box input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-}
+    .comment-management__search-icon {
+      position: absolute;
+      left: 10px;
+      color: #aaa;
+      cursor: pointer;
+    }
+    .comment-management__search-input {
+      padding: 10px 30px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
 
-.comments-container {
-  display: grid;
-  gap: 20px;
-}
+    .comment-management__search-clear {
+      position: absolute;
+      right: 10px;
+      color: #aaa;
+      cursor: pointer;
+    }
+  }
+  &__filter-select {
+    width: 100%;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+  }
+  &__container {
+    display: grid;
+    gap: 20px;
+  }
+  .comment {
+    &__card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+    }
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
 
-.comment-card {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+      &-user {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      &-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      &-details {
+        h4 {
+          margin: 0;
+          color: #333;
+        }
+      }
+      &-date {
+        font-size: 12px;
+        color: #666;
+      }
+      .comment__header-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: capitalize; // Viết hoa chữ cái đầu nếu cần.
+        display: inline-block;
 
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
+        &.pending {
+          background-color: #fff3e0;
+          color: #f57c00;
+        }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
+        &.approved {
+          background-color: #e8f5e9;
+          color: #2e7d32;
+        }
 
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
+        &.spam {
+          background-color: #ffebee;
+          color: #c62828;
+        }
 
-.user-details h4 {
-  margin: 0;
-  color: #333;
-}
+        &.deleted {
+          background-color: #f8d7da;
+          color: #721c24;
+        }
+      }
+    }
+    &__content {
+      margin: 15px 0;
+      color: #444;
+      line-height: 1.5;
+    }
+    &__actions {
+      display: flex;
+      gap: 10px;
 
-.date {
-  font-size: 12px;
-  color: #666;
-}
+      button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+      }
+      &-approve {
+        background: #4caf50;
+        color: white;
 
-.status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-}
+        &:hover {
+          background: #388e3c;
+        }
+      }
 
-.status-badge.pending {
-  background: #fff3e0;
-  color: #f57c00;
-}
+      &-edit {
+        background: #2196f3;
+        color: white;
 
-.status-badge.approved {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
+        &:hover {
+          background: #0d8bf2;
+        }
+      }
+      &-delete {
+        background: #dc3545;
+        color: white;
 
-.status-badge.rejected {
-  background: #ffebee;
-  color: #c62828;
-}
+        &:hover {
+          background: #c82333;
+        }
+      }
+      &-restore {
+        background: #10dc09;
+        color: white;
 
-.comment-content {
-  margin: 15px 0;
-  color: #444;
-  line-height: 1.5;
-}
+        &:hover {
+          background: #0a9e07;
+        }
+      }
+    }
+  }
+  @media (max-width: 768px) {
+    .comment-management__header {
+      flex-direction: column;
+      gap: 15px;
+    }
 
-.comment-actions {
-  display: flex;
-  gap: 10px;
-}
+    .comment-management__filters {
+      width: 100%;
+      flex-direction: column;
+    }
 
-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.3s ease;
-}
-
-.approve-btn {
-  background: #4caf50;
-  color: white;
-}
-
-.reject-btn {
-  background: #f44336;
-  color: white;
-}
-
-.edit-btn {
-  background: #2196f3;
-  color: white;
-}
-
-.delete-btn {
-  background: #dc3545;
-  color: white;
+    .comment-actions {
+      flex-wrap: wrap;
+    }
+  }
 }
 
 .modal {
@@ -188,20 +259,4 @@ textarea {
 
 .notification.info {
   background: #2196f3;
-}
-
-@media (max-width: 768px) {
-  .header-section {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .filters {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .comment-actions {
-    flex-wrap: wrap;
-  }
 }

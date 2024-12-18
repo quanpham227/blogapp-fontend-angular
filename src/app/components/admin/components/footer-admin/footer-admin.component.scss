@@ -5,25 +5,29 @@
   padding: 20px 0;
   transition: all 0.3s;
   border-top: 1px solid #cddfff;
-  background: #ffffff;
+  background: #23272d;
   height: 80px;
   margin-left: 270px;
-  &.shifted {
+
+  &--shifted {
     margin-left: 0; /* Khoảng cách khi sidebar ẩn */
   }
-  &.collapsed {
+
+  &--collapsed {
     margin-left: 50px; /* Khoảng cách khi sidebar thu gọn */
   }
+
   @media (max-width: 768px) {
     margin-left: 0; /* Đẩy footer qua trái khi sidebar ẩn */
   }
-  .copyright,
-  .credits {
+
+  &__copyright,
+  &__credits {
     text-align: center;
-    color: rgb(1, 115, 169);
+    color: rgb(255, 255, 255);
   }
 
-  .credits {
+  &__credits {
     padding-top: 5px;
   }
 }

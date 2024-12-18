@@ -1,3 +1,10 @@
+/* admin-layout.component.scss */
+@import '../../../../styles.scss';
+
+.admin-layout {
+  background-color: $admin-background-color;
+  /* Các kiểu dáng khác cho giao diện admin */
+}
 .main {
   margin-top: 30px;
   padding: 20px 10px;
@@ -12,6 +19,7 @@
   &.collapsed {
     margin-left: 50px; /* Khoảng cách khi sidebar thu gọn */
   }
+
   @media (max-width: 768px) {
     margin-left: 0; /* Đẩy main qua trái khi sidebar ẩn */
   }

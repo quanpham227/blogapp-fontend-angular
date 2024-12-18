@@ -29,7 +29,8 @@ export class PostService {
     page: number,
     limit: number,
     status?: '' | PostStatus,
-    createdAt?: string,
+    startDate?: string,
+    endDate?: string,
   ): Observable<ApiResponse<PostListResponse>> {
     let params = new HttpParams()
       .set('keyword', keyword)
@@ -40,8 +41,11 @@ export class PostService {
     if (status) {
       params = params.set('status', status.toString());
     }
-    if (createdAt) {
-      params = params.set('createdAt', createdAt);
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
     }
     return this.http.get<ApiResponse<PostListResponse>>(this.apiAdminPosts, { params }).pipe(
       map((response) => {
@@ -53,12 +57,7 @@ export class PostService {
     );
   }
 
-  getPostsForUser(
-    keyword: string,
-    categorySlug: string,
-    page: number,
-    limit: number,
-  ): Observable<ApiResponse<PostListResponse>> {
+  getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number): Observable<ApiResponse<PostListResponse>> {
     let params = new HttpParams()
       .set('keyword', keyword)
       .set('categorySlug', categorySlug)
@@ -142,16 +141,8 @@ export class PostService {
       }),
     );
   }
-
-  deletePost(id: number): Observable<any> {
-    return this.http
-      .delete<ApiResponse<any>>(`${this.apiAdminPosts}/${id}`)
-      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
-  }
-
-  deletePosts(ids: number[]): Observable<ApiResponse<any>> {
-    return this.http
-      .request<ApiResponse<any>>('delete', this.apiAdminPosts, { body: ids })
-      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
+  deleteOrDisablePost(id: number, isPermanent: boolean): Observable<ApiResponse<any>> {
+    const url = `${this.apiAdminPosts}/disable/${id}/${isPermanent}`;
+    return this.http.delete<ApiResponse<any>>(url).pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

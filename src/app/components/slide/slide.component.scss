@@ -1,0 +1,115 @@
+.slide {
+  width: 100%;
+  background-color: rgba(31, 38, 39, 0.8);
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+
+  &__container {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__carousel {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+  }
+
+  &__item {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__item-content {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 70vh;
+  }
+
+  &__carousel-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__pagination {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+
+    .swiper-pagination-bullet {
+      background-color: rgba(255, 255, 255, 0.7);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin: 0 4px;
+    }
+
+    .swiper-pagination-bullet-active {
+      background-color: #01b1d7;
+    }
+  }
+
+  &__button-next,
+  &__button-prev {
+    color: #fff;
+  }
+
+  &__btn-get-started {
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 1px;
+    display: inline-block;
+    padding: 14px 32px;
+    border-radius: 5px;
+    transition: 0.5s;
+    line-height: 1;
+    margin: 10px;
+    color: #fff;
+    background: #01b1d7;
+    animation-delay: 0.8s;
+
+    &:hover {
+      background: #019cbe;
+    }
+  }
+  &__loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  @media (max-width: 768px) {
+    height: 90vh;
+
+    h2 {
+      font-size: 28px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    p {
+      width: 60%;
+    }
+  }
+}

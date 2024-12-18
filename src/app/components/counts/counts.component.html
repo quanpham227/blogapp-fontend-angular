@@ -1,19 +1,19 @@
 <!-- ======= Counts Section ======= -->
 <section id="counts" class="counts">
-  <img src="/assets/images/counts-bg.jpg" alt="Background Image" class="background-image" />
-  <div class="container position-relative">
-    <div class="text-center title" data-aos="fade-up">
-      <h3>Những gì chúng tôi đạt được cho đến nay</h3>
+  <img src="/assets/images/counts-bg.jpg" alt="Background Image" class="counts__background-image" />
+  <div class="counts__container">
+    <div class="counts__title" data-aos="fade-up">
+      <h3 class="counts__title-text">Những gì chúng tôi đạt được cho đến nay</h3>
     </div>
-    <div class="row counters">
-      <div *ngFor="let achievement of achievements$ | async" class="col-lg-3 col-6 text-center" data-aos="fade-up">
+    <div class="counts__row">
+      <div *ngFor="let achievement of achievements$ | async" class="counts__col" data-aos="fade-up">
         <span
           data-purecounter-start="0"
           [attr.data-purecounter-end]="achievement.value"
           data-purecounter-duration="3"
-          class="purecounter"
+          class="counts__number purecounter"
         ></span>
-        <p>{{ achievement.title }}</p>
+        <p class="counts__description">{{ achievement.title }}</p>
       </div>
     </div>
   </div>

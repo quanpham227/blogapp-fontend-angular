@@ -1,302 +1,339 @@
-import { Component, OnInit } from '@angular/core';
-import { PostService } from '../../../services/post.service';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
-import { Post } from '../../../models/post';
-import { Category } from '../../../models/category';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbDateStruct, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { CategoryService } from '../../../services/category.service';
-import { ApiResponse } from '../../../models/response';
-import { HttpErrorResponse } from '@angular/common/http';
+import { NavigationEnd, Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Category } from '../../../models/category';
+import { Post } from '../../../models/post';
 import { PostStatus } from '../../../enums/post-status.enum';
-import { filter } from 'rxjs/operators';
+import { SnackbarService } from '../../../services/snackbar.service';
+import { PostService } from '../../../services/post.service';
+import { CategoryService } from '../../../services/category.service';
 import { MessageService } from '../../../services/message.service';
-import { Subscription } from 'rxjs';
-import { ToasterService } from '../../../services/toaster.service';
-import { LoggingService } from '../../../services/logging.service';
-import { SuccessHandlerService } from '../../../services/success-handler.service';
+import { Subject } from 'rxjs';
+import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { CustomPaginationComponent } from '../../common/custom-pagination/custom-pagination.component';
+import { PostEnumService } from '../../../utils/post-enum.service';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { ApiResponse } from '../../../models/response';
+import { PostListResponse } from '../../../responses/post/post-list-response';
+import isEqual from 'lodash-es/isEqual';
+import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
 
+@UntilDestroy()
 @Component({
   selector: 'app-post-admin',
   templateUrl: './post.admin.component.html',
   styleUrls: ['./post.admin.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, CommonModule, NgbModule, RouterModule],
+  imports: [FormsModule, CommonModule, RouterModule, CustomPaginationComponent, LazyLoadDirective],
 })
 export class PostAdminComponent implements OnInit {
   posts: Post[] = [];
-  selectedObjectType: string = '';
   categories: Category[] = [];
   selectedCategoryId: number = 0;
   currentPage: number = 1; // Sửa đổi để bắt đầu từ trang 1
-  itemsPerPage: number = 12;
+  itemsPerPage: number = 6;
   totalPages: number = 0;
   visiblePages: number[] = [];
   keyword: string = '';
-  localStorage?: Storage;
-
-  activeColumn: string = '';
-  sortDirection: string = 'asc';
-
-  months: string[] = [];
-  totalPostCount: number = 0; // Biến lưu trữ tổng số lượng bài viết
-
   status: PostStatus | '' = '';
-  createdAt: string | null = null;
-
-  selectedPosts: Set<number> = new Set<number>(); // Set chứa ID của các bài viết đã chọn
-  allPostsSelected: boolean = false; // Biến kiểm tra xem tất cả checkbox đã được chọn hay chưa
-
-  private routerSubscription: Subscription;
+  startDate: string | null = null;
+  endDate: string | null = null;
+  private searchSubject: Subject<string> = new Subject();
+  dialogRef: MatDialogRef<any> | null = null;
+  showClearIcon: boolean = false;
 
   constructor(
     private router: Router,
-    private toast: ToasterService,
+    private route: ActivatedRoute,
+    private snackBar: SnackbarService,
     private postService: PostService,
     private categoryService: CategoryService,
     private messageService: MessageService,
+    private postEnumService: PostEnumService,
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
   ) {
-    this.localStorage = document.defaultView?.localStorage;
-    this.routerSubscription = this.router.events
+    this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
+      .pipe(untilDestroyed(this))
       .subscribe(() => {
         const message = this.messageService.getMessage();
         if (message) {
-          this.toast.success(message);
+          this.snackBar.show(message);
         }
       });
   }
-
-  counts: {
-    PUBLISHED: number;
-    DRAFT: number;
-    DELETED: number;
-    PENDING: number;
-  } = { PUBLISHED: 0, DRAFT: 0, DELETED: 0, PENDING: 0 };
-
-  postStatus = PostStatus;
+  PostStatus = this.postEnumService.getPostStatus();
+  startDateDisplay: string = 'Start Date';
+  endDateDisplay: string = 'End Date';
 
   ngOnInit(): void {
-    this.currentPage = Number(this.localStorage?.getItem('currentProductAdminPage')) || 1;
-    this.getPosts(
-      this.keyword,
-      this.selectedCategoryId,
-      this.currentPage - 1,
-      this.itemsPerPage,
-      this.status,
-      this.createdAt ?? undefined,
-    );
+    this.getPosts();
     this.getCategories();
-    this.getPostCounts();
-  }
 
-  ngOnDestroy() {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
-  }
-  getCategories() {
-    this.categoryService.getCategories().subscribe({
-      next: (response: any) => {
-        if (response.status === 'OK' && response.data) {
-          this.categories = response.data.categories;
-        }
-      },
+    this.searchSubject.pipe(debounceTime(300), untilDestroyed(this)).subscribe((keyword) => {
+      this.keyword = keyword;
+      this.updateUrl();
+      this.getPosts();
     });
   }
 
-  getPosts(
-    keyword: string,
-    selectedCategoryId: number,
-    page: number,
-    limit: number,
-    status?: '' | PostStatus,
-    createdAt?: string,
-  ) {
-    this.postService.getPostsForAdmin(keyword, selectedCategoryId, page, limit, status, createdAt).subscribe({
-      next: (response: any) => {
-        if (response.status === 'OK' && response.data) {
-          this.posts = response.data.posts;
-          this.totalPages = response.data.totalPages;
-        }
-      },
-    });
-  }
-
-  onPageChange(page: number) {
-    if (page !== this.currentPage && page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.getPosts(
+  getPosts() {
+    this.postService
+      .getPostsForAdmin(
         this.keyword,
         this.selectedCategoryId,
         this.currentPage - 1,
         this.itemsPerPage,
         this.status,
-        this.createdAt ?? undefined,
-      );
+        this.startDate ?? undefined,
+        this.endDate ?? undefined,
+      )
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+      )
+      .subscribe({
+        next: (response: ApiResponse<PostListResponse>) => {
+          if (response.status === 'OK' && response.data) {
+            const newPosts = response.data.posts;
+            if (!isEqual(this.posts, newPosts)) {
+              this.posts = newPosts;
+              this.totalPages = response.data.totalPages;
+              this.cdr.markForCheck(); // Inform Angular to check for changes
+            }
+          }
+        },
+      });
+  }
+
+  getCategories() {
+    this.categoryService
+      .getCategories()
+      .pipe(
+        untilDestroyed(this),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+      )
+      .subscribe({
+        next: (response: ApiResponse<Category[]>) => {
+          if (response.status === 'OK' && response.data) {
+            const newCategories = response.data;
+            if (!isEqual(this.categories, newCategories)) {
+              this.categories = newCategories;
+              this.cdr.markForCheck(); // Inform Angular to check for changes
+            }
+          }
+        },
+      });
+  }
+
+  onPageChange(page: number) {
+    if (page !== this.currentPage && page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateUrl();
+      this.getPosts();
     }
   }
 
-  onKeywordChange(event: Event): void {
+  onSearchEnter(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.keyword = target.value;
-    this.getPosts(
-      this.keyword,
-      this.selectedCategoryId,
-      this.currentPage - 1,
-      this.itemsPerPage,
-      this.status,
-      this.createdAt ?? undefined,
-    );
+    this.searchSubject.next(this.keyword);
+    this.showClearIcon = this.keyword.length > 0;
   }
 
-  onStatusChange(status: PostStatus | '') {
-    this.status = status;
-    this.filterPosts(this.status, this.createdAt ?? undefined, this.selectedCategoryId);
+  clearSearch(event: Event): void {
+    this.keyword = '';
+    this.showClearIcon = false;
+    const input = (event.target as HTMLElement).parentElement?.querySelector('.post-list-admin__search-input') as HTMLInputElement;
+    if (input) {
+      input.value = '';
+      input.focus();
+      this.onSearchEnter({ target: input } as unknown as Event);
+    }
+    this.currentPage = 1;
+    this.updateUrl();
+    this.getPosts();
   }
 
-  onDateChange(date: NgbDateStruct) {
-    if (date) {
-      this.createdAt = `${date.year}-${('0' + date.month).slice(-2)}`;
-      this.filterPosts(this.status, this.createdAt, this.selectedCategoryId);
-    } else {
-      this.clearDate();
+  onFocusSearch(event: Event): void {
+    this.showClearIcon = this.keyword.length > 0;
+  }
+
+  onBlurSearch(event: Event): void {
+    if (this.keyword.length === 0) {
+      this.showClearIcon = false;
     }
   }
-  clearDate() {
-    if (this.createdAt !== null && this.createdAt !== '') {
-      this.createdAt = null;
-      this.filterPosts(this.status, this.createdAt ?? undefined, this.selectedCategoryId);
-    } else {
-      console.log('Date is already cleared or not set');
-    }
+
+  onStatusChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.status = selectElement.value as PostStatus | '';
+    this.currentPage = 1;
+    this.updateUrl();
+    this.getPosts();
   }
 
   onCategoryChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    this.selectedCategoryId = +target.value;
-    this.filterPosts(this.status, this.createdAt ?? undefined, this.selectedCategoryId);
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedCategoryId = +selectElement.value;
+    this.currentPage = 1;
+    this.updateUrl();
+    this.getPosts();
   }
 
-  filterPosts(status: '' | PostStatus, createdAt?: string, categoryId?: number) {
-    this.status = status;
-    this.createdAt = createdAt || '';
-    this.selectedCategoryId = categoryId !== undefined ? categoryId : this.selectedCategoryId;
-    this.getPosts(
-      this.keyword,
-      this.selectedCategoryId,
-      this.currentPage - 1,
-      this.itemsPerPage,
-      this.status,
-      this.createdAt,
-    );
+  onSearchClick(): void {
+    if (this.startDate && this.endDate && new Date(this.startDate) > new Date(this.endDate)) {
+      this.snackBar.show('Start date must be earlier than end date.');
+      return;
+    }
+    this.currentPage = 1;
+    this.updateUrl();
+    this.getPosts();
   }
+
   navigateToAddPost(): void {
     this.router.navigate(['/admin/add-post']);
   }
+
+  navigateToPostDetail(slug: string) {
+    if (!slug || typeof slug !== 'string' || slug.trim() === '') {
+      this.snackBar.show('Invalid slug');
+      return;
+    }
+    this.router.navigate([`/blog/${slug}`]);
+  }
+
   navigateToEditPost(postId: number) {
     if (postId) {
       this.router.navigate(['/admin/post-edit', postId]);
     } else {
-      this.toast.error('Invalid post ID');
+      this.snackBar.show('Invalid post ID');
     }
   }
 
-  deletePost(postId: number) {
-    this.postService.deletePost(postId).subscribe({
-      next: (response: any) => {
-        if (response.status === 'OK') {
-          this.getPosts(
-            this.keyword,
-            this.selectedCategoryId,
-            this.currentPage - 1,
-            this.itemsPerPage,
-            this.status,
-            this.createdAt ?? undefined,
-          );
-          this.getPostCounts();
-        }
-      },
+  deleteOrDisablePostDialog(id: number, isPermanent: boolean): void {
+    if (id === null) {
+      this.snackBar.show('Invalid post ID');
+      return;
+    }
+    const dialogData: ConfirmDialogData = {
+      title: isPermanent ? 'Confirm Delete' : 'Confirm Disable',
+      message: isPermanent ? 'Are you sure you want to delete this post permanently?' : 'Are you sure you want to disable this post?',
+      confirmText: isPermanent ? 'Delete' : 'Disable',
+      cancelText: 'Cancel',
+    };
+
+    import('../shared/confirm-dialog/confirm-dialog.component').then(({ ConfirmDialogComponent }) => {
+      this.dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: dialogData,
+      });
+      this.handleDialogResponse(this.dialogRef, id, isPermanent);
     });
   }
-  deleteSelectedPosts() {
-    const selectedPostIds = Array.from(this.selectedPosts);
-    this.postService.deletePosts(selectedPostIds).subscribe({
-      next: (response: any) => {
-        if (response.status === 'OK') {
-          this.getPosts(
-            this.keyword,
-            this.selectedCategoryId,
-            this.currentPage - 1,
-            this.itemsPerPage,
-            this.status,
-            this.createdAt ?? undefined,
-          );
-          this.getPostCounts();
-          this.selectedPosts.clear();
-          this.allPostsSelected = false;
-        }
-      },
-    });
+
+  private handleDialogResponse(dialogRef: MatDialogRef<ConfirmDialogComponent>, id: number, isPermanent: boolean): void {
+    dialogRef
+      .afterClosed()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (result) => {
+          if (result) {
+            this.postService
+              .deleteOrDisablePost(id, isPermanent)
+              .pipe(untilDestroyed(this))
+              .subscribe({
+                next: (response: ApiResponse<void>) => {
+                  if (response.status === 'OK' || response.status === 'DELETED' || response.status === 'DISABLED') {
+                    this.getPosts();
+                    this.cdr.markForCheck();
+                  }
+                },
+                error: (error) => {
+                  console.error('Error deleting or disabling post:', error);
+                },
+              });
+          }
+        },
+      });
   }
-  viewPost(postId: number) {
-    console.log(postId);
-  }
-  // Phương thức sắp xếp bài viết theo cột
-  sortPostsBy(column: keyof Post) {
-    if (this.activeColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.activeColumn = column;
-      this.sortDirection = 'asc';
+
+  onFocusDate(field: 'startDate' | 'endDate', event: any): void {
+    if (field === 'startDate' && !this.startDate) {
+      this.startDateDisplay = ''; // Xóa placeholder khi focus
+      event.target.type = 'date'; // Chuyển input sang kiểu date
     }
 
-    this.posts.sort((a, b) => {
-      let comparison = 0;
-      if (a[column] > b[column]) {
-        comparison = 1;
-      } else if (a[column] < b[column]) {
-        comparison = -1;
+    if (field === 'endDate' && !this.endDate) {
+      this.endDateDisplay = ''; // Xóa placeholder khi focus
+      event.target.type = 'date'; // Chuyển input sang kiểu date
+    }
+  }
+
+  onBlurDate(field: 'startDate' | 'endDate', event: any): void {
+    if (field === 'startDate') {
+      if (!event.target.value) {
+        this.startDateDisplay = 'Start Date'; // Hiển thị lại placeholder khi blur
+        event.target.type = 'text'; // Chuyển input lại kiểu text
+      } else {
+        this.startDate = event.target.value; // Lưu giá trị ngày đã chọn
       }
-      return this.sortDirection === 'asc' ? comparison : -comparison;
-    });
-  }
-  // Phương thức chọn hoặc bỏ chọn tất cả bài viết
-  selectAllPosts = (event: any) => {
-    const isChecked = (event.target as HTMLInputElement).checked;
-    if (isChecked) {
-      this.posts.forEach((post) => this.selectedPosts.add(post.id)); // Chọn tất cả bài viết
-    } else {
-      this.selectedPosts.clear(); // Bỏ chọn tất cả bài viết
     }
-    this.allPostsSelected = isChecked; // Cập nhật trạng thái checkbox tổng
-  };
 
-  // Phương thức chọn hoặc bỏ chọn một bài viết
-  selectPost(postId: number, event: Event) {
-    const isChecked = (event.target as HTMLInputElement).checked;
-    if (isChecked) {
-      this.selectedPosts.add(postId);
-    } else {
-      this.selectedPosts.delete(postId);
+    if (field === 'endDate') {
+      if (!event.target.value) {
+        this.endDateDisplay = 'End Date'; // Hiển thị lại placeholder khi blur
+        event.target.type = 'text'; // Chuyển input lại kiểu text
+      } else {
+        this.endDate = event.target.value; // Lưu giá trị ngày đã chọn
+      }
     }
-    this.updateAllPostsSelectedState(); // Kiểm tra lại trạng thái của checkbox tổng
   }
 
-  // Cập nhật trạng thái của checkbox "chọn tất cả" dựa trên số lượng checkbox đã chọn
-  updateAllPostsSelectedState() {
-    this.allPostsSelected = this.posts.length === this.selectedPosts.size;
+  clearDate() {
+    if (this.startDate || this.endDate) {
+      this.startDate = null;
+      this.endDate = null;
+
+      // Đặt lại placeholder
+      this.startDateDisplay = 'Start Date';
+      this.endDateDisplay = 'End Date';
+
+      // Đặt lại kiểu input thành text để hiển thị placeholder
+      const startDateInput = document.querySelector('input[placeholder="Start Date"]') as HTMLInputElement;
+      const endDateInput = document.querySelector('input[placeholder="End Date"]') as HTMLInputElement;
+      if (startDateInput) {
+        startDateInput.type = 'text';
+      }
+      if (endDateInput) {
+        endDateInput.type = 'text';
+      }
+
+      // Gọi API với các giá trị ngày bị xóa
+      this.currentPage = 1;
+      this.updateUrl();
+      this.getPosts();
+    }
   }
-  getPostCounts() {
-    this.postService.countPostsByStatus().subscribe({
-      next: (
-        response: ApiResponse<{
-          [key in PostStatus]: number;
-        }>,
-      ) => {
-        this.counts = response.data;
-      },
-    });
+
+  trackByPostId(index: number, post: Post): number {
+    return post.id;
+  }
+
+  updateUrl(): void {
+    const queryParams: any = {
+      keyword: this.keyword || undefined,
+      category: this.selectedCategoryId || undefined,
+      page: this.currentPage > 1 ? this.currentPage : undefined,
+      status: this.status || undefined,
+      startDate: this.startDate || undefined,
+      endDate: this.endDate || undefined,
+    };
+    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
   }
 }

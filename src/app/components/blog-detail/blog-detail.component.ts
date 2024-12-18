@@ -1,10 +1,10 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, firstValueFrom, of, EMPTY } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { Post } from '../../models/post';
 import { PostService } from '../../services/post.service';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Title, Meta, DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CommentService } from '../../services/comment.service';
@@ -14,8 +14,7 @@ import { AuthService } from '../../services/auth.service';
 import { CommentFormComponent } from '../common/comment-form/comment-form.component';
 import { noWhitespaceValidator } from '../../validators/validators'; // Adjust the import path accordingly
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { ToasterService } from '../../services/toaster.service';
-import { NgxSpinnerModule } from 'ngx-spinner';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @UntilDestroy()
 @Component({
@@ -24,7 +23,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
   styleUrls: ['./blog-detail.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, RouterModule, CommentFormComponent, NgxSpinnerModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, RouterModule, CommentFormComponent],
 })
 export class BlogDetailComponent implements OnInit {
   newCommentForm: FormGroup;
@@ -49,33 +48,41 @@ export class BlogDetailComponent implements OnInit {
     public authService: AuthService,
     private sanitizer: DomSanitizer,
     private cdr: ChangeDetectorRef,
-    private toast: ToasterService,
-    private fb: FormBuilder,
+    private snackBarService: SnackbarService,
+    public fb: FormBuilder,
   ) {
     this.newCommentForm = this.createCommentForm();
   }
 
   private createCommentForm(): FormGroup {
     return this.fb.group({
-      content: [
-        '',
-        [Validators.required, Validators.minLength(5), Validators.maxLength(1000), noWhitespaceValidator()],
-      ],
+      content: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(1000), noWhitespaceValidator()]],
     });
   }
 
   ngOnInit() {
-    this.route.paramMap.pipe(untilDestroyed(this)).subscribe((params) => {
+    this.route.paramMap.pipe(untilDestroyed(this)).subscribe(async (params) => {
       const slug = params.get('slug');
       if (slug) {
-        this.initializeData(slug);
+        try {
+          await this.initializeData(slug);
+        } catch (error) {
+          this.snackBarService.show('Failed to initialize post data.');
+        }
       }
     });
+    this.rootComments$ = this.comments$.asObservable();
   }
 
-  private initializeData(slug: string) {
-    this.getPostBySlug(slug);
-    this.initializeComments(0, 10);
+  private async initializeData(slug: string) {
+    try {
+      await this.getPostBySlug(slug); // Đợi cho việc lấy post hoàn tất
+      if (this.postId !== 0) {
+        this.initializeComments(this.currentPage, this.pageSize); // Gọi sau khi có postId
+      }
+    } catch (error) {
+      // Xử lý lỗi nếu cần
+    }
   }
 
   async getPostBySlug(slug: string) {
@@ -83,18 +90,21 @@ export class BlogDetailComponent implements OnInit {
       const response = await firstValueFrom(this.postService.getPostBySlug(slug));
       if (response.status === 'OK' && response.data) {
         this.post = response.data;
-        console.log('meta', this.post);
         this.postId = this.post.id;
         this.updateMetaTags(this.post);
-        this.initializeComments(this.currentPage, this.pageSize); // Gọi hàm để khởi tạo comments
+        this.initializeComments(this.currentPage, this.pageSize); // Gọi sau khi có postId
         this.cdr.markForCheck();
+      } else {
+        this.snackBarService.show('Failed to load post.');
       }
     } catch (error) {
-      this.toast.error('Failed to load post.');
+      this.snackBarService.show('Failed to load post.');
     }
   }
 
   private initializeComments(page: number, size: number) {
+    if (this.postId === 0) return; // Đảm bảo `postId` hợp lệ trước khi gọi service
+
     this.commentService
       .getCommentsByPostId(this.postId, page, size)
       .pipe(
@@ -102,25 +112,25 @@ export class BlogDetailComponent implements OnInit {
           if (response.status === 'OK' && response.data) {
             this.comments = [...this.comments, ...response.data];
             this.comments$.next(this.comments); // Emit the new value
-            this.hasMoreComments = response.data.length === size; // Check if there are more comments to load
+            this.hasMoreComments = response.data.length === size;
             return response.data;
           } else {
             throw new Error(response.message);
           }
         }),
-        tap((comments: CommentResponse[]) => {
+        tap((comments) => {
           this.initializeReplyForms(comments);
-          this.cdr.markForCheck(); // Ensure Angular checks and updates the view
+          this.cdr.markForCheck(); // Update view
+        }),
+        catchError((error) => {
+          this.snackBarService.show('Error fetching comments.');
+          return of([]); // Trả về danh sách rỗng nếu lỗi
         }),
         untilDestroyed(this),
       )
       .subscribe({
-        error: () => this.toast.error('Failed to load comments.'),
+        error: () => this.snackBarService.show('Failed to load comments.'),
       });
-
-    this.rootComments$ = this.comments$.pipe(
-      map((comments: CommentResponse[]) => comments.filter((comment) => !comment.parentCommentId)),
-    );
   }
 
   private initializeReplyForms(comments: CommentResponse[]) {
@@ -135,31 +145,37 @@ export class BlogDetailComponent implements OnInit {
 
   private updateMetaTags(post: Post) {
     if (!post.meta) return;
-    this.titleService.setTitle(post.meta.ogTitle || '');
-    this.updateMetaTag('description', post.meta.ogDescription || '');
+
+    const ogTitle = post.meta.ogTitle || post.title || 'Default Title';
+    const ogDescription = post.meta.ogDescription || post.excerpt || 'Default Description';
+    const ogImage = post.meta.ogImage || 'default-image-url';
+    const ogUrl = post.meta.slug || window.location.href;
+
+    this.titleService.setTitle(ogTitle);
+    this.updateMetaTag('description', ogDescription);
     this.updateMetaTag('keywords', post.tags.map((tag) => tag.name).join(', ') || '');
 
     // Open Graph tags
-    this.updateMetaTag('og:title', post.meta.ogTitle || '', true);
-    this.updateMetaTag('og:description', post.meta.ogDescription || '', true);
-    this.updateMetaTag('og:image', post.meta.ogImage || '', true);
-    this.updateMetaTag('og:url', post.meta.slug || '', true);
+    this.updateMetaTag('og:title', ogTitle, true);
+    this.updateMetaTag('og:description', ogDescription, true);
+    this.updateMetaTag('og:image', ogImage, true);
+    this.updateMetaTag('og:url', ogUrl, true);
 
     // Twitter Card tags
     this.updateMetaTag('twitter:card', 'summary_large_image');
-    this.updateMetaTag('twitter:title', post.meta.ogTitle || '');
-    this.updateMetaTag('twitter:description', post.meta.ogDescription || '');
-    this.updateMetaTag('twitter:image', post.meta.ogImage || '');
+    this.updateMetaTag('twitter:title', ogTitle);
+    this.updateMetaTag('twitter:description', ogDescription);
+    this.updateMetaTag('twitter:image', ogImage);
 
     // Schema Markup
     const schema = {
       '@context': 'http://schema.org',
       '@type': 'BlogPosting',
-      headline: post.title,
-      image: post.thumbnailUrl,
+      headline: post.title || 'Default Headline',
+      image: post.thumbnailUrl || 'default-thumbnail-url',
       author: {
         '@type': 'Person',
-        name: post.authorName,
+        name: post.authorName || 'Default Author',
       },
       publisher: {
         '@type': 'Organization',
@@ -169,12 +185,11 @@ export class BlogDetailComponent implements OnInit {
           url: 'URL_TO_YOUR_LOGO',
         },
       },
-      datePublished: post.meta.createdAt,
-      description: post.excerpt,
+      datePublished: post.meta.createdAt || new Date().toISOString(),
+      description: post.excerpt || 'Default Description',
     };
     this.updateMetaTag('application/ld+json', JSON.stringify(schema));
   }
-
   private updateMetaTag(name: string, content: string, isProperty: boolean = false) {
     if (isProperty) {
       this.metaService.updateTag({ property: name, content });
@@ -199,6 +214,7 @@ export class BlogDetailComponent implements OnInit {
     if (!this.checkLoggedIn()) return;
     const userId = this.authService.getUserId();
     const content = this.newCommentForm.get('content')?.value;
+    if (!content) return;
     const postId = this.postId;
     this.commentService
       .addComment(this.postId, userId, content)
@@ -219,7 +235,9 @@ export class BlogDetailComponent implements OnInit {
           }
 
           // Reset the form and toggle the comment form
-          this.newCommentForm.reset();
+          this.newCommentForm.reset({
+            content: '',
+          });
           this.showAddCommentForm = false;
         },
       });
@@ -232,7 +250,13 @@ export class BlogDetailComponent implements OnInit {
     const parentCommentId = commentId;
     this.commentService
       .replyComment(commentId, userId, replyContent, parentCommentId)
-      .pipe(untilDestroyed(this))
+      .pipe(
+        untilDestroyed(this),
+        catchError((error) => {
+          this.snackBarService.show('Failed to add reply.');
+          return EMPTY;
+        }),
+      )
       .subscribe({
         next: (response: ApiResponse<CommentResponse>) => {
           if (response.status === 'OK' || response.status === 'CREATED') {
@@ -268,9 +292,9 @@ export class BlogDetailComponent implements OnInit {
     return this.sanitizer.bypassSecurityTrustHtml(content);
   }
 
-  private checkLoggedIn(): boolean {
+  public checkLoggedIn(): boolean {
     if (!this.authService.isLoggedIn()) {
-      this.toast.warning('Bạn cần đăng nhập để thực hiện hành động này.');
+      this.snackBarService.show('Bạn cần đăng nhập để thực hiện hành động này.');
       return false;
     }
     return true;
@@ -282,5 +306,8 @@ export class BlogDetailComponent implements OnInit {
   loadMoreComments() {
     this.currentPage++;
     this.initializeComments(this.currentPage, this.pageSize);
+  }
+  handleImageError(event: any): void {
+    event.target.src = 'assets/images/user-profile-default.jpeg';
   }
 }

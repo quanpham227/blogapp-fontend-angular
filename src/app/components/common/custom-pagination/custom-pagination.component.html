@@ -1,0 +1,17 @@
+<div class="custom-pagination">
+  <button mat-icon-button (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+
+  <ng-container *ngIf="pages.length > 0">
+    <button *ngFor="let page of pages" mat-button [class.active]="page === currentPage" (click)="goToPage(page)">
+      {{ page }}
+    </button>
+
+    <span *ngIf="showEllipsisAfter">...</span>
+  </ng-container>
+
+  <button mat-icon-button (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+</div>

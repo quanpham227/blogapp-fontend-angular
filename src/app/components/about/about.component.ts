@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AboutService } from '../../services/about.service';
 import { About } from '../../models/about';
-import { LoggingService } from '../../services/logging.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 
 @UntilDestroy()
@@ -16,9 +15,30 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 })
 export class AboutComponent implements OnInit {
   about: About = {} as About;
+  businessForm: FormGroup;
   isLoading = true;
+  isEditMode = false;
 
-  constructor(private aboutService: AboutService) {}
+  constructor(
+    private aboutService: AboutService,
+    private fb: FormBuilder,
+  ) {
+    this.businessForm = this.fb.group({
+      id: [''],
+      title: [''],
+      content: [''],
+      imageUrl: [''],
+      address: [''],
+      phoneNumber: [''],
+      email: [''],
+      workingHours: [''],
+      facebookLink: [''],
+      youtube: [''],
+      visionStatement: [''],
+      foundingDate: [''],
+      ceoName: [''],
+    });
+  }
 
   ngOnInit() {
     this.getAbout();
@@ -32,6 +52,7 @@ export class AboutComponent implements OnInit {
         next: (response: any) => {
           if (response && response.data) {
             this.about = response.data;
+            this.businessForm.patchValue(this.about);
           }
           this.isLoading = false;
         },
@@ -39,5 +60,29 @@ export class AboutComponent implements OnInit {
           this.isLoading = false;
         },
       });
+  }
+
+  toggleEditMode() {
+    this.isEditMode = !this.isEditMode;
+  }
+
+  onSubmit() {
+    if (this.businessForm.valid) {
+      this.isLoading = true;
+      const updatedAbout = this.businessForm.value;
+      this.aboutService
+        .updateAbout(updatedAbout.id, updatedAbout)
+        .pipe(untilDestroyed(this))
+        .subscribe({
+          next: (response: any) => {
+            this.about = response.data;
+            this.isLoading = false;
+            this.isEditMode = false;
+          },
+          error: (error: any) => {
+            this.isLoading = false;
+          },
+        });
+    }
   }
 }

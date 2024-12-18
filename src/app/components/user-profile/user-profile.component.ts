@@ -1,82 +1,61 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ValidatorFn,
-  AbstractControl,
-  ValidationErrors,
-} from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ValidationErrors, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UserResponse } from '../../responses/user/user.response';
 import { UserService } from '../../services/user.service';
 import { UpdateUserDTO } from '../../dtos/user/update.user';
 import { AuthService } from '../../services/auth.service';
+import { ApiResponse } from '../../models/response';
 
 @Component({
-  selector: 'app-user-profile',
+  selector: 'app-profile-update',
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
 })
 export class UserProfileComponent implements OnInit {
-  userResponse?: UserResponse;
-  userProfileForm: FormGroup; // đối tượng FormGroup quản lý dữ liệu của form
+  updateForm: FormGroup;
+  isSubmitting = false;
+  showPassword = false;
+  showConfirmPassword = false;
+  userImageUrl: string | null = null;
+  defaultImage = 'assets/images/default-user.png';
   token: string | null = '';
 
   constructor(
-    private formBuilder: FormBuilder,
+    private fb: FormBuilder,
     private router: Router,
     private userService: UserService,
     private authService: AuthService,
-    private activatedRoute: ActivatedRoute,
   ) {
-    // Tạo FormGroup và các FormControl tương ứng
-    this.userProfileForm = this.formBuilder.group(
+    this.updateForm = this.fb.nonNullable.group(
       {
-        fullname: ['', Validators.required], // fullname là FormControl bắt buộc
-        phone_number: ['', Validators.minLength(10)], // phone_number là FormControl bắt buộc
-        password: ['', Validators.minLength(3)],
-        retype_password: ['', Validators.minLength(3)],
+        fullName: ['', [Validators.required, Validators.minLength(2)]],
+        phoneNumber: ['', [Validators.pattern('^[0-9]{10}$')]],
+        password: ['', [Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$')]],
+        retypePassword: [''],
       },
-      {
-        validators: this.passwordMatchValidator, // Thêm validator tự định nghĩa
-      },
+      { validators: this.passwordMatchValidator },
     );
   }
 
   ngOnInit(): void {
-    debugger;
     this.token = this.authService.getAccessToken();
     if (this.token) {
       this.userService.getUserDetail(this.token).subscribe({
-        next: (response: any) => {
-          this.userResponse = {
-            id: response.data.id,
-            fullname: response.data.fullname,
-            email: response.data.email,
-            phone_number: response.data.phone_number,
-            profile_image: response.data.profile_image,
-            is_active: response.data.is_active,
-            facebook_account_id: response.data.facebook_account_id,
-            google_account_id: response.data.google_account_id,
-            role: response.data.role,
-          };
-          this.userProfileForm.patchValue({
-            fullname: this.userResponse?.fullname ?? '',
-            phone_number: this.userResponse?.phone_number ?? '',
+        next: (response: ApiResponse<UserResponse>) => {
+          const userResponse: UserResponse = response.data;
+          this.updateForm.patchValue({
+            fullName: userResponse.fullName,
+            phoneNumber: userResponse.phoneNumber,
           });
-          this.authService.setUser(this.userResponse);
-        },
-        complete: () => {
-          debugger;
+          this.userImageUrl = userResponse.profileImage;
+          this.authService.setUser(userResponse);
         },
         error: (error: HttpErrorResponse) => {
-          debugger;
           console.error(error?.error?.message ?? '');
         },
       });
@@ -85,46 +64,75 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
-  passwordMatchValidator(): ValidatorFn {
-    return (formGroup: AbstractControl): ValidationErrors | null => {
-      const password = formGroup.get('password')?.value;
-      const retypedPassword = formGroup.get('retype_password')?.value;
-      if (password !== retypedPassword) {
-        return { passwordMismatch: true };
-      }
+  passwordMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const password = control.get('password')?.value;
+    const retypePassword = control.get('retypePassword')?.value;
+    if (password && retypePassword && password !== retypePassword) {
+      return { passwordMismatch: true };
+    }
+    return null;
+  };
 
-      return null;
-    };
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 
-  save(): void {
-    if (this.userProfileForm.valid) {
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  onFileSelect(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.userImageUrl = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  handleImageError(): void {
+    this.userImageUrl = this.defaultImage;
+  }
+
+  resetForm(): void {
+    this.updateForm.reset();
+    this.userImageUrl = null;
+  }
+
+  onSubmit(): void {
+    if (this.updateForm.valid) {
+      this.isSubmitting = true;
       const updateUserDTO: UpdateUserDTO = {
-        fullname: this.userProfileForm.get('fullname')?.value,
-        phone_number: this.userProfileForm.get('phone_number')?.value,
-        password: this.userProfileForm.get('password')?.value,
-        retype_password: this.userProfileForm.get('retype_password')?.value,
+        fullName: this.updateForm.get('fullName')?.value,
+        phoneNumber: this.updateForm.get('phoneNumber')?.value,
+        password: this.updateForm.get('password')?.value,
+        retypePassword: this.updateForm.get('retypePassword')?.value,
       };
 
       if (this.token) {
         this.userService.updateUserDetail(this.token, updateUserDTO).subscribe({
-          next: (response: any) => {
+          next: (response: UserResponse) => {
             this.authService.setUser(null);
             this.authService.clearAuthData();
             this.router.navigate(['/login']);
           },
           error: (error: HttpErrorResponse) => {
-            debugger;
             console.error(error?.error?.message ?? '');
+            this.isSubmitting = false;
           },
         });
       } else {
         this.router.navigate(['/login']);
       }
     } else {
-      if (this.userProfileForm.hasError('passwordMismatch')) {
-        console.error('Mật khẩu và mật khẩu gõ lại chưa chính xác');
-      }
+      Object.keys(this.updateForm.controls).forEach((key) => {
+        const control = this.updateForm.get(key);
+        if (control?.invalid) {
+          control.markAsTouched();
+        }
+      });
     }
   }
 }

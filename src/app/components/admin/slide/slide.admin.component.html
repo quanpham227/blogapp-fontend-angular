@@ -1,60 +1,72 @@
-<div class="admin-slide container">
-  <div class="admin-slide__container mt-4">
-    <header class="admin-slide__header mb-4">
-      <h1 class="admin-slide__title">Slide</h1>
-      <p class="admin-slide__description text-muted">
-        Create, edit, and manage the slide on your site.
-      </p>
-    </header>
+<div class="admin-slide">
+  <div class="admin-slide__header">
+    <h2 class="admin-slide__header-title">Slide Management</h2>
+    <button class="admin-slide__header-button" (click)="openForm()">Add New Slide</button>
+  </div>
 
-    <div
-      class="admin-slide__input-wrapper d-flex justify-content-between align-items-center"
-    >
-      <div class="admin-slide__input-group position-relative">
-        <i class="bi bi-search admin-slide__icon"></i>
-        <input
-          type="search"
-          class="admin-slide__search-input"
-          placeholder="Tìm kiếm..."
-          aria-label="Tìm kiếm"
-        />
+  <div class="admin-slide__list" cdkDropList (cdkDropListDropped)="drop($event)">
+    <div class="admin-slide__item" *ngFor="let slide of slides; trackBy: trackById" cdkDrag>
+      <div class="admin-slide__thumbnail">
+        <img [src]="slide.imageUrl" [alt]="slide.title" />
       </div>
-      <button class="admin-slide__btn-add" type="button" (click)="addSlide()">
-        Thêm chuyên mục
-      </button>
-    </div>
-
-    <div class="admin-slide__list-slide">
-      <div class="admin-slide__list-slide-item" *ngFor="let slide of slides">
-        <i class="fas fa-folder admin-slide__left-icon"></i>
-        <p class="admin-slide__slide-name">{{ slide.title }}</p>
-        <div class="admin-slide__right-icon">
-          <i
-            class="bi bi-three-dots"
-            [class.rotate-icon]="menuVisible && selectedSlideId === slide.id"
-            (click)="toggleMenu($event, slide.id)"
-          ></i>
-          <div
-            class="admin-slide__options-menu"
-            *ngIf="menuVisible && selectedSlideId === slide.id"
-          >
-            <!-- Mũi tên chỉ vào icon -->
-            <div class="admin-slide__arrow"></div>
-            <div class="admin-slide__option-item" (click)="editSlide(slide.id)">
-              <i class="bi bi-pencil"></i> Sửa
-            </div>
-            <div
-              class="admin-slide__option-item"
-              (click)="openDeleteModal(slide.id)"
-            >
-              <i class="bi bi-trash"></i> Xóa
-            </div>
-            <div class="admin-slide__option-item">
-              <i class="bi bi-check-circle-fill"></i> Đặt làm mặc định
-            </div>
-          </div>
-        </div>
+      <div class="admin-slide__content">
+        <h3>{{ slide.title }}</h3>
+        <p>{{ slide.description }}</p>
+        <span class="admin-slide__status" [ngClass]="{ active: slide.status, inactive: !slide.status }">
+          {{ slide.status ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+      <div class="admin-slide__actions">
+        <button class="admin-slide__actions-edit" (click)="openForm(slide)" aria-label="Edit slide">Edit</button>
+        <button class="admin-slide__actions-delete" (click)="deleteSlide(slide.id)" aria-label="Delete slide">Delete</button>
       </div>
     </div>
   </div>
+
+  <ng-template #content>
+    <div class="admin-slide__dialog">
+      <div class="admin-slide__dialog-content">
+        <h3 id="slideFormTitle">{{ currentEditId ? 'Edit' : 'Add' }} Slide</h3>
+        <form [formGroup]="slideForm" (ngSubmit)="onSubmit()">
+          <div class="admin-slide__form-group">
+            <input id="title" type="text" formControlName="title" aria-required="true" placeholder="Title" />
+            <div class="admin-slide__error" *ngIf="slideForm.get('title')?.errors?.['required'] && slideForm.get('title')?.touched">
+              Title is required
+            </div>
+          </div>
+
+          <div class="admin-slide__form-group">
+            <textarea id="description" placeholder="Description" formControlName="description" rows="3"></textarea>
+          </div>
+
+          <div class="admin-slide__form-group admin-slide__form-group--inline">
+            <select id="status" formControlName="status" aria-required="true">
+              <option [value]="true">Active</option>
+              <option [value]="false">Inactive</option>
+            </select>
+            <input id="order" placeholder="Order" type="number" formControlName="order" min="1" />
+          </div>
+
+          <div class="admin-slide__form-group">
+            <input id="link" placeholder="Link" type="url" formControlName="link" />
+          </div>
+
+          <div class="admin-slide__form-group">
+            <label for="image">Image*</label>
+            <div class="admin-slide__image-container">
+              <div class="admin-slide__image-preview" *ngIf="imagePreview">
+                <img [src]="imagePreview" alt="Preview" />
+              </div>
+              <button type="button" class="admin-slide__select-btn" (click)="openImageSelectDialog()">Select Image</button>
+            </div>
+          </div>
+
+          <div class="admin-slide__form-actions">
+            <button type="button" class="admin-slide__btn-cancel" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="admin-slide__btn-save" [disabled]="!slideForm.valid">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-template>
 </div>

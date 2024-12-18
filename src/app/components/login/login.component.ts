@@ -7,8 +7,11 @@ import { UserDetailService } from '../../services/user.details';
 import { LoginResponse } from '../../responses/user/login.response';
 import { UserResponse } from './../../responses/user/user.response';
 import { CommonModule } from '@angular/common';
-import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { debounceTime } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { emailOrPhoneValidator } from '../../validators/validators';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @UntilDestroy()
 @Component({
@@ -16,7 +19,7 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, NgxSpinnerModule],
+  imports: [ReactiveFormsModule, CommonModule],
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -32,47 +35,63 @@ export class LoginComponent implements OnInit {
     private userService: UserService,
     private userDetailService: UserDetailService,
     private authService: AuthService,
-    private spinner: NgxSpinnerService,
+    private snackBar: SnackbarService,
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, emailOrPhoneValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   ngOnInit() {
-    this.authService.user$.pipe(untilDestroyed(this)).subscribe((user) => {
-      this.userResponse = user;
+    const existingUser = this.authService.getUser();
+    if (existingUser) {
+      this.userResponse = existingUser;
+    } else {
+      this.authService.user$.pipe(untilDestroyed(this)).subscribe((user) => {
+        this.userResponse = user;
+      });
+    }
+    // Thêm debounce vào form validation
+    this.loginForm.valueChanges.pipe(debounceTime(300), untilDestroyed(this)).subscribe(() => {
+      // Handle form changes
+      this.validateForm();
     });
   }
-
+  validateForm() {
+    // Thực hiện các bước kiểm tra và xử lý form
+    if (this.loginForm.invalid) {
+      this.errorMessage = 'Form không hợp lệ';
+    } else {
+      this.errorMessage = null;
+    }
+  }
   login() {
     if (this.loginForm.invalid) {
       return;
     }
     this.isLoading = true;
-    this.spinner.show(); // Hiển thị spinner
     const loginDTO = this.loginForm.value;
-    this.userService
-      .login(loginDTO)
+
+    // Tạm thời lưu token của tài khoản trước khi xóa
+    const previousToken = this.authService.getAccessToken();
+    const previousRefreshToken = this.authService.getRefreshToken();
+
+    this.authService
+      .loginWithRecovery(loginDTO, previousToken!, previousRefreshToken!)
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: LoginResponse) => {
           if (response.status == 'OK' && response.data) {
-            const { token } = response.data;
-            this.authService.setAccessToken(token);
-            this.authService.setRefreshTokenFlag();
-            this.getUserDetails(token);
+            this.getUserDetails(response.data.token);
           }
-          this.spinner.hide();
         },
         error: (error: any) => {
-          this.spinner.hide(); // Ẩn spinner nếu có lỗi
           this.isLoading = false;
+          this.errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
         },
       });
   }
-
   getUserDetails(token: string) {
     this.userDetailService
       .getUserDetail(token)
@@ -83,20 +102,23 @@ export class LoginComponent implements OnInit {
             this.userResponse = response.data;
             this.authService.setUser(this.userResponse ?? null);
             this.navigateToDashboard();
-            this.spinner.hide(); // Ẩn spinner sau khi hoàn thành
             this.isLoading = false;
           }
         },
         error: (error: any) => {
-          this.spinner.hide(); // Ẩn spinner nếu có lỗi
           this.isLoading = false;
         },
       });
   }
 
   navigateToDashboard() {
-    switch (this.userResponse?.role.name) {
+    if (!this.userResponse) {
+      this.router.navigate(['/']);
+      return;
+    }
+    switch (this.userResponse.role.name) {
       case 'ADMIN':
+      case 'MODERATOR':
         this.router.navigate(['/admin/dashboard']);
         break;
       case 'USER':
@@ -115,12 +137,44 @@ export class LoginComponent implements OnInit {
   navigateToRegister(): void {
     this.router.navigate(['/register']);
   }
-
+  navigateToResetPassword(): void {
+    if (!this.loginForm.get('email')?.value) {
+      this.snackBar.show('Vui lòng nhập email hoặc số điện thoại để lấy lại mật khẩu');
+      return;
+    }
+    this.router.navigate(['/forgot-password']);
+  }
   loginWithGoogle() {
-    console.log('Google login initiated');
+    debugger;
+    this.authService.authenticate('google').subscribe({
+      next: (url: string) => {
+        if (url) {
+          window.location.href = url;
+        } else {
+          this.snackBar.show('URL đăng nhập không hợp lệ');
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        debugger;
+        this.snackBar.show('Lỗi khi xác thực với Google:', error?.error?.message ?? '');
+      },
+    });
   }
 
   loginWithFacebook() {
-    console.log('Facebook login initiated');
+    // Logic đăng nhập với Facebook
+    this.authService.authenticate('facebook').subscribe({
+      next: (url: string) => {
+        if (url) {
+          window.location.href = url;
+        } else {
+          this.snackBar.show('URL đăng nhập không hợp lệ');
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        debugger;
+        this.snackBar.show('Lỗi khi xác thực với Facebook:', error?.error?.message ?? '');
+      },
+    });
   }
 }

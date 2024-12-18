@@ -1,174 +1,216 @@
-import { Component, OnInit, OnDestroy, HostListener, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, TemplateRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { CategoryService } from '../../../services/category.service';
 import { ApiResponse } from '../../../models/response';
 import { Category } from '../../../models/category';
-import { Router, NavigationStart } from '@angular/router';
-import { NavigationState } from '../../../models/navigation-state';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ConfirmModalComponent } from '../../common/confirm-modal/confirm-modal.component';
-import { Subscription } from 'rxjs';
+import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { InsertCategoryAdminComponent } from '../insert-category/insert-category.admin.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
 import { CategoryRequest } from '../../../request/category.request';
-import { UpdateCategoryAdminComponent } from '../update-category/update-category.admin.component';
-import { ToasterService } from '../../../services/toaster.service';
 
+@UntilDestroy()
 @Component({
   selector: 'app-category-admin',
   templateUrl: './category.admin.component.html',
   styleUrls: ['./category.admin.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule, MatDialogModule, MatTooltipModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CategoryAdminComponent implements OnInit, OnDestroy {
+export class CategoryAdminComponent implements OnInit {
+  @ViewChild('content', { static: true }) content!: TemplateRef<any>;
+
   categories: Category[] = [];
-  categoryIdToDelete: number | null = null;
-  private navigationStateMessage: string | null = null;
-  private modalRef: NgbModalRef | null = null;
-  private routerSubscription: Subscription | null = null;
-  menuVisible = false;
   selectedCategoryId: number | null = null;
+  showForm = false;
+  editMode = false;
+  currentEditId: number | null = null;
+  categoryForm: FormGroup;
+  dialogRef: MatDialogRef<any> | null = null;
 
   constructor(
+    private fb: FormBuilder,
     private categoryService: CategoryService,
-    private router: Router,
-    private toast: ToasterService,
-    private modalService: NgbModal,
-  ) {}
-
-  ngOnInit(): void {
-    this.getCategories();
-    this.checkNavigationState();
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+  ) {
+    this.categoryForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
+      description: ['', [Validators.required, Validators.maxLength(255)]],
+    });
   }
 
-  ngOnDestroy(): void {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
+  ngOnInit() {
+    this.getCategories();
   }
 
   getCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (response: ApiResponse<Category[]>) => {
-        if (response.status === 'OK') {
-          this.categories = response.data;
+    this.categoryService
+      .getCategories()
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Category[]>) => {
+          if (response.status === 'OK' && response.data) {
+            this.categories = response.data;
+          }
+          this.cdr.markForCheck(); // Manually trigger change detection
+        },
+        error: (error) => {
+          this.cdr.markForCheck(); // Inform Angular to check for changes
+        },
+      });
+  }
+
+  openForm(category: Category | null = null): void {
+    if (category) {
+      this.categoryForm.patchValue(category);
+      this.currentEditId = category.id;
+      this.editMode = true;
+    } else {
+      this.categoryForm.reset();
+      this.currentEditId = null;
+      this.editMode = false;
+    }
+
+    this.dialogRef = this.dialog.open(this.content, {
+      width: '600px',
+      disableClose: true,
+    });
+
+    this.dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (this.editMode && this.currentEditId) {
+          this.updateCategory(this.currentEditId, this.categoryForm.value);
+        } else {
+          this.createCategory(this.categoryForm.value);
         }
+      }
+    });
+  }
+
+  closeForm(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+    this.showForm = false;
+    this.currentEditId = null;
+    this.cdr.markForCheck(); // Inform Angular to check for changes
+  }
+
+  deleteCategory(id: number): void {
+    if (id === null) {
+      return;
+    }
+    const dialogData: ConfirmDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this ctegory?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    };
+
+    import('../shared/confirm-dialog/confirm-dialog.component').then(({ ConfirmDialogComponent }) => {
+      this.dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: dialogData,
+      });
+      this.handleDialogResponse(this.dialogRef, id);
+    });
+  }
+  private handleDialogResponse(dialogRef: MatDialogRef<ConfirmDialogComponent>, id: number): void {
+    dialogRef.afterClosed().subscribe({
+      next: (result) => {
+        if (result) {
+          this.categoryService
+            .deleteCategory(id)
+            .pipe(untilDestroyed(this))
+            .subscribe({
+              next: (response: ApiResponse<void>) => {
+                if (response.status === 'OK' || response.status === 'DELETED') {
+                  this.categories = this.categories.filter((client) => client.id !== id);
+                  this.cdr.markForCheck(); // Inform Angular to check for changes
+                }
+              },
+              error: (error) => {
+                this.snackBar.open('Failed to delete client', 'Close', {
+                  duration: 3000,
+                });
+              },
+            });
+        }
+      },
+      error: (reason) => {
+        this.snackBar.open('Failed to delete client', 'Close', {
+          duration: 3000,
+        });
       },
     });
   }
+  onSubmit(): void {
+    if (this.categoryForm.valid) {
+      const formValue = this.categoryForm.value;
+      const category: CategoryRequest = {
+        name: formValue.name,
+        description: formValue.description,
+      };
 
-  addCategory(): void {
-    const modalRef = this.modalService.open(InsertCategoryAdminComponent);
-    modalRef.componentInstance.addCategory.subscribe((category: CategoryRequest) => {
-      this.categoryService.insertCategory(category).subscribe({
+      if (this.editMode && this.currentEditId) {
+        this.updateCategory(this.currentEditId, category);
+      } else {
+        this.createCategory(category);
+      }
+    } else {
+      this.snackBar.open('Invalid form', 'Close', {
+        duration: 3000,
+      });
+    }
+  }
+
+  createCategory(categoryRequest: CategoryRequest): void {
+    this.categoryService
+      .insertCategory(categoryRequest)
+      .pipe(untilDestroyed(this))
+      .subscribe({
         next: (response: ApiResponse<Category>) => {
           if (response.status === 'OK' || response.status === 'CREATED') {
-            this.getCategories();
+            this.categories.push(response.data);
+            this.closeForm();
+            this.cdr.markForCheck(); // Inform Angular to check for changes
           }
         },
+        error: (error) => {},
       });
-    });
   }
-
-  openDeleteModal(id: number | null): void {
-    if (id !== null) {
-      this.categoryIdToDelete = id;
-      this.modalRef = this.modalService.open(ConfirmModalComponent);
-      this.modalRef.componentInstance.title = 'Confirm Delete';
-      this.modalRef.componentInstance.message = 'Do you want to delete this category?';
-      this.modalRef.componentInstance.confirmText = 'Delete';
-      this.modalRef.componentInstance.cancelText = 'Cancel';
-
-      this.modalRef.componentInstance.confirm.subscribe(() => {
-        this.confirmDelete();
-      });
-    } else {
-      this.toast.warning('Category ID is null');
-    }
-  }
-
-  confirmDelete(): void {
-    if (this.categoryIdToDelete !== null) {
-      this.categoryService.deleteCategory(this.categoryIdToDelete).subscribe({
-        next: (response: ApiResponse<any>) => {
-          if (response.status === 'OK') {
-            this.getCategories();
+  updateCategory(id: number, categoryRequest: CategoryRequest): void {
+    this.categoryService
+      .updateCategory(id, categoryRequest)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Category>) => {
+          if (response.status === 'OK' || response.status === 'UPDATED') {
+            const index = this.categories.findIndex((s) => s.id === id);
+            if (index !== -1) {
+              this.categories[index] = response.data;
+            }
+            this.closeForm();
+            this.cdr.markForCheck(); // Inform Angular to check for changes
           }
         },
-        complete: () => {
-          if (this.modalRef) {
-            this.modalRef.close();
-          }
-        },
-      });
-      this.categoryIdToDelete = null;
-    }
-  }
-
-  editCategory(id: number | null): void {
-    if (id !== null) {
-      const category = this.categories.find((cat) => cat.id === id);
-      if (category) {
-        const modalRef = this.modalService.open(UpdateCategoryAdminComponent, {
-          centered: true,
-          backdrop: 'static',
-          keyboard: true,
-          windowClass: 'admin-modal',
-          size: 'md',
-        });
-        modalRef.componentInstance.categoryId = id; // Truyền ID vào modal
-        modalRef.componentInstance.categoryForm.patchValue(category); // Truyền dữ liệu vào form
-        modalRef.componentInstance.updateCategory.subscribe((categoryRequest: CategoryRequest) => {
-          // Gọi phương thức updateCategory từ CategoryService để cập nhật chuyên mục
-          this.categoryService.updateCategory(id, categoryRequest).subscribe({
-            next: (response: ApiResponse<Category>) => {
-              if (response.status === 'OK' || response.status === 'UPDATED') {
-                this.getCategories(); // Gọi lại hàm getCategories để làm mới danh sách
-              }
-            },
+        error: (error) => {
+          this.snackBar.open('Failed to update category', 'Close', {
+            duration: 3000,
           });
-        });
-      }
-    } else {
-      this.toast.warning('Category ID is null');
-    }
+        },
+      });
   }
-  private checkNavigationState(): void {
-    this.routerSubscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        const navigation = this.router.getCurrentNavigation();
-        const state = navigation?.extras?.state as NavigationState;
-        if (state?.message) {
-          this.navigationStateMessage = state.message;
-        }
-      }
-    });
-
-    if (this.navigationStateMessage) {
-      this.toast.success(this.navigationStateMessage);
-      this.navigationStateMessage = null;
+  truncate(text: string, maxLength: number): string {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
     }
-  }
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    if (this.menuVisible) {
-      this.menuVisible = false;
-      this.selectedCategoryId = null;
-    }
-  }
-  toggleMenu(event: Event, categoryId: number | null): void {
-    if (categoryId !== null) {
-      if (this.selectedCategoryId === categoryId && this.menuVisible) {
-        this.menuVisible = false;
-        this.selectedCategoryId = null;
-      } else {
-        this.menuVisible = true;
-        this.selectedCategoryId = categoryId;
-      }
-      event.stopPropagation(); // Ensure no other unwanted events are triggered
-    } else {
-      this.toast.warning('Category ID is null');
-    }
+    return text;
   }
 }

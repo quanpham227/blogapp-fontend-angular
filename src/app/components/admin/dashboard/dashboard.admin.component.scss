@@ -1,0 +1,117 @@
+.dashboard-admin {
+  padding: 20px;
+  transition: all 0.3s ease;
+
+  &--dark-theme {
+    background-color: #1a1a1a;
+    color: #ffffff;
+
+    .dashboard-admin__stat-card,
+    .dashboard-admin__widget {
+      background-color: #2d2d2d;
+      color: #ffffff;
+    }
+
+    .dashboard-admin__quick-stat {
+      border-bottom-color: #404040;
+    }
+
+    .dashboard-admin__post-title,
+    .dashboard-admin__post-views,
+    .dashboard-admin__stat-title,
+    .dashboard-admin__chart-title,
+    .dashboard-admin__quick-stat span,
+    .dashboard-admin__quick-stat strong {
+      color: #ffffff;
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  &__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__stat-card {
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+
+  &__stat-title {
+    margin-bottom: 20px; // Add margin to create space between the title and the chart
+
+    @media (max-width: 768px) {
+      margin-bottom: 10px; // Adjust margin for mobile screens
+    }
+  }
+
+  &__chart-container {
+    height: 300px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 10px; // Add padding to create space between the title and the chart
+
+    @media (max-width: 768px) {
+      height: 250px;
+      padding-top: 20px; // Increase padding for mobile screens
+    }
+  }
+
+  &__widgets-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__widget {
+    border-radius: 10px;
+  }
+
+  &__post-title {
+    font-size: 14px; // Adjust the size as needed
+  }
+
+  &__quick-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  @media (max-width: 768px) {
+    &__stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__chart-container {
+      height: 250px;
+    }
+  }
+}

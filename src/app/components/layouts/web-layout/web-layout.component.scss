@@ -1,4 +1,14 @@
+/* web-layout.component.scss */
+@import '../../../../styles.scss';
+
+.web-layout {
+  background-color: $web-background-color;
+}
+
 .content {
   flex: 1; /* Phần nội dung sẽ chiếm không gian còn lại giữa header và footer */
   padding-top: 114px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng chiều cao của màn hình */
 }

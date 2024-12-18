@@ -1,17 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Post } from '../../models/post';
 import { PostService } from '../../services/post.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { HttpStatusService } from '../../services/http-status.service';
-import { LoggingService } from '../../services/logging.service';
-import { catchError, distinctUntilChanged, take, tap } from 'rxjs/operators';
 import { LazyLoadDirective } from '../../directives/lazy-load.directive';
-import { isEqual } from 'lodash';
-import { ApiResponse } from '../../models/response';
-import { PostListResponse } from '../../responses/post/post-list-response';
+import isEqual from 'lodash-es/isEqual';
+import { catchError, distinctUntilChanged, take, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @UntilDestroy()
 @Component({
@@ -23,60 +22,65 @@ import { PostListResponse } from '../../responses/post/post-list-response';
 })
 export class RecentPostsComponent implements OnInit {
   recentPosts: Post[] = [];
+  isLoading = false;
+  errorMessage = '';
 
   constructor(
     private postService: PostService,
     private router: Router,
     private cdr: ChangeDetectorRef,
     private httpStatusService: HttpStatusService,
+    private snackBar: SnackbarService,
   ) {}
 
   ngOnInit() {
-    this.getRecentPosts(0, 4);
+    this.fetchRecentPosts(0, 4);
   }
 
-  getRecentPosts(page: number, limit: number) {
+  fetchRecentPosts(page: number, limit: number) {
+    this.isLoading = true;
+    this.errorMessage = '';
+
     this.postService
       .getRecentPosts(page, limit)
       .pipe(
         untilDestroyed(this),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        tap((response: ApiResponse<PostListResponse>) => {
-          if (response.status == 'OK' && response.data.posts) {
-            const newPosts = response.data.posts;
-            if (!isEqual(this.recentPosts, newPosts)) {
-              this.recentPosts = newPosts;
-              this.cdr.detectChanges();
-            }
+        tap((response) => {
+          if (response.status === 'OK' && response.data.posts) {
+            this.recentPosts = response.data.posts;
+          } else {
+            this.errorMessage = 'Failed to load posts. Please try again later.';
           }
+          this.cdr.detectChanges();
         }),
         catchError((error) => {
-          console.error('Error fetching posts:', error);
-          return [];
+          this.errorMessage = 'Error loading posts. Please try again.';
+          return of([]);
         }),
       )
-      .subscribe();
+      .subscribe(() => {
+        this.isLoading = false;
+      });
   }
 
   onPostClick(slug: string) {
-    if (!slug || typeof slug !== 'string' || slug.trim() === '') {
-      alert('Slug không hợp lệ. Vui lòng thử lại.');
+    if (!slug?.trim()) {
+      this.snackBar.show('Invalid slug. Please try again.');
       return;
     }
 
-    // Kiểm tra trạng thái của ứng dụng (ví dụ: không có yêu cầu HTTP đang chờ xử lý)
     if (this.isRequestPending()) {
-      alert('Vui lòng đợi yêu cầu hiện tại hoàn thành.');
+      this.snackBar.show('Please wait for the current request to complete.');
       return;
     }
+
     this.router.navigate([`/blog/${slug}`]);
   }
 
   isRequestPending(): boolean {
     let isPending = false;
-    this.httpStatusService.pendingRequests$.pipe(take(1)).subscribe((status) => {
-      isPending = status;
-    });
+    this.httpStatusService.pendingRequests$.pipe(take(1)).subscribe((status) => (isPending = status));
     return isPending;
   }
 }

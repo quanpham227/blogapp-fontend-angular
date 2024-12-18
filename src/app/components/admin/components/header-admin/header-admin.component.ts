@@ -1,8 +1,7 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnInit } from '@angular/core';
 import { UserResponse } from '../../../../responses/user/user.response';
 import { UserService } from '../../../../services/user.service';
-import { TokenService } from '../../../../services/token.service';
-import { Router } from 'express';
+import { Router } from '@angular/router';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -12,7 +11,7 @@ import { AuthService } from '../../../../services/auth.service';
 @Component({
   selector: 'app-header-admin',
   standalone: true,
-  imports: [RouterModule, FormsModule, CommonModule],
+  imports: [RouterModule, FormsModule, CommonModule, RouterModule],
   templateUrl: './header-admin.component.html',
   styleUrl: './header-admin.component.scss',
 })
@@ -21,11 +20,13 @@ export class HeaderAdminComponent implements OnInit {
   activeComponent: string = ''; // Thêm thuộc tính này
   localStorage?: Storage;
   isSidebarVisible: boolean = true;
+  isProfileMenuVisible = false;
+  isNotificationsVisible = false;
   constructor(
     private userService: UserService,
     private sidebarService: SidebarAdminService,
-    private tokenService: TokenService,
     private authService: AuthService,
+    private router: Router,
 
     @Inject(DOCUMENT) private document: Document,
   ) {
@@ -55,5 +56,29 @@ export class HeaderAdminComponent implements OnInit {
   }
   toggleSidebar() {
     this.sidebarService.toggleSidebarVisibility();
+  }
+  toggleNotifications() {
+    this.isNotificationsVisible = !this.isNotificationsVisible;
+  }
+  toggleProfileMenu() {
+    this.isProfileMenuVisible = !this.isProfileMenuVisible;
+  }
+  navigateUserProfile() {
+    this.router.navigate(['/admin/profile']);
+    this.toggleProfileMenu();
+  }
+  handleImageError(event: any): void {
+    event.target.src = 'assets/images/user-profile-default.jpeg';
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const clickedInside = target.closest('.header-admin__profile-menu') || target.closest('.header-admin__nav-link');
+    if (!clickedInside) {
+      this.isProfileMenuVisible = false;
+    }
+  }
+  handleNavigateDashboard() {
+    this.router.navigate(['/admin/dashboard']);
   }
 }

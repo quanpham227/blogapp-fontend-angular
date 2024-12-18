@@ -1,264 +1,127 @@
-<div class="admin-posts container mt-4">
-  <!-- Tiêu đề và nút viết bài -->
-  <div class="admin-posts__header d-flex align-items-center">
-    <h1 class="admin-posts__title">Bài viết</h1>
+<div class="post-list-admin">
+  <div class="post-list-admin__header">
+    <h2 class="post-list-admin__title">Posts Management</h2>
+    <button class="post-list-admin__add-post-btn" (click)="navigateToAddPost()" matTooltip="Add new post">
+      <i class="fas fa-plus"></i>
+      Add New Post
+    </button>
   </div>
 
-  <!-- Navigation -->
-  <!-- Navigation -->
-  <ul class="admin-posts__nav nav">
-    <li class="admin-posts__nav-item">
-      <a class="admin-posts__nav-link" (click)="onStatusChange('')">
-        Tất cả
-        <span class="admin-posts__nav-badge">
-          ({{ counts.PUBLISHED + counts.DRAFT + counts.DELETED + counts.PENDING }})
-        </span>
-      </a>
-    </li>
-    <li class="admin-posts__nav-separator">|</li>
-    <li class="admin-posts__nav-item">
-      <a class="admin-posts__nav-link" (click)="onStatusChange(postStatus.Published)">
-        Đã đăng
-        <span class="admin-posts__nav-badge">({{ counts.PUBLISHED }})</span>
-      </a>
-    </li>
-    <li class="admin-posts__nav-separator">|</li>
-    <li class="admin-posts__nav-item">
-      <a class="admin-posts__nav-link" (click)="onStatusChange(postStatus.Draft)">
-        Bản nháp
-        <span class="admin-posts__nav-badge">({{ counts.DRAFT }})</span>
-      </a>
-    </li>
-    <li class="admin-posts__nav-separator">|</li>
-    <li class="admin-posts__nav-item">
-      <a class="admin-posts__nav-link" (click)="onStatusChange(postStatus.Deleted)">
-        Đã xoá
-        <span class="admin-posts__nav-badge">({{ counts.DELETED }})</span>
-      </a>
-    </li>
-  </ul>
-  <!-- Search -->
-  <div class="admin-posts__search d-flex mb-3">
-    <input
-      type="search"
-      class="admin-posts__search-input form-control"
-      placeholder="Tìm kiếm bài viết"
-      (input)="onKeywordChange($event)"
-    />
-    <button type="button" class="admin-posts__add-post form-control" (click)="navigateToAddPost()">Viết bài mới</button>
-  </div>
-
-  <!-- Filter and Pagination -->
-  <div class="admin-posts__filter row align-items-center">
-    <!-- Filters -->
-    <div class="admin-posts__filters-select form-group col-md-6 d-flex align-items-center">
-      <div class="form-group d-flex align-items-center me-2">
-        <input
-          id="monthPicker"
-          class="form-control me-2"
-          placeholder="Chọn thời gian"
-          name="dp"
-          ngbDatepicker
-          #d="ngbDatepicker"
-          (dateSelect)="onDateChange($event)"
-          [value]="createdAt ? createdAt : ''"
-          readonly
-        />
-        <button class="btn btn-outline-secondary calendar me-2" (click)="d.toggle()" type="button">
-          <i class="fa fa-calendar"></i>
-        </button>
-        <button
-          class="btn btn-outline-secondary me-2"
-          (click)="clearDate()"
-          type="button"
-          [disabled]="createdAt === null || createdAt === ''"
-        >
-          <i class="fa fa-times"></i>
-        </button>
-      </div>
-      <select class="admin-posts__filter-select--category form-select w-auto" (change)="onCategoryChange($event)">
-        <option value="0">Tất cả</option>
+  <div class="post-list-admin__filters">
+    <div class="post-list-admin__search">
+      <i class="fas fa-search post-list-admin__search-icon"></i>
+      <input
+        class="post-list-admin__search-input"
+        type="text"
+        [(ngModel)]="keyword"
+        (keyup.enter)="onSearchEnter($event)"
+        (focus)="onFocusSearch($event)"
+        (blur)="onBlurSearch($event)"
+        placeholder="Search posts..."
+        aria-label="Search posts"
+      />
+      <i class="fas fa-times post-list-admin__search-clear" (click)="clearSearch($event)" *ngIf="showClearIcon"></i>
+    </div>
+    <div class="post-list-admin__filter-options">
+      <select [(ngModel)]="selectedCategoryId" (change)="onCategoryChange($event)" aria-label="Filter by category">
+        <option value="0">All Categories</option>
         <option *ngFor="let category of categories" [value]="category.id">
           {{ category.name }}
         </option>
       </select>
-      <button
-        class="btn btn btn-danger me-2"
-        (click)="deleteSelectedPosts()"
-        type="button"
-        *ngIf="selectedPosts.size > 0"
-      >
-        <i class="fa-regular fa-trash-can"></i>
-      </button>
-    </div>
+      <select [(ngModel)]="status" (change)="onStatusChange($event)" aria-label="Filter by status">
+        <option value="">All Statuses</option>
+        <option *ngFor="let status of PostStatus | keyvalue" [value]="status.value">{{ status.value }}</option>
+      </select>
+      <input
+        type="text"
+        [value]="startDateDisplay"
+        (focus)="onFocusDate('startDate', $event)"
+        (blur)="onBlurDate('startDate', $event)"
+        placeholder="Start Date"
+      />
+      <input
+        type="text"
+        [value]="endDateDisplay"
+        (focus)="onFocusDate('endDate', $event)"
+        (blur)="onBlurDate('endDate', $event)"
+        placeholder="End Date"
+      />
 
-    <!-- Pagination -->
-    <div class="admin-posts__pagination col-md-6 d-flex justify-content-end align-items-center">
-      <span class="pagination-links">
-        <ngb-pagination
-          [collectionSize]="totalPages * itemsPerPage"
-          [pageSize]="itemsPerPage"
-          [page]="currentPage"
-          (pageChange)="onPageChange($event)"
-        ></ngb-pagination>
-      </span>
+      <button (click)="onSearchClick()">Search</button>
+      <button (click)="clearDate()">Clear Dates</button>
     </div>
   </div>
 
-  <!-- Table -->
-  <table class="admin-posts__table table table-striped">
-    <thead class="admin-posts__table-head">
-      <tr>
-        <th class="admin-posts__table-column admin-posts__table-column--checkbox">
-          <input
-            class="form-check-input checkbox-all"
-            type="checkbox"
-            (change)="selectAllPosts($event)"
-            [checked]="allPostsSelected"
-          />
-        </th>
-        <th class="admin-posts__table-column admin-posts__table-column--title" (click)="sortPostsBy('title')">
-          Tiêu đề
-          <i
-            [ngClass]="{
-              'fa-sort-up': activeColumn === 'title' && sortDirection === 'asc',
-              'fa-sort-down': activeColumn === 'title' && sortDirection === 'desc',
-              'fa-sort': activeColumn !== 'title',
-              active: activeColumn === 'title',
-            }"
-            class="fa"
-          ></i>
-        </th>
-        <th class="admin-posts__table-column admin-posts__table-column--author">Tác giả</th>
-        <th class="admin-posts__table-column admin-posts__table-column--categories">Chuyên mục</th>
-        <th class="admin-posts__table-column admin-posts__table-column--stats">Thống kê</th>
-        <th class="admin-posts__table-column admin-posts__table-column--comments" (click)="sortPostsBy('commentCount')">
-          <i class="fa-solid fa-message"></i>
-          <i
-            [ngClass]="{
-              'fa-sort-up': activeColumn === 'comment_count' && sortDirection === 'asc',
-              'fa-sort-down': activeColumn === 'comment_count' && sortDirection === 'desc',
-              'fa-sort': activeColumn !== 'comment_count',
-              active: activeColumn === 'comment_count',
-            }"
-            class="fa"
-          ></i>
-        </th>
-        <th class="admin-posts__table-column admin-posts__table-column--featured" (click)="sortPostsBy('ratingsCount')">
-          <i class="fa-solid fa-star"></i>
-          <i
-            [ngClass]="{
-              'fa-sort-up': activeColumn === 'ratings_count' && sortDirection === 'asc',
-              'fa-sort-down': activeColumn === 'ratings_count' && sortDirection === 'desc',
-              'fa-sort': activeColumn !== 'ratings_count',
-              active: activeColumn === 'ratings_count',
-            }"
-            class="fa"
-          ></i>
-        </th>
-        <th class="admin-posts__table-column admin-posts__table-column--date" (click)="sortPostsBy('createdAt')">
-          Ngày
-          <i
-            [ngClass]="{
-              'fa-sort-up': activeColumn === 'created_at' && sortDirection === 'asc',
-              'fa-sort-down': activeColumn === 'created_at' && sortDirection === 'desc',
-              'fa-sort': activeColumn !== 'created_at',
-              active: activeColumn === 'created_at',
-            }"
-            class="fa"
-          ></i>
-        </th>
-      </tr>
-    </thead>
-    <tbody class="admin-posts__table-body">
-      <tr class="admin-posts__table-row" *ngFor="let post of posts">
-        <td class="admin-posts__table-cell admin-posts__table-cell--checkbox text-center">
-          <input
-            class="form-check-input checkbox-post"
-            type="checkbox"
-            [value]="post.id"
-            (change)="selectPost(post.id, $event)"
-            [checked]="selectedPosts.has(post.id)"
-          />
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--title">
-          <div class="admin-posts__thumbnail">
-            <img [src]="post.thumbnailUrl || '/assets/images/No_Image_Available.jpg'" alt="thumbnail" />
-          </div>
-          <div class="admin-posts__content">
-            <div class="admin-posts__title-actions">
-              <p class="admin-posts__title">
-                <a>{{ post.title }}</a>
-                <span *ngIf="post.status !== 'PUBLISHED'" class="admin-posts__title-status">- {{ post.status }}</span>
-              </p>
-              <div class="admin-posts__row-actions">
-                <span class="admin-posts__action admin-posts__action--edit">
-                  <a (click)="navigateToEditPost(post.id)" class="text-primary">Sửa</a>
-                </span>
-                <span class="admin-posts__separator">|</span>
-                <span class="admin-posts__action admin-posts__action--edit">
-                  <a class="text-primary">Trình soạn thảo cổ điển</a>
-                </span>
+  <div class="post-list-admin__posts" *ngIf="posts.length > 0; else noPosts">
+    <div class="post-list-admin__post-card" *ngFor="let post of posts; trackBy: trackByPostId" [attr.aria-label]="'Post: ' + post.title">
+      <div class="post-list-admin__post-header">
+        <div class="post-list-admin__image-container">
+          <img [appLazyLoad]="post.thumbnailUrl" [transitionDuration]="'3s'" [alt]="post.title" class="post-list-admin__image" />
+          <span class="post-list-admin__status-badge" [class]="post.status.toLowerCase()">{{ post.status }}</span>
+        </div>
+        <h3 class="post-list-admin__post-title">{{ post.title }}</h3>
+      </div>
+      <div class="post-list-admin__post-content">
+        <p class="post-list-admin__excerpt">{{ post.excerpt }}</p>
+        <div class="post-list-admin__meta">
+          <span class="post-list-admin__author">
+            <i class="fas fa-user"></i>
+            {{ post.authorName }}
+          </span>
+          <span class="post-list-admin__date">
+            <i class="fas fa-calendar"></i>
+            {{ post.createdAt | date: 'mediumDate' }}
+          </span>
+          <span class="post-list-admin__category">
+            <i class="fas fa-folder"></i>
+            {{ post.category.name }}
+          </span>
+          <span class="post-list-admin__comments">
+            <i class="fas fa-comments"></i>
+            {{ post.commentCount }}
+          </span>
+        </div>
+      </div>
+      <div class="post-list-admin__actions">
+        <button (click)="navigateToPostDetail(post.slug)" aria-label="View post" class="post-list-admin__view-btn" matTooltip="View">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button (click)="navigateToEditPost(post.id)" aria-label="Edit post" class="post-list-admin__edit-btn" matTooltip="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button
+          (click)="deleteOrDisablePostDialog(post.id, false)"
+          aria-label="Disable post"
+          class="post-list-admin__disable-btn"
+          matTooltip="Disable"
+        >
+          <i class="fas fa-ban"></i>
+        </button>
+        <button
+          (click)="deleteOrDisablePostDialog(post.id, true)"
+          aria-label="Delete post"
+          class="post-list-admin__delete-btn"
+          matTooltip="Delete"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
-                <span class="admin-posts__separator">|</span>
-                <br />
-                <span class="admin-posts__action admin-posts__action--edit">
-                  <a class="text-primary">Sửa Nhanh</a>
-                </span>
-                <span class="admin-posts__separator">|</span>
-                <span class="admin-posts__action admin-posts__action--edit">
-                  <a class="text-primary">Sao chép</a>
-                </span>
-                <span class="admin-posts__separator">|</span>
-                <br />
-                <span class="admin-posts__action admin-posts__action--delete">
-                  <a (click)="deletePost(post.id)" class="text-danger">Thùng rác</a>
-                </span>
-                <span class="admin-posts__separator">|</span>
-                <span class="admin-posts__action admin-posts__action--view">
-                  <a (click)="viewPost(post.id)" class="text-info">Xem</a>
-                </span>
-              </div>
-            </div>
-          </div>
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--author">
-          <a>{{ post.authorName }}</a>
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--categories">
-          <a>{{ post.category.name }}</a>
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--stats">
-          <a><i class="admin-posts__stats-icon fa-solid fa-chart-simple"></i></a>
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--comments">
-          <a class="admin-posts__comment-count">
-            <i *ngIf="post.commentCount; else noComment" class="admin-posts__icon fa-solid fa-message">
-              <span class="admin-posts__count-number">{{ post.commentCount }}</span>
-            </i>
-            <ng-template #noComment>
-              <span class="admin-posts__icon">-</span>
-            </ng-template>
-          </a>
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--ratings">
-          <a class="admin-posts__ratings-count">
-            <ng-container *ngIf="post.ratingsCount > 0; else noRatings">
-              <i class="admin-posts__icon fa-solid fa-square">
-                <span class="admin-posts__count-number">{{ post.ratingsCount }}</span>
-              </i>
-            </ng-container>
-            <ng-template #noRatings>
-              <span class="admin-posts__icon">-</span>
-            </ng-template>
-          </a>
-        </td>
-        <td class="admin-posts__table-cell admin-posts__table-cell--date">
-          <span>Đã xuất bản:</span>
-          <br />
-          <time>{{ post.createdAt | date: 'dd MMMM yyyy' }}</time>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="post-list-admin__pagination" *ngIf="posts.length > 0">
+    <app-custom-pagination
+      [totalPages]="totalPages"
+      [currentPage]="currentPage"
+      (pageChange)="onPageChange($event)"
+    ></app-custom-pagination>
+  </div>
+
+  <ng-template #noPosts>
+    <div class="post-list-admin__no-results" role="alert">
+      <i class="fas fa-search"></i>
+      <p>No posts found matching your criteria</p>
+    </div>
+  </ng-template>
 </div>

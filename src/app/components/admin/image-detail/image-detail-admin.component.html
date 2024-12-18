@@ -1,0 +1,52 @@
+<div class="image-detail-dialog mat-elevation-z8" fxLayout="column" fxLayoutAlign="center center">
+  <h1 class="image-detail-dialog__title">Chi tiết ảnh</h1>
+  <div fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="space-between center" fxLayoutGap="10px">
+    <div fxFlex="50" fxFlex.lt-md="100">
+      <img [src]="data.image.imageUrl" alt="{{ data.image.fileName }}" class="image-detail-dialog__image" />
+    </div>
+    <div fxFlex="50" fxFlex.lt-md="100" class="image-detail-dialog__info">
+      <h2>{{ data.image.fileName }}</h2>
+      <mat-divider></mat-divider>
+      <p>
+        <strong>Public ID:</strong>
+        {{ data.image.publicId }}
+      </p>
+      <p>
+        <strong>Object Type:</strong>
+        {{ data.image.objectType }}
+      </p>
+      <p>
+        <strong>File Type:</strong>
+        {{ data.image.fileType }}
+      </p>
+      <p>
+        <strong>File Size:</strong>
+        {{ (data.image.fileSize / (1024 * 1024)).toFixed(2) }} MB
+      </p>
+      <p>
+        <strong>Created At:</strong>
+        {{ data.image.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}
+      </p>
+      <p>
+        <strong>Updated At:</strong>
+        {{ data.image.updatedAt | date: 'dd/MM/yyyy HH:mm:ss' }}
+      </p>
+      <p>
+        <strong>Is Used:</strong>
+        {{ data.image.isUsed ? 'Yes' : 'No' }}
+      </p>
+      <p>
+        <strong>Usage Count:</strong>
+        {{ data.image.usageCount }}
+      </p>
+      <mat-form-field class="image-detail-dialog__image-url-field" appearance="outline">
+        <mat-label>Image URL</mat-label>
+        <input matInput [value]="data.image.imageUrl" readonly />
+        <button mat-icon-button matSuffix (click)="copyUrl(data.image.imageUrl)" matTooltip="Copy URL">
+          <i class="fas fa-copy image-detail-dialog__icon-copy"></i>
+        </button>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="closeDialog()">Đóng</button>
+    </div>
+  </div>
+</div>

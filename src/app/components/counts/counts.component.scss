@@ -1,69 +1,105 @@
-/*--------------------------------------------------------------
-# Counts
---------------------------------------------------------------*/
+$primary-color: #01b1d7;
+$secondary-color: #fff;
+$background-overlay: rgba(0, 0, 0, 0.6);
+$text-shadow: rgba(0, 0, 0, 0.8);
+$container-max-width: 1200px;
+$padding: 15px;
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'small' {
+    @media (max-width: 576px) {
+      @content;
+    }
+  } @else if $breakpoint == 'medium' {
+    @media (max-width: 768px) {
+      @content;
+    }
+  }
+}
+
 .counts {
-  padding: 80px 0 80px 0;
+  padding: 80px 0;
   position: relative;
   z-index: 1;
-  /* Ensure the counts section is above the image */
-}
 
-.counts::before {
-  content: "";
-  position: absolute;
-  background: rgba(0, 0, 0, 0.6);
-  /* Reduce overlay opacity for better readability */
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-  /* Overlay above the image */
-}
+  &::before {
+    content: '';
+    position: absolute;
+    background: $background-overlay;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+  }
 
-.counts .background-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  /* Ensure the image is behind everything */
-}
+  &__background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
 
-.counts .title,
-.counts .counters {
-  position: relative;
-  z-index: 3;
-  /* Ensure text is above the overlay */
-  color: #fff;
-}
+  &__container {
+    position: relative;
+    z-index: 3;
+    max-width: $container-max-width;
+    margin: 0 auto;
+    padding: 0 $padding;
+  }
 
-.counts .title h3 {
-  margin-top: 0;
-  /* Remove any extra top margin */
-  margin-bottom: 50px;
-  /* Adjust this to control space between h3 and p */
-  font-size: 36px;
-  font-weight: 700;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  /* Add shadow for clarity */
-}
+  &__title {
+    text-align: center;
+    color: $secondary-color;
+    margin-bottom: 50px;
 
-.counts .counters span {
-  font-size: 48px;
-  display: block;
-  color: #01b1d7;
-}
+    &-text {
+      margin-top: 0;
+      font-size: 36px;
+      font-weight: 700;
+      text-shadow: 1px 1px 2px $text-shadow;
+      line-height: 1.5;
+    }
+  }
 
-.counts .counters p {
-  padding: 0;
-  margin: 0 0 20px 0;
-  font-family: "Raleway", sans-serif;
-  font-size: 14px;
-  color: #fff;
-  font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  /* Shadow for better readability */
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  &__col {
+    flex: 0 0 25%;
+    max-width: 25%;
+    padding: $padding;
+    text-align: center;
+
+    @include respond-to('medium') {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+
+    @include respond-to('small') {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+
+  &__number {
+    font-size: 48px;
+    display: block;
+    color: $primary-color;
+  }
+
+  &__description {
+    padding: 0;
+    margin: 20px 0;
+    font-size: 14px;
+    color: $secondary-color;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px $text-shadow;
+  }
 }

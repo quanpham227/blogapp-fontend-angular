@@ -1,0 +1,23 @@
+<!-- Slide Section -->
+<section id="slide" *ngIf="!isLoading && slides.length > 0" class="slide">
+  <div class="slide__container">
+    <div id="slideCarousel" class="slide__carousel swiper-container">
+      <div class="slide__wrapper swiper-wrapper">
+        <div *ngFor="let slide of slides; let i = index" class="slide__item swiper-slide">
+          <div class="slide__item-content" [style.background-image]="'url(' + slide.imageUrl + ')'">
+            <div class="slide__carousel-content"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Add Pagination -->
+      <div class="slide__pagination swiper-pagination"></div>
+      <!-- Add Navigation -->
+      <div class="slide__button-next swiper-button-next"></div>
+      <div class="slide__button-prev swiper-button-prev"></div>
+    </div>
+  </div>
+  <div *ngIf="isLoading" class="loading-indicator">Loading...</div>
+</section>
+<!-- Loading Indicator -->
+
+<!-- End Slide Section -->

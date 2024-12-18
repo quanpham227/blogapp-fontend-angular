@@ -2,7 +2,6 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  font-family: 'Segoe UI', Arial, sans-serif;
 
   &__header {
     margin-bottom: 2rem;
@@ -13,6 +12,7 @@
     color: #333;
     margin-bottom: 1rem;
     text-align: center;
+    line-height: 1.5;
   }
 
   &__author-info {
@@ -55,9 +55,9 @@
   }
 
   &__text {
-    line-height: 1.8;
+    line-height: 2;
     color: #444;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 
   &__comments {

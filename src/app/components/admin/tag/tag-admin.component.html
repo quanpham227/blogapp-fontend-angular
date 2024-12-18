@@ -1,0 +1,83 @@
+<div class="tag-management">
+  <div class="tag-management__header">
+    <h2 class="tag-management__title">Tag Management</h2>
+    <div class="tag-management__search">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="filterTags()"
+        placeholder="Search tags..."
+        class="tag-management__search-input"
+        aria-label="Search tags"
+      />
+    </div>
+  </div>
+
+  <form [formGroup]="tagForm" (ngSubmit)="addTag()" class="tag-management__form">
+    <div class="tag-management__form-group">
+      <input
+        type="text"
+        formControlName="newTag"
+        placeholder="Enter new tag"
+        class="tag-management__input"
+        [class.error]="tagForm.controls['newTag'].invalid && tagForm.controls['newTag'].touched"
+      />
+      <button type="submit" class="tag-management__button" [disabled]="tagForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Add Tag</span>
+        <div *ngIf="isLoading" class="tag-management__spinner"></div>
+      </button>
+    </div>
+    <div *ngIf="tagForm.controls['newTag'].invalid && tagForm.controls['newTag'].touched" class="tag-management__error">
+      Please enter a valid tag name
+    </div>
+  </form>
+
+  <div class="tag-management__list" role="list">
+    <div
+      *ngFor="let tag of filteredTags"
+      class="tag-management__item"
+      role="listitem"
+      [attr.aria-label]="'Tag: ' + tag.name"
+    >
+      <div *ngIf="!tag.isEditing" class="tag-management__item-content">
+        <span class="tag-management__tag-name">{{ tag.name }}</span>
+        <div class="tag-management__actions">
+          <button (click)="enableEditing(tag)" class="tag-management__action-btn edit" aria-label="Edit tag">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button (click)="openDeleteModal(tag)" class="tag-management__action-btn delete" aria-label="Delete tag">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div *ngIf="tag.isEditing" class="tag-management__edit-form">
+        <input
+          type="text"
+          [(ngModel)]="tag.editName"
+          class="tag-management__edit-input"
+          (keyup.enter)="updateTag(tag)"
+          [attr.aria-label]="'Edit tag: ' + tag.name"
+        />
+        <div class="tag-management__edit-actions">
+          <button (click)="updateTag(tag)" class="tag-management__action-btn save" aria-label="Save changes">
+            <i class="fas fa-check"></i>
+          </button>
+          <button (click)="cancelEditing(tag)" class="tag-management__action-btn cancel" aria-label="Cancel editing">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tag-management__modal" *ngIf="showDeleteModal" role="dialog" aria-labelledby="deleteModalTitle">
+    <div class="tag-management__modal-content">
+      <h3 id="deleteModalTitle" class="tag-management__modal-title">Confirm Deletion</h3>
+      <p>Are you sure you want to delete this tag?</p>
+      <div class="tag-management__modal-actions">
+        <button (click)="confirmDelete()" class="tag-management__button delete">Delete</button>
+        <button (click)="cancelDelete()" class="tag-management__button cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,35 +1,35 @@
 <!-- ======= Recent Blog Posts Section ======= -->
 <section class="recent-posts">
-  <div class="container" data-aos="fade-up">
-    <div class="section-title">
-      <span>Recent posts</span>
-      <h2>Tin gần đây</h2>
+  <div class="recent-posts__container" data-aos="fade-up">
+    <div class="recent-posts__header">
+      <span class="recent-posts__header-span">Recent posts</span>
+      <h2 class="recent-posts__header-heading">Tin gần đây</h2>
     </div>
-    <div class="row gy-5">
-      <div class="col-xl-3 col-md-6" data-aos="fade-up" data-aos-delay="100" *ngFor="let post of recentPosts">
-        <div class="post-box">
-          <div class="post-img">
-            <img [appLazyLoad]="post.thumbnailUrl" [transitionDuration]="'0.5s'" class="img-fluid" alt="" />
+    <div class="recent-posts__grid">
+      <div class="recent-posts__item" data-aos="fade-up" data-aos-delay="100" *ngFor="let post of recentPosts">
+        <div class="recent-posts__post-box">
+          <div class="recent-posts__post-img">
+            <img [appLazyLoad]="post.thumbnailUrl" [transitionDuration]="'0.5s'" class="recent-posts__img" alt="" />
           </div>
-          <div class="meta">
+          <div class="recent-posts__meta">
             <a>
               <time [attr.datetime]="post.createdAt">{{ post.createdAt | date: 'MMM d, y' }}</time>
             </a>
-            <span class="post-author">/ Julia Parker</span>
+            <span class="recent-posts__post-author">/ Julia Parker</span>
           </div>
-          <h3 class="post-title">
+          <h3 class="recent-posts__post-title">
             <a>{{ post.title }}</a>
           </h3>
-          <p>
+          <p class="recent-posts__post-excerpt">
             {{ post.excerpt }}
           </p>
-          <a class="readmore" (click)="onPostClick(post.slug)">
+          <a class="recent-posts__readmore" (click)="onPostClick(post.slug)">
             <span>Read More</span>
-            <i class="bi bi-arrow-right"></i>
+            <i class="fas fa-arrow-right"></i>
           </a>
         </div>
       </div>
-      <div *ngIf="recentPosts.length === 0" class="col-12">
+      <div *ngIf="recentPosts.length === 0" class="recent-posts__no-posts">
         <p>No recent posts available.</p>
       </div>
     </div>

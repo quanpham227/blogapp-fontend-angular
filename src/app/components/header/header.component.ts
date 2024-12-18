@@ -1,14 +1,12 @@
-import { Component, OnInit, HostListener, ChangeDetectionStrategy, Renderer2 } from '@angular/core';
-import { NgbPopover, NgbPopoverConfig } from '@ng-bootstrap/ng-bootstrap';
+import { Component, OnInit, Renderer2 } from '@angular/core';
 import { UserResponse } from '../../responses/user/user.response';
-import { UserService } from '../../services/user.service';
 import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { throttle } from 'lodash';
+import { filter } from 'rxjs';
 
 @UntilDestroy()
 @Component({
@@ -16,16 +14,15 @@ import { throttle } from 'lodash';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   standalone: true,
-  imports: [FormsModule, CommonModule, NgbPopover, RouterModule],
+  imports: [FormsModule, CommonModule, RouterModule],
 })
 export class HeaderComponent implements OnInit {
   activeNavItem: number = 0;
   userResponse?: UserResponse | null;
-  isPopoverOpen = false;
+  isMenuOpen = false;
   lastScrollTop = 0;
 
   constructor(
-    private userService: UserService,
     private router: Router,
     private authService: AuthService,
     private renderer: Renderer2,
@@ -42,12 +39,16 @@ export class HeaderComponent implements OnInit {
       },
     });
 
-    this.router.events.pipe(untilDestroyed(this)).subscribe((event) => {
-      if (event instanceof NavigationEnd) {
+    this.router.events
+      .pipe(
+        untilDestroyed(this),
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      )
+      .subscribe((event: NavigationEnd) => {
         this.setActiveNavItemBasedOnUrl(event.urlAfterRedirects);
-      }
-    });
+      });
 
+    // Đặt lại activeNavItem dựa trên URL hiện tại
     this.setActiveNavItemBasedOnUrl(this.router.url);
   }
 
@@ -62,52 +63,63 @@ export class HeaderComponent implements OnInit {
   }
 
   private setActiveNavItemBasedOnUrl(url: string) {
-    if (url.startsWith('/blog')) {
-      this.activeNavItem = 3;
-    } else if (url.startsWith('/about')) {
-      this.activeNavItem = 1;
-    } else if (url.startsWith('/clients')) {
-      this.activeNavItem = 2;
-    } else if (url.startsWith('/contact')) {
-      this.activeNavItem = 4;
-    } else {
-      this.activeNavItem = 0;
+    const navItemMap: { [key: string]: number } = {
+      '/': 0,
+      '/about': 1,
+      '/clients': 2,
+      '/blog': 3,
+      '/contact': 4,
+    };
+
+    // Kiểm tra nếu URL có khớp với một trong các URL trong map
+    for (const path in navItemMap) {
+      if (url.includes(path)) {
+        this.activeNavItem = navItemMap[path];
+        break;
+      }
     }
   }
-
-  @HostListener('window:scroll', [])
-  onWindowScroll = throttle(() => {
-    const topBar = document.getElementById('topbar');
-    const header = document.getElementById('header');
-    const st = window.scrollY || document.documentElement.scrollTop;
-    if (st > this.lastScrollTop) {
-      // Cuộn xuống
-      this.renderer.addClass(topBar, 'topbar-hidden');
-      this.renderer.addClass(header, 'topbar-hidden');
-    } else {
-      // Cuộn lên
-      this.renderer.removeClass(topBar, 'topbar-hidden');
-      this.renderer.removeClass(header, 'topbar-hidden');
-    }
-    this.lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
-  }, 200);
 
   scrollToSection(id: string, index: number) {
     if (this.router.url !== '/') {
+      // Nếu không phải trang home, chuyển về home trước
       this.router.navigate(['/']).then(() => {
-        setTimeout(() => {
-          this.scrollToElement(id, index);
-        }, 100); // Điều chỉnh thời gian chờ nếu cần thiết
+        this.waitForHomeToLoad(() => {
+          this.scrollToElement(id);
+          this.setActiveNavItem(index);
+        });
       });
     } else {
-      this.scrollToElement(id, index);
+      // Nếu đang ở home, cuộn trực tiếp
+      this.scrollToElement(id);
+      this.setActiveNavItem(index);
     }
   }
 
-  private scrollToElement(id: string, index: number) {
+  private waitForHomeToLoad(callback: () => void) {
+    const checkInterval = 50; // Kiểm tra mỗi 50ms
+    const maxWaitTime = 2000; // Thời gian tối đa chờ (2 giây)
+    let elapsedTime = 0;
+
+    const interval = setInterval(() => {
+      if (document.getElementById('slide')) {
+        // Nếu phần tử home đã load, thực hiện callback
+        clearInterval(interval);
+        callback();
+      } else if (elapsedTime >= maxWaitTime) {
+        // Nếu quá thời gian chờ, dừng kiểm tra
+        clearInterval(interval);
+        console.error('Home did not load in time.');
+      } else {
+        elapsedTime += checkInterval;
+      }
+    }, checkInterval);
+  }
+
+  private scrollToElement(id: string) {
     const element = document.getElementById(id);
     if (element) {
-      const headerOffset = 90; // You can adjust this value to get the desired result
+      const headerOffset = 90; // Adjust based on header height
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
       const offsetPosition = elementPosition - headerOffset;
 
@@ -115,13 +127,9 @@ export class HeaderComponent implements OnInit {
         top: offsetPosition,
         behavior: 'smooth',
       });
+    } else {
+      console.error(`Element with ID ${id} not found.`);
     }
-    this.setActiveNavItem(index);
-  }
-
-  togglePopover(event: Event): void {
-    event.preventDefault();
-    this.isPopoverOpen = !this.isPopoverOpen;
   }
 
   handleBlogClick(event: Event): void {
@@ -133,38 +141,31 @@ export class HeaderComponent implements OnInit {
     this.activeNavItem = index;
   }
 
-  handleItemClick(index: number): void {
-    if (index === 1) {
-      this.userService.logout();
-    } else if (index === 0) {
-      this.router.navigate(['/user-profile']);
-    }
-    this.isPopoverOpen = false; // Close the popover after clicking an item
-  }
-
   toggleMobileNav(event: Event) {
     const navbar = document.querySelector('#navbar') as HTMLElement;
-    if (navbar.classList.contains('navbar-mobile')) {
-      this.renderer.removeClass(navbar, 'navbar-mobile');
-    } else {
-      this.renderer.addClass(navbar, 'navbar-mobile');
-    }
-    const target = event.target as HTMLElement;
-    if (target.classList.contains('bi-list')) {
-      this.renderer.removeClass(target, 'bi-list');
-      this.renderer.addClass(target, 'bi-x');
-    } else {
-      this.renderer.removeClass(target, 'bi-x');
-      this.renderer.addClass(target, 'bi-list');
+    const icon = document.getElementById('mobile-nav-icon') as HTMLElement;
+    const header = document.getElementById('header') as HTMLElement;
+
+    if (navbar && icon && header) {
+      if (navbar.classList.contains('navbar-mobile')) {
+        this.renderer.removeClass(navbar, 'navbar-mobile');
+        this.renderer.removeClass(icon, 'fa-times');
+        this.renderer.addClass(icon, 'fa-bars');
+        this.renderer.removeClass(header, 'menu-open');
+      } else {
+        this.renderer.addClass(navbar, 'navbar-mobile');
+        this.renderer.removeClass(icon, 'fa-bars');
+        this.renderer.addClass(icon, 'fa-times');
+        this.renderer.addClass(header, 'menu-open');
+      }
     }
   }
 
   toggleDropdown(event: Event) {
-    const navbar = document.querySelector('#navbar') as HTMLElement;
-    if (navbar.classList.contains('navbar-mobile')) {
-      event.preventDefault();
-      const target = event.target as HTMLElement;
-      const nextElement = target.nextElementSibling as HTMLElement;
+    const target = event.target as HTMLElement;
+    const nextElement = target?.nextElementSibling as HTMLElement;
+
+    if (nextElement && nextElement.classList) {
       if (nextElement.classList.contains('dropdown-active')) {
         this.renderer.removeClass(nextElement, 'dropdown-active');
       } else {

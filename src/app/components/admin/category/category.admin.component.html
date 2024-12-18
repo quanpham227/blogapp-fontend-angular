@@ -1,53 +1,78 @@
-<div class="admin category-page">
-  <div class="container mt-3">
-    <header class="mb-4">
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="text-left">
-          <h1 class="title">Chuyên mục</h1>
-          <p class="text-muted">Create, edit, and manage the chuyên mục on your site.</p>
-        </div>
-      </div>
-    </header>
+<div class="admin-category">
+  <header class="admin-category__header">
+    <h1 class="admin-category__header-title">Category Management</h1>
+    <button class="admin-category__header-add" (click)="openForm()">Add Category</button>
+  </header>
 
-    <div class="input-wrapper mb-3">
-      <div class="input-group">
-        <i class="bi bi-search"></i>
-        <input type="search" class="form-control search" placeholder="Tìm kiếm..." aria-label="Tìm kiếm" />
-        <div class="button-container">
-          <button class="btn btn-sm btn-primary custom-btn" type="button" (click)="addCategory()">
-            Thêm chuyên mục
-          </button>
-        </div>
-      </div>
-    </div>
+  <div class="admin-category__search-bar">
+    <input type="text" placeholder="Search categories..." />
+  </div>
 
-    <div class="list-category">
-      <div
-        class="list-category-item d-flex justify-content-between align-items-center"
-        *ngFor="let category of categories"
-      >
-        <div class="left-icon">
-          <i class="fas fa-folder"></i>
-        </div>
-        <p class="category-name">{{ category.name }}</p>
-        <div class="right-icon">
-          <i class="bi bi-three-dots" (click)="toggleMenu($event, category.id)"></i>
-          <div class="options-menu" *ngIf="menuVisible && selectedCategoryId === category.id">
-            <div class="option-item" (click)="editCategory(category.id)">
-              <i class="bi bi-pencil"></i>
-              Sửa
-            </div>
-            <div class="option-item" (click)="openDeleteModal(category.id)">
-              <i class="bi bi-trash"></i>
-              Xóa
-            </div>
-            <div class="option-item">
-              <i class="bi bi-check-circle-fill"></i>
-              Đặt làm mặc định
+  <div class="admin-category__table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Post Count</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let category of categories">
+          <td>{{ category.name }}</td>
+          <td>{{ truncate(category.description, 100) }}</td>
+          <td>{{ category.postCount }}</td>
+          <td class="admin-category__actions">
+            <button class="admin-category__actions-button admin-category__button-edit" (click)="openForm(category)" matTooltip="edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="admin-category__actions-button admin-category__button-delete"
+              *ngIf="category.id !== null"
+              (click)="deleteCategory(category.id)"
+              matTooltip="Delete"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <ng-template #content>
+    <div class="admin-category__dialog" role="dialog" aria-modal="true">
+      <div class="admin-category__dialog-content">
+        <h2>{{ currentEditId ? 'Edit' : 'Add' }} Category</h2>
+        <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+          <div class="admin-category__form-group">
+            <label for="name">Category Name</label>
+            <input type="text" id="name" formControlName="name" aria-required="true" placeholder="Name" />
+            <div
+              class="admin-category__dialog-error"
+              *ngIf="categoryForm.get('name')?.errors?.['required'] && categoryForm.get('name')?.touched"
+            >
+              Name is required
             </div>
           </div>
-        </div>
+          <div class="admin-category__form-group">
+            <label for="description">Description</label>
+            <textarea id="description" formControlName="description" aria-required="true" placeholder="description" rows="3"></textarea>
+            <div
+              class="admin-category__dialog-error"
+              *ngIf="categoryForm.get('description')?.errors?.['required'] && categoryForm.get('description')?.touched"
+            >
+              Description is required
+            </div>
+          </div>
+          <div class="admin-category__dialog-actions">
+            <button class="admin-category__btn-save" type="submit" [disabled]="categoryForm.invalid">Save</button>
+            <button class="admin-category__btn-cancel" type="button" (click)="closeForm()">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
+  </ng-template>
 </div>

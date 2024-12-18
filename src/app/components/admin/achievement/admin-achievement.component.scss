@@ -1,103 +1,219 @@
 .admin-achievement {
-  font-family: 'Roboto', sans-serif;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 
   &__header {
-    // Custom styles for header
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
   }
 
   &__title {
-    // Custom styles for title
+    font-size: 24px;
+    font-weight: bold;
   }
 
   &__add-button {
-    // Custom styles for add button
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #0056b3;
+    }
   }
 
   &__list {
-    // Custom styles for list
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
   }
 
   &__item {
-    // Custom styles for item
+    flex: 1 1 calc(33.333% - 20px);
+    box-sizing: border-box;
   }
 
   &__card {
-    // Custom styles for card
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 
   &__card-body {
-    // Custom styles for card body
+    padding: 15px;
   }
 
   &__card-header {
-    // Custom styles for card header
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 15px;
   }
 
   &__card-title {
-    // Custom styles for card title
+    font-size: 18px;
+    font-weight: bold;
   }
 
   &__card-actions {
-    // Custom styles for card actions
-  }
+    display: flex;
+    gap: 10px;
 
-  &__edit-button {
-    // Custom styles for edit button
-  }
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background 0.3s ease;
 
-  &__delete-button {
-    // Custom styles for delete button
+      &:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      &.admin-achievement__edit-button {
+        color: #007bff;
+      }
+
+      &.admin-achievement__delete-button {
+        color: #dc3545;
+      }
+    }
   }
 
   &__card-value {
-    // Custom styles for card value
+    font-size: 16px;
+    margin-bottom: 10px;
   }
 
   &__card-description {
-    // Custom styles for card description
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 10px;
   }
 
   &__card-status {
-    // Custom styles for card status
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+
+    &.enabled {
+      background: #28a745;
+      color: white;
+    }
+
+    &.disabled {
+      background: #dc3545;
+      color: white;
+    }
   }
 
-  &__modal-header {
-    // Custom styles for modal header
+  &__modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  &__modal-title {
-    // Custom styles for modal title
-  }
-
-  &__modal-close {
-    // Custom styles for modal close button
-  }
-
-  &__modal-body {
-    // Custom styles for modal body
+  &__modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
   }
 
   &__form-group {
-    // Custom styles for form group
+    margin-bottom: 20px;
+
+    &--inline {
+      display: flex;
+      gap: 10px;
+
+      select,
+      input {
+        flex: 1;
+      }
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
   }
 
-  &__form-label {
-    // Custom styles for form label
+  &__error {
+    color: #d32f2f;
+    font-size: 12px;
+    margin-top: 4px;
   }
 
-  &__form-control {
-    // Custom styles for form control
-  }
+  &__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 
-  &__form-feedback {
-    // Custom styles for form feedback
-  }
+    .admin-achievement__btn-cancel {
+      background-color: #838383;
+      color: white;
+      border: 1px solid #e9e9e9;
+      padding: 8px 15px;
 
-  &__form-select {
-    // Custom styles for form select
-  }
+      &:hover {
+        background-color: #969696;
+      }
+    }
 
-  &__form-submit {
-    // Custom styles for form submit button
+    .admin-achievement__btn-save {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background: #0056b3;
+      }
+
+      &:disabled {
+        background-color: #9e9e9e;
+        cursor: not-allowed;
+      }
+    }
   }
 }

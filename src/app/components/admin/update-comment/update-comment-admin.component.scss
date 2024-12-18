@@ -1,0 +1,59 @@
+.update-comment {
+  &__header {
+    padding: 16px;
+    border-bottom: 1px solid #ddd;
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__content {
+    padding: 16px;
+    .form-field {
+      margin-bottom: 16px;
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  &__actions {
+    padding: 16px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    .button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+
+      &--cancel {
+        background-color: #f5f5f5;
+        color: #333;
+      }
+
+      &--primary {
+        background-color: #007bff;
+        color: white;
+      }
+
+      &:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+  }
+}

@@ -13,7 +13,7 @@ import { map } from 'rxjs/operators';
   styleUrls: ['./counts.component.scss'],
   standalone: true,
   imports: [FormsModule, CommonModule],
-  changeDetection: ChangeDetectionStrategy.OnPush, // Sử dụng ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CountsComponent implements OnInit {
   private achievementsSubject = new BehaviorSubject<Achievement[]>([]);
@@ -22,7 +22,7 @@ export class CountsComponent implements OnInit {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private achievementService: AchievementService,
-    private cdr: ChangeDetectorRef, // Inject ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -31,17 +31,17 @@ export class CountsComponent implements OnInit {
 
   loadAchievements(): void {
     this.achievementService
-      .getAchievements()
+      .getActiveAchievementsForUser()
       .pipe(
         map((response) => {
-          console.log('Response data:', response.data); // In ra response.data
+          console.log('Response data:', response.data);
           return response.data;
         }),
         untilDestroyed(this),
       )
       .subscribe((achievements: Achievement[]) => {
         this.achievementsSubject.next(achievements);
-        this.cdr.markForCheck(); // Mark for check to update view
+        this.cdr.markForCheck();
         this.initializePureCounter();
       });
   }

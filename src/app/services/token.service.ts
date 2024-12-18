@@ -56,10 +56,9 @@ export class TokenService {
         }),
       );
   }
+
   private handleNavigation() {
     const currentUrl = this.router.url;
-    if (currentUrl.startsWith('/admin')) {
-      this.router.navigate(['/login']);
-    }
+    this.authService.handleNavigation(currentUrl);
   }
 }

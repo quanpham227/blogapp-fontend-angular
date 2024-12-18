@@ -20,8 +20,18 @@ export class SlideService {
     private successHandlerService: SuccessHandlerService,
   ) {}
 
-  getSlides(): Observable<ApiResponse<Slide[]>> {
-    return this.http.get<ApiResponse<Slide[]>>(this.apiSlides).pipe(
+  getSlidesForAdmin(): Observable<ApiResponse<Slide[]>> {
+    return this.http.get<ApiResponse<Slide[]>>(`${this.apiSlides}/admin`).pipe(
+      map((response) => {
+        if (response && response.data) {
+          response.data = response.data.map((slide) => convertToCamelCase(slide));
+        }
+        return response;
+      }),
+    );
+  }
+  getActiveSlidesForUser(): Observable<ApiResponse<Slide[]>> {
+    return this.http.get<ApiResponse<Slide[]>>(`${this.apiSlides}/user`).pipe(
       map((response) => {
         if (response && response.data) {
           response.data = response.data.map((slide) => convertToCamelCase(slide));
@@ -72,5 +82,10 @@ export class SlideService {
         return response;
       }),
     );
+  }
+  updateSlideOrder(slides: Slide[]): Observable<ApiResponse<void>> {
+    return this.http
+      .put<ApiResponse<void>>(`${this.apiSlides}/order`, slides)
+      .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

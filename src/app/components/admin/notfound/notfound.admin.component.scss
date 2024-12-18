@@ -3,6 +3,18 @@
 --------------------------------------------------------------*/
 .error-404 {
   padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.error-404-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .error-404 h1 {
@@ -20,13 +32,13 @@
   margin-bottom: 30px;
 }
 
-.error-404 .btn {
+.error-404 .mat-raised-button {
   background: #51678f;
   color: #fff;
   padding: 8px 30px;
 }
 
-.error-404 .btn:hover {
+.error-404 .mat-raised-button:hover {
   background: #3e4f6f;
 }
 

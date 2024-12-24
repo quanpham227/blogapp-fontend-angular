@@ -16,6 +16,7 @@ import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { ApiResponseInterceptor } from './interceptors/api-response.interceptor';
 import { NewlinePipe } from './pipes/newline.pipe';
+import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
   useClass: TokenInterceptor,
@@ -40,11 +41,16 @@ export const appConfig: ApplicationConfig = {
     loadingInterceptorProvider,
     apiResponseInterceptorProvider,
     HttpStatusInterceptor,
-    importProvidersFrom(HttpClientModule),
-    importProvidersFrom(BrowserAnimationsModule),
+    importProvidersFrom(
+      HttpClientModule,
+      BrowserAnimationsModule,
+      EditorModule,
+      LoadingBarHttpClientModule,
+      LoadingBarRouterModule,
+      NgxPageScrollCoreModule.forRoot({ duration: 800 }),
+    ),
     provideHttpClient(),
     NewlinePipe,
-    importProvidersFrom(EditorModule),
     importProvidersFrom(LazyLoadDirective),
     provideAnimationsAsync(),
     AuthService,

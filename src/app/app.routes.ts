@@ -7,7 +7,6 @@ import { NotfoundAdminComponent } from './components/admin/notfound/notfound.adm
 import { AdminGuardFn } from './guards/admin.guard';
 import { AuthGuardFn } from './guards/auth.guard';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { AuthCallbackComponent } from './auth-callback/auth-callback.component';
 
 export const routes: Routes = [
   {

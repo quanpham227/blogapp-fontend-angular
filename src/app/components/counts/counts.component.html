@@ -2,17 +2,12 @@
 <section id="counts" class="counts">
   <img src="/assets/images/counts-bg.jpg" alt="Background Image" class="counts__background-image" />
   <div class="counts__container">
-    <div class="counts__title" data-aos="fade-up">
+    <div class="counts__title">
       <h3 class="counts__title-text">Những gì chúng tôi đạt được cho đến nay</h3>
     </div>
     <div class="counts__row">
-      <div *ngFor="let achievement of achievements$ | async" class="counts__col" data-aos="fade-up">
-        <span
-          data-purecounter-start="0"
-          [attr.data-purecounter-end]="achievement.value"
-          data-purecounter-duration="3"
-          class="counts__number purecounter"
-        ></span>
+      <div *ngFor="let achievement of achievements$ | async; let i = index" class="counts__col">
+        <span id="counter-{{ i }}" class="counts__number"></span>
         <p class="counts__description">{{ achievement.title }}</p>
       </div>
     </div>

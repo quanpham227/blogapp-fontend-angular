@@ -1,13 +1,13 @@
 <!-- ======= Contact Section ======= -->
 <section id="contact" class="contact">
-  <div class="contact__container" data-aos="fade-up">
+  <div class="contact__container">
     <div class="contact__header">
       <span class="contact__header-span">Liên Hệ</span>
       <h2 class="contact__header-heading">Liên Hệ</h2>
     </div>
   </div>
 
-  <div class="contact__map" data-aos="fade-up">
+  <div class="contact__map">
     <iframe
       style="border: 0; width: 100%; height: 350px"
       src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3833.6703016235733!2d108.13914137464556!3d16.082589784598795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31421f3266e1a309%3A0xe82acc70534b4bc2!2sC%C3%94NG%20TY%20TNHH%20PI%20VINA%20DANANG!5e0!3m2!1svi!2s!4v1710085631590!5m2!1svi!2s"
@@ -16,7 +16,7 @@
     ></iframe>
   </div>
 
-  <div class="contact__container" data-aos="fade-up">
+  <div class="contact__container">
     <div class="contact__info-wrap">
       <div class="contact__row">
         <div class="contact__col contact__info">
@@ -46,25 +46,11 @@
     </div>
     <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact__email-form">
       <div class="contact__group">
-        <input
-          type="text"
-          formControlName="name"
-          class="contact__form-control"
-          placeholder="Nhập tên của bạn"
-          required
-        />
-        <div *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" class="contact__error">
-          Tên bắt buộc
-        </div>
+        <input type="text" formControlName="name" class="contact__form-control" placeholder="Nhập tên của bạn" required />
+        <div *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" class="contact__error">Tên bắt buộc</div>
       </div>
       <div class="contact__group">
-        <input
-          type="email"
-          formControlName="email"
-          class="contact__form-control"
-          placeholder="Email của bạn"
-          required
-        />
+        <input type="email" formControlName="email" class="contact__form-control" placeholder="Email của bạn" required />
         <div *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" class="contact__error">
           Cần phải có email hợp lệ.
         </div>
@@ -88,12 +74,7 @@
         </div>
       </div>
       <div class="contact__actions">
-        <button
-          class="contact__button"
-          type="submit"
-          [disabled]="contactForm.invalid"
-          [ngClass]="{ disabled: contactForm.invalid }"
-        >
+        <button class="contact__button" type="submit" [disabled]="contactForm.invalid" [ngClass]="{ disabled: contactForm.invalid }">
           Gửi Tin nhắn
         </button>
       </div>

@@ -18,7 +18,11 @@ export class SlideComponent implements OnInit, AfterViewInit {
   slides: Slide[] = [];
   swiperSlides: Swiper | null = null;
   isLoading = true;
-
+  defaultSlides = [
+    { imageUrl: 'assets/images/slides/slide1.jpg' },
+    { imageUrl: 'assets/images/slides/slide2.jpg' },
+    { imageUrl: 'assets/images/slides/slide3.jpg' },
+  ];
   constructor(
     private slideService: SlideService,
     private cdr: ChangeDetectorRef,
@@ -62,7 +66,7 @@ export class SlideComponent implements OnInit, AfterViewInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: any) => {
-          this.slides = response.data;
+          this.slides = response.data.length > 0 ? response.data : this.defaultSlides;
           this.isLoading = false;
           this.cdr.detectChanges();
           setTimeout(() => {

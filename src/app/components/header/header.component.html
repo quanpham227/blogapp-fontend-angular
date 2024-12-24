@@ -12,9 +12,7 @@
     <nav id="navbar" class="header__navbar" aria-label="Main Navigation">
       <ul class="header__nav-list">
         <li class="header__nav-item">
-          <a class="header__nav-link" [ngClass]="{ active: activeNavItem === 0 }" (click)="scrollToSection('slide', 0)" routerLink="/">
-            TRANG CHỦ
-          </a>
+          <a class="header__nav-link" [ngClass]="{ active: activeNavItem === 0 }" (click)="scrollToSection('slide', 0)">TRANG CHỦ</a>
         </li>
         <li class="header__nav-item">
           <a class="header__nav-link" [ngClass]="{ active: activeNavItem === 1 }" (click)="scrollToSection('about', 1)">GIỚI THIỆU</a>
@@ -37,3 +35,4 @@
     </nav>
   </div>
 </header>
+<div data-scroll-container></div>

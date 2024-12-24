@@ -2,50 +2,32 @@
   <div class="dashboard-admin__header">
     <h1 class="dashboard-admin__title">Blog Analytics Dashboard</h1>
     <div class="dashboard-admin__theme-toggle">
-      <mat-slide-toggle [(ngModel)]="isDarkMode" (change)="toggleTheme()">Dark Mode</mat-slide-toggle>
+      <mat-slide-toggle [(ngModel)]="isDarkMode">Dark Mode</mat-slide-toggle>
     </div>
   </div>
 
   <div class="dashboard-admin__stats-grid">
+    <!-- Page Views Chart -->
     <mat-card class="dashboard-admin__stat-card">
       <mat-card-content>
         <h3 class="dashboard-admin__stat-title">Total Page Views</h3>
-        <div *ngIf="pageViewsChart.series[0]?.data?.length">
-          <apx-chart
-            [series]="pageViewsChart.series"
-            [chart]="pageViewsChart.chart"
-            [xaxis]="pageViewsChart.xaxis"
-            [title]="pageViewsChart.title"
-          ></apx-chart>
-        </div>
+        <canvas baseChart [data]="pageViewsChartData" [options]="pageViewsChartOptions" chartType="line"></canvas>
       </mat-card-content>
     </mat-card>
 
+    <!-- Engagement Chart -->
     <mat-card class="dashboard-admin__stat-card">
       <mat-card-content>
         <h3 class="dashboard-admin__stat-title">User Engagement</h3>
-        <div *ngIf="engagementChart.series.length">
-          <apx-chart
-            [series]="engagementChart.series"
-            [chart]="engagementChart.chart"
-            [labels]="engagementChart.labels"
-            [title]="engagementChart.title"
-          ></apx-chart>
-        </div>
+        <canvas baseChart [data]="engagementChartData" [options]="engagementChartOptions" chartType="pie"></canvas>
       </mat-card-content>
     </mat-card>
 
+    <!-- Comments Chart -->
     <mat-card class="dashboard-admin__stat-card">
       <mat-card-content>
         <h3 class="dashboard-admin__stat-title">Comments Analysis</h3>
-        <div *ngIf="commentsChart.series[0]?.data?.length">
-          <apx-chart
-            [series]="commentsChart.series"
-            [chart]="commentsChart.chart"
-            [xaxis]="commentsChart.xaxis"
-            [title]="commentsChart.title"
-          ></apx-chart>
-        </div>
+        <canvas baseChart [data]="commentsChartData" [options]="commentsChartOptions" chartType="bar"></canvas>
       </mat-card-content>
     </mat-card>
   </div>

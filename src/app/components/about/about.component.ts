@@ -85,4 +85,7 @@ export class AboutComponent implements OnInit {
         });
     }
   }
+  handleImageError(event: any): void {
+    event.target.src = 'https://res.cloudinary.com/damphlbsi/image/upload/v1734612634/blogapp/about/cnjhofjhgykqgxkfbgdn.jpg';
+  }
 }

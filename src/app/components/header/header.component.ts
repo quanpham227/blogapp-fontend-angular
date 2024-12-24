@@ -1,12 +1,18 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
-import { UserResponse } from '../../responses/user/user.response';
+// filepath: /Users/quanpham/MyProject/blogapp/blogapp-fontend/src/app/components/header/header.component.ts
+import { Component, OnInit, Renderer2, Inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll-core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { filter } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { DOCUMENT } from '@angular/common';
+import { UserResponse } from '../../responses/user/user.response';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+const SCROLL_OFFSET = 90;
+const SCROLL_ADJUSTMENT = 100;
 
 @UntilDestroy()
 @Component({
@@ -20,12 +26,13 @@ export class HeaderComponent implements OnInit {
   activeNavItem: number = 0;
   userResponse?: UserResponse | null;
   isMenuOpen = false;
-  lastScrollTop = 0;
 
   constructor(
     private router: Router,
     private authService: AuthService,
     private renderer: Renderer2,
+    private pageScrollService: PageScrollService,
+    @Inject(DOCUMENT) private document: any,
   ) {}
 
   ngOnInit() {
@@ -48,8 +55,10 @@ export class HeaderComponent implements OnInit {
         this.setActiveNavItemBasedOnUrl(event.urlAfterRedirects);
       });
 
-    // Đặt lại activeNavItem dựa trên URL hiện tại
     this.setActiveNavItemBasedOnUrl(this.router.url);
+
+    // Listen for scroll events to update menu active state
+    window.addEventListener('scroll', this.onScroll.bind(this));
   }
 
   private checkUserStatus() {
@@ -71,18 +80,24 @@ export class HeaderComponent implements OnInit {
       '/contact': 4,
     };
 
-    // Kiểm tra nếu URL có khớp với một trong các URL trong map
+    let isNavItemSet = false;
+
     for (const path in navItemMap) {
-      if (url.includes(path)) {
+      if (url === path) {
         this.activeNavItem = navItemMap[path];
+        isNavItemSet = true;
         break;
       }
+    }
+
+    // If URL starts with '/blog/' but is not '/blog', do not activate any item
+    if (!isNavItemSet && url.startsWith('/blog/')) {
+      this.activeNavItem = -1;
     }
   }
 
   scrollToSection(id: string, index: number) {
     if (this.router.url !== '/') {
-      // Nếu không phải trang home, chuyển về home trước
       this.router.navigate(['/']).then(() => {
         this.waitForHomeToLoad(() => {
           this.scrollToElement(id);
@@ -90,24 +105,29 @@ export class HeaderComponent implements OnInit {
         });
       });
     } else {
-      // Nếu đang ở home, cuộn trực tiếp
       this.scrollToElement(id);
       this.setActiveNavItem(index);
     }
   }
+  private scrollToElement(id: string) {
+    const pageScrollInstance: PageScrollInstance = this.pageScrollService.create({
+      document: this.document,
+      scrollTarget: `#${id}`,
+      scrollOffset: SCROLL_OFFSET,
+    });
+    this.pageScrollService.start(pageScrollInstance);
+  }
 
   private waitForHomeToLoad(callback: () => void) {
-    const checkInterval = 50; // Kiểm tra mỗi 50ms
-    const maxWaitTime = 2000; // Thời gian tối đa chờ (2 giây)
+    const checkInterval = 50;
+    const maxWaitTime = 2000;
     let elapsedTime = 0;
 
     const interval = setInterval(() => {
       if (document.getElementById('slide')) {
-        // Nếu phần tử home đã load, thực hiện callback
         clearInterval(interval);
         callback();
       } else if (elapsedTime >= maxWaitTime) {
-        // Nếu quá thời gian chờ, dừng kiểm tra
         clearInterval(interval);
         console.error('Home did not load in time.');
       } else {
@@ -116,25 +136,11 @@ export class HeaderComponent implements OnInit {
     }, checkInterval);
   }
 
-  private scrollToElement(id: string) {
-    const element = document.getElementById(id);
-    if (element) {
-      const headerOffset = 90; // Adjust based on header height
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-    } else {
-      console.error(`Element with ID ${id} not found.`);
-    }
-  }
-
   handleBlogClick(event: Event): void {
-    this.toggleDropdown(event);
     this.setActiveNavItem(3);
+    this.router.navigate(['/blog']).then(() => {
+      this.setActiveNavItem(3);
+    });
   }
 
   setActiveNavItem(index: number): void {
@@ -170,6 +176,30 @@ export class HeaderComponent implements OnInit {
         this.renderer.removeClass(nextElement, 'dropdown-active');
       } else {
         this.renderer.addClass(nextElement, 'dropdown-active');
+      }
+    }
+  }
+
+  private onScroll() {
+    const sections = [
+      { id: 'slide', index: 0 },
+      { id: 'about', index: 1 },
+      { id: 'clients', index: 2 },
+      { id: 'contact', index: 4 },
+    ];
+
+    const scrollPosition = window.scrollY + SCROLL_ADJUSTMENT;
+
+    for (const section of sections) {
+      const element = document.getElementById(section.id);
+      if (element) {
+        const elementTop = element.offsetTop;
+        const elementBottom = elementTop + element.offsetHeight;
+
+        if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
+          this.setActiveNavItem(section.index);
+          break;
+        }
       }
     }
   }

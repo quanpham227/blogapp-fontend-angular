@@ -1,6 +1,6 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError, BehaviorSubject, EMPTY } from 'rxjs';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -48,13 +48,6 @@ export class TokenInterceptor implements HttpInterceptor {
       this.refreshTokenSubject.next(null);
       this.snackbarService.show('Token expired, attempting to refresh token');
 
-      if (!this.authService.hasRefreshToken()) {
-        this.isRefreshing = false;
-        this.authService.clearAuthData();
-        this.authService.handleNavigation(this.router.url);
-        return EMPTY;
-      }
-
       return this.tokenService.refreshToken().pipe(
         switchMap((response: any) => {
           this.isRefreshing = false;
@@ -66,7 +59,7 @@ export class TokenInterceptor implements HttpInterceptor {
         catchError((err) => {
           this.isRefreshing = false;
           this.authService.clearAuthData();
-          this.authService.handleNavigation(this.router.url);
+          this.router.navigate(['/login']);
           return throwError(() => err);
         }),
       );

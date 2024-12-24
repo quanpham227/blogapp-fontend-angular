@@ -1,16 +1,19 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatListModule } from '@angular/material/list';
-import { NgApexchartsModule } from 'ng-apexcharts';
+import { Chart, ChartConfiguration, ChartOptions, registerables } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 import { DashboardService } from '../../../services/dashboard.service';
 import { Dashboard } from '../../../models/dashboard';
 import { Post } from '../../../models/post';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { take } from 'rxjs/operators';
 import { SnackbarService } from '../../../services/snackbar.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatListModule } from '@angular/material/list';
+Chart.register(...registerables);
 
 @UntilDestroy()
 @Component({
@@ -18,7 +21,7 @@ import { SnackbarService } from '../../../services/snackbar.service';
   templateUrl: './dashboard.admin.component.html',
   styleUrls: ['./dashboard.admin.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatSlideToggleModule, MatListModule, NgApexchartsModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatGridListModule, MatListModule, MatSlideToggleModule, BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardAdminComponent implements OnInit {
@@ -28,9 +31,71 @@ export class DashboardAdminComponent implements OnInit {
   todayComments = 0;
   recentPosts: Post[] = [];
 
-  pageViewsChart: any = this.initializeChart('line', 'Weekly Page Views');
-  engagementChart: any = this.initializeChart('pie', 'Engagement Distribution', ['Likes', 'Shares', 'Comments']);
-  commentsChart: any = this.initializeChart('bar', 'Daily Comments');
+  // Biểu đồ Page Views
+  public pageViewsChartData: ChartConfiguration<'line'>['data'] = {
+    labels: this.getLast7Days(),
+    datasets: [
+      {
+        data: [], // Dữ liệu sẽ được cập nhật
+        label: 'Page Views',
+        borderColor: 'blue',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        fill: true,
+      },
+    ],
+  };
+
+  public pageViewsChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+      },
+    },
+  };
+
+  // Biểu đồ Engagement
+  public engagementChartData: ChartConfiguration<'pie'>['data'] = {
+    labels: ['Likes', 'Shares', 'Comments'],
+    datasets: [
+      {
+        data: [], // Dữ liệu sẽ được cập nhật
+        backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'],
+      },
+    ],
+  };
+
+  public engagementChartOptions: ChartOptions<'pie'> = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+    },
+  };
+
+  // Biểu đồ Comments
+  public commentsChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: this.getLast7Days(),
+    datasets: [
+      {
+        data: [], // Dữ liệu sẽ được cập nhật
+        label: 'Comments',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  public commentsChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true,
+      },
+    },
+  };
 
   constructor(
     private dashboardService: DashboardService,
@@ -39,50 +104,7 @@ export class DashboardAdminComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.updateChartsTheme();
     this.loadDashboardData();
-  }
-
-  toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.updateChartsTheme();
-    this.cdr.markForCheck();
-  }
-
-  private initializeChart(type: string, title: string, labels: string[] = []): any {
-    return {
-      series: [],
-      chart: {
-        type: type,
-        height: 350,
-        toolbar: { show: false },
-      },
-      xaxis: {
-        categories: this.getLast7Days(),
-      },
-      title: {
-        text: title,
-      },
-      labels: labels,
-    };
-  }
-
-  private updateChartsTheme(): void {
-    const theme = this.isDarkMode
-      ? {
-          mode: 'dark',
-          background: '#2d2d2d',
-          foreColor: '#ffffff',
-        }
-      : {
-          mode: 'light',
-          background: '#ffffff',
-          foreColor: '#373d3f',
-        };
-
-    [this.pageViewsChart, this.engagementChart, this.commentsChart].forEach((chart) => {
-      chart.theme = theme;
-    });
   }
 
   private loadDashboardData(): void {
@@ -107,21 +129,10 @@ export class DashboardAdminComponent implements OnInit {
     this.todayComments = data.commentsToday || 0;
     this.recentPosts = data.recentPosts || [];
 
-    this.pageViewsChart.series = [
-      {
-        name: 'Page Views',
-        data: data.pageViewsPerDayLastWeek || [],
-      },
-    ];
-
-    this.engagementChart.series = (data.recentPosts || []).map((post) => post.viewCount || 0);
-
-    this.commentsChart.series = [
-      {
-        name: 'Comments',
-        data: data.commentsPerDayLastWeek || [],
-      },
-    ];
+    // Cập nhật dữ liệu biểu đồ
+    this.pageViewsChartData.datasets[0].data = data.pageViewsPerDayLastWeek || [];
+    // this.engagementChartData.datasets[0].data = [data.likes || 0, data.shares || 0, data.comments || 0];
+    this.commentsChartData.datasets[0].data = data.commentsPerDayLastWeek || [];
 
     this.cdr.markForCheck();
   }

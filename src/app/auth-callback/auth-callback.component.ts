@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { SnackbarService } from '../services/snackbar.service';
+import { LoginType } from '../enums/login.type';
 
 interface TokenResponse {
   token: string;
@@ -35,13 +36,9 @@ export class AuthCallbackComponent implements OnInit {
 
   ngOnInit() {
     const url = this.router.url;
-    let loginType: 'google' | 'facebook';
-    if (url.includes('/auth/google/callback')) {
-      loginType = 'google';
-    } else if (url.includes('/auth/facebook/callback')) {
-      loginType = 'facebook';
-    } else {
-      console.error('Không xác định được nhà cung cấp xác thực.');
+    const loginType = this.getLoginTypeFromUrl(url);
+    if (!loginType) {
+      this.snackbarService.show('Không tìm thấy loại đăng nhập trong URL.');
       return;
     }
 
@@ -54,7 +51,6 @@ export class AuthCallbackComponent implements OnInit {
               tap((response: ApiResponse<TokenResponse>) => {
                 const token = response.data.token;
                 this.authService.setAccessToken(token);
-                this.authService.setRefreshTokenFlag();
               }),
               switchMap((response: ApiResponse<TokenResponse>) => {
                 const token = response.data.token;
@@ -71,26 +67,21 @@ export class AuthCallbackComponent implements OnInit {
         next: (apiResponse: ApiResponse<UserResponse>) => {
           this.userResponse = apiResponse.data;
           this.authService.setUser(this.userResponse ?? null);
-          this.navigateToDashboard();
+          this.authService.navigateToDashboard(this.userResponse);
         },
         error: (error: HttpErrorResponse) => {
           console.error(error);
+          this.snackbarService.show('Lỗi khi xử lý xác thực:', error?.error?.message ?? '');
         },
       });
   }
-
-  private navigateToDashboard() {
-    switch (this.userResponse?.role.name) {
-      case 'ADMIN':
-      case 'MODERATOR':
-        this.router.navigate(['/admin/dashboard']);
-        break;
-      case 'USER':
-        this.router.navigate(['/']);
-        break;
-      default:
-        this.router.navigate(['/']);
-        break;
+  private getLoginTypeFromUrl(url: string): LoginType | null {
+    if (url.includes('/auth/google/callback')) {
+      return LoginType.GOOGLE;
+    } else if (url.includes('/auth/facebook/callback')) {
+      return LoginType.FACEBOOK;
+    } else {
+      return null;
     }
   }
 }

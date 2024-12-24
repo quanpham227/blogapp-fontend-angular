@@ -11,9 +11,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { LoginResponse } from '../responses/user/login.response';
 import { LoginService } from './login.service';
 import CryptoJS from 'crypto-es';
-
-const ROLE_ADMIN = 'ADMIN';
-const ROLE_MODERATOR = 'MODERATOR';
+import { LoginType } from '../enums/login.type';
+import { Roles } from '../enums/roles.enum';
+import { BroadcastMessages } from '../enums/broadcast-messages.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -22,13 +22,10 @@ export class AuthService {
   private apiBaseUrl = environment.apiBaseUrl;
   private secretKey = environment.secretKey;
 
-  private readonly refreshTokenKey = 'refreshToken';
-  private readonly refreshTokenFlagKey = 'refreshTokenFlag';
   private userSubject: BehaviorSubject<UserResponse | null>;
   public user$: Observable<UserResponse | null>;
   private jwtHelperService = new JwtHelperService();
   private broadcastChannel = new BroadcastChannel('auth');
-  private isRefreshingToken = false;
 
   constructor(
     private router: Router,
@@ -40,9 +37,9 @@ export class AuthService {
     this.userSubject = new BehaviorSubject<UserResponse | null>(null);
     this.user$ = this.userSubject.asObservable();
     this.broadcastChannel.onmessage = (event) => {
-      if (event.data.type === 'LOGOUT') {
+      if (event.data.type === BroadcastMessages.LOGOUT) {
         this.clearAuthData();
-      } else if (event.data.type === 'TOKEN_UPDATE') {
+      } else if (event.data.type === BroadcastMessages.TOKEN_UPDATE) {
         this.setAccessToken(event.data.token);
       }
     };
@@ -61,63 +58,28 @@ export class AuthService {
   }
 
   setAccessToken(token: string) {
-    const encryptedToken = CryptoJS.AES.encrypt(token, this.secretKey).toString();
+    const encryptedToken = this.encryptData(token);
     localStorage.setItem('accessToken', encryptedToken);
     this.broadcastChannel.postMessage({ type: 'TOKEN_UPDATE', token: encryptedToken });
   }
 
   getAccessToken(): string | null {
     const encryptedToken = localStorage.getItem('accessToken');
-    if (encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, this.secretKey);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (error) {
-        console.error('Error decrypting access token:', error);
-        this.clearAuthData(); // Xóa dữ liệu xác thực nếu giải mã thất bại
-        return null;
-      }
-    }
-    return null;
-  }
-
-  setRefreshToken(refreshToken: string) {
-    const encryptedToken = CryptoJS.AES.encrypt(refreshToken, this.secretKey).toString();
-    localStorage.setItem(this.refreshTokenKey, encryptedToken);
-  }
-
-  getRefreshToken(): string | null {
-    const encryptedToken = localStorage.getItem(this.refreshTokenKey);
-    if (encryptedToken) {
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedToken, this.secretKey);
-        return bytes.toString(CryptoJS.enc.Utf8);
-      } catch (error) {
-        console.error('Error decrypting refresh token:', error);
-        this.clearAuthData(); // Xóa dữ liệu xác thực nếu giải mã thất bại
-        return null;
-      }
-    }
-    return null;
+    return encryptedToken ? this.decryptData(encryptedToken) : null;
   }
 
   isTokenExpired(token: string): boolean {
-    if (!token || token.split('.').length !== 3) {
-      console.warn('Invalid token format');
-      return true; // Nếu token không hợp lệ, coi như hết hạn
-    }
-    return this.jwtHelperService.isTokenExpired(token);
+    return !token || token.split('.').length !== 3 || this.jwtHelperService.isTokenExpired(token);
   }
 
   isLoggedIn(): boolean {
     const token = this.getAccessToken();
-    return token !== null && !this.isTokenExpired(token);
+    return !!token && !this.isTokenExpired(token);
   }
 
   clearAuthData() {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem(this.refreshTokenKey); // Nếu bạn dùng refresh token
-    this.broadcastChannel.postMessage({ type: 'LOGOUT' });
+    this.broadcastChannel.postMessage({ type: BroadcastMessages.LOGOUT });
   }
 
   logout() {
@@ -126,7 +88,7 @@ export class AuthService {
 
   isAdminOrModerator(): boolean {
     const user = this.getUser();
-    return user?.role.name === ROLE_ADMIN || user?.role.name === ROLE_MODERATOR;
+    return user?.role.name === Roles.ADMIN || user?.role.name === Roles.MODERATOR;
   }
 
   async setUserFromToken(token: string): Promise<void> {
@@ -139,71 +101,69 @@ export class AuthService {
     }
   }
 
-  setRefreshTokenFlag() {
-    localStorage.setItem(this.refreshTokenFlagKey, 'true');
-  }
-
-  clearRefreshTokenFlag() {
-    localStorage.removeItem(this.refreshTokenFlagKey);
-  }
-
-  hasRefreshToken(): boolean {
-    return localStorage.getItem(this.refreshTokenFlagKey) === 'true';
-  }
-
   clearPreviousSession() {
     localStorage.removeItem('accessToken'); // Xóa token
-    localStorage.removeItem(this.refreshTokenKey); // Xóa refresh token
-    this.clearRefreshTokenFlag(); // Xóa cờ liên quan
-    this.broadcastChannel.postMessage('LOGOUT'); // Gửi thông báo đăng xuất
+    this.broadcastChannel.postMessage({ type: BroadcastMessages.LOGOUT }); // Gửi thông báo đăng xuất
   }
 
-  handleNavigation(currentUrl: string) {
-    if (this.isRefreshingToken) {
-      // Wait for the token refresh process to complete
-      setTimeout(() => this.handleNavigation(currentUrl), 100);
-      return;
-    }
-
-    if (currentUrl.startsWith('/admin') && !this.isLoggedIn()) {
-      this.router.navigate(['/login']);
-    } else if (currentUrl.startsWith('/login')) {
-      // Giữ nguyên trang đăng nhập
-    } else {
-      // Giữ nguyên trang hiện tại
-    }
-  }
-
-  loginWithRecovery(loginDTO: any, previousToken: string, previousRefreshToken: string): Observable<LoginResponse> {
+  loginWithRecovery(loginDTO: any, previousToken: string): Observable<LoginResponse> {
     return this.loginService.login(loginDTO).pipe(
       tap((response: LoginResponse) => {
         if (response.status == 'OK' && response.data) {
           this.clearPreviousSession();
           const { token } = response.data;
           this.setAccessToken(token);
-          this.setRefreshTokenFlag();
         } else {
           this.setAccessToken(previousToken);
-          this.setRefreshToken(previousRefreshToken);
         }
       }),
       catchError((error: any) => {
         this.setAccessToken(previousToken);
-        this.setRefreshToken(previousRefreshToken);
         return throwError(() => new Error(error));
       }),
     );
   }
 
   // Corrected function name and parameter usage
-  authenticate(loginType: 'facebook' | 'google'): Observable<string> {
-    debugger;
+  authenticate(loginType: LoginType): Observable<string> {
     return this.http.get(`${this.apiBaseUrl}/users/auth/social-login?login_type=${loginType}`, { responseType: 'text' });
   }
 
-  exchangeCodeForToken(code: string, loginType: 'facebook' | 'google'): Observable<any> {
+  exchangeCodeForToken(code: string, loginType: LoginType): Observable<any> {
     const params = new HttpParams().set('code', code).set('login_type', loginType);
 
-    return this.http.get<any>(`${this.apiBaseUrl}/users/auth/social/callback`, { params });
+    return this.http.get<any>(`${this.apiBaseUrl}/users/auth/social/callback`, { params, withCredentials: true });
+  }
+
+  private encryptData(data: string): string {
+    return CryptoJS.AES.encrypt(data, this.secretKey).toString();
+  }
+
+  private decryptData(encryptedData: string): string | null {
+    try {
+      const bytes = CryptoJS.AES.decrypt(encryptedData, this.secretKey);
+      return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+      console.error('Lỗi khi giải mã token:', error, encryptedData);
+      return null;
+    }
+  }
+  navigateToDashboard(userResponse: UserResponse | null) {
+    if (!userResponse) {
+      this.router.navigate(['/']);
+      return;
+    }
+    switch (userResponse.role?.name) {
+      case 'ADMIN':
+      case 'MODERATOR':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'USER':
+        this.router.navigate(['/']);
+        break;
+      default:
+        this.router.navigate(['/']);
+        break;
+    }
   }
 }

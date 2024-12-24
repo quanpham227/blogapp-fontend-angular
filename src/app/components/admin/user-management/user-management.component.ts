@@ -20,7 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { UpdateUserAdminComponent } from '../update-user/update-user.admin.component';
 import { AuthService } from '../../../services/auth.service';
 import { UpdateUserByAdminDTO } from '../../../dtos/user/update.user.admin';
-import { UserStatus } from '../../../enums/user-status.;enum';
+import { UserStatus } from '../../../enums/user-status.enum';
 
 @UntilDestroy()
 @Component({

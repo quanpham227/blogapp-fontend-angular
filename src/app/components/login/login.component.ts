@@ -8,10 +8,11 @@ import { LoginResponse } from '../../responses/user/login.response';
 import { UserResponse } from './../../responses/user/user.response';
 import { CommonModule } from '@angular/common';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { emailOrPhoneValidator } from '../../validators/validators';
 import { SnackbarService } from '../../services/snackbar.service';
+import { LoginType } from '../../enums/login.type';
 
 @UntilDestroy()
 @Component({
@@ -32,7 +33,6 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private userService: UserService,
     private userDetailService: UserDetailService,
     private authService: AuthService,
     private snackBar: SnackbarService,
@@ -61,7 +61,10 @@ export class LoginComponent implements OnInit {
   validateForm() {
     // Thực hiện các bước kiểm tra và xử lý form
     if (this.loginForm.invalid) {
-      this.errorMessage = 'Form không hợp lệ';
+      const errors = Object.keys(this.loginForm.controls)
+        .filter((key) => this.loginForm.get(key)?.invalid)
+        .map((key) => `${key} không hợp lệ`);
+      this.errorMessage = errors.join(', ');
     } else {
       this.errorMessage = null;
     }
@@ -75,11 +78,13 @@ export class LoginComponent implements OnInit {
 
     // Tạm thời lưu token của tài khoản trước khi xóa
     const previousToken = this.authService.getAccessToken();
-    const previousRefreshToken = this.authService.getRefreshToken();
 
     this.authService
-      .loginWithRecovery(loginDTO, previousToken!, previousRefreshToken!)
-      .pipe(untilDestroyed(this))
+      .loginWithRecovery(loginDTO, previousToken!)
+      .pipe(
+        untilDestroyed(this),
+        finalize(() => (this.isLoading = false)),
+      )
       .subscribe({
         next: (response: LoginResponse) => {
           if (response.status == 'OK' && response.data) {
@@ -101,7 +106,7 @@ export class LoginComponent implements OnInit {
           if (response.status == 'OK' && response.data) {
             this.userResponse = response.data;
             this.authService.setUser(this.userResponse ?? null);
-            this.navigateToDashboard();
+            this.authService.navigateToDashboard(this.userResponse ?? null); // Sử dụng toán tử ?? để đảm bảo giá trị không phải undefined
             this.isLoading = false;
           }
         },
@@ -109,25 +114,6 @@ export class LoginComponent implements OnInit {
           this.isLoading = false;
         },
       });
-  }
-
-  navigateToDashboard() {
-    if (!this.userResponse) {
-      this.router.navigate(['/']);
-      return;
-    }
-    switch (this.userResponse.role.name) {
-      case 'ADMIN':
-      case 'MODERATOR':
-        this.router.navigate(['/admin/dashboard']);
-        break;
-      case 'USER':
-        this.router.navigate(['/']);
-        break;
-      default:
-        this.router.navigate(['/']);
-        break;
-    }
   }
 
   togglePasswordVisibility(): void {
@@ -146,7 +132,7 @@ export class LoginComponent implements OnInit {
   }
   loginWithGoogle() {
     debugger;
-    this.authService.authenticate('google').subscribe({
+    this.authService.authenticate(LoginType.GOOGLE).subscribe({
       next: (url: string) => {
         if (url) {
           window.location.href = url;
@@ -163,7 +149,7 @@ export class LoginComponent implements OnInit {
 
   loginWithFacebook() {
     // Logic đăng nhập với Facebook
-    this.authService.authenticate('facebook').subscribe({
+    this.authService.authenticate(LoginType.FACEBOOK).subscribe({
       next: (url: string) => {
         if (url) {
           window.location.href = url;

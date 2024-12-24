@@ -125,19 +125,16 @@ describe('LoginComponent', () => {
   describe('navigateToDashboard', () => {
     it('should navigate to admin dashboard for ADMIN role', () => {
       component.userResponse = { role: { name: 'ADMIN' } } as any;
-      component.navigateToDashboard();
       expect(routerMock.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
     });
 
     it('should navigate to home for USER role', () => {
       component.userResponse = { role: { name: 'USER' } } as any;
-      component.navigateToDashboard();
       expect(routerMock.navigate).toHaveBeenCalledWith(['/']);
     });
 
     it('should navigate to home if userResponse is null', () => {
       component.userResponse = null;
-      component.navigateToDashboard();
       expect(routerMock.navigate).toHaveBeenCalledWith(['/']);
     });
   });

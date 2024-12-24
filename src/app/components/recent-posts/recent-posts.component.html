@@ -1,12 +1,12 @@
 <!-- ======= Recent Blog Posts Section ======= -->
 <section class="recent-posts">
-  <div class="recent-posts__container" data-aos="fade-up">
+  <div class="recent-posts__container">
     <div class="recent-posts__header">
       <span class="recent-posts__header-span">Recent posts</span>
       <h2 class="recent-posts__header-heading">Tin gần đây</h2>
     </div>
     <div class="recent-posts__grid">
-      <div class="recent-posts__item" data-aos="fade-up" data-aos-delay="100" *ngFor="let post of recentPosts">
+      <div class="recent-posts__item" *ngFor="let post of recentPosts">
         <div class="recent-posts__post-box">
           <div class="recent-posts__post-img">
             <img [appLazyLoad]="post.thumbnailUrl" [transitionDuration]="'0.5s'" class="recent-posts__img" alt="" />

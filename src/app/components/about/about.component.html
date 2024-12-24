@@ -1,6 +1,6 @@
 <!-- ======= About Section ======= -->
 <section *ngIf="about" id="about" class="about">
-  <div class="about__container" data-aos="fade-up">
+  <div class="about__container">
     <div class="about__header">
       <span class="about__header-span">ABOUT</span>
       <h2 class="about__header-heading">GIỚI THIỆU</h2>
@@ -8,14 +8,12 @@
     <div class="about__content">
       <div class="about__image-wrapper">
         <img
-          *ngIf="about.imageUrl; else noImage"
+          *ngIf="about.imageUrl"
           [src]="about.imageUrl"
           class="about__image"
           [alt]="about.title || 'About Image'"
+          (error)="handleImageError($event)"
         />
-        <ng-template #noImage>
-          <p class="about__no-image">Image not available</p>
-        </ng-template>
       </div>
       <div class="about__details">
         <h3 class="about__title" *ngIf="about.title">

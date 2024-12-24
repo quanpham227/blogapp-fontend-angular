@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { UserResponse } from '../responses/user/user.response';
+import { Roles } from '../enums/roles.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +27,7 @@ export class AdminGuard {
     const token = this.authService.getAccessToken();
     const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
     const userResponse: UserResponse | null = this.authService.getUser();
-    const isAdminOrModerator = userResponse?.role?.name === 'ADMIN' || userResponse?.role?.name === 'MODERATOR';
+    const isAdminOrModerator = userResponse?.role?.name === Roles.ADMIN || userResponse?.role?.name === Roles.MODERATOR;
 
     if (!isTokenExpired && isAdminOrModerator) {
       return true;

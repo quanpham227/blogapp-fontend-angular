@@ -13,6 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { emailOrPhoneValidator } from '../../validators/validators';
 import { SnackbarService } from '../../services/snackbar.service';
 import { LoginType } from '../../enums/login.type';
+import { ApiResponse } from '../../models/response';
 
 @UntilDestroy()
 @Component({
@@ -58,6 +59,7 @@ export class LoginComponent implements OnInit {
       this.validateForm();
     });
   }
+
   validateForm() {
     // Thực hiện các bước kiểm tra và xử lý form
     if (this.loginForm.invalid) {
@@ -69,40 +71,44 @@ export class LoginComponent implements OnInit {
       this.errorMessage = null;
     }
   }
+
   login() {
-    if (this.loginForm.invalid) {
-      return;
+    if (this.loginForm.invalid) return;
+    const existingToken = this.authService.getAccessToken();
+    if (existingToken) {
+      this.authService.clearPreviousSession(); // Xóa token cũ trước khi đăng nhập lại
     }
+
     this.isLoading = true;
     const loginDTO = this.loginForm.value;
 
-    // Tạm thời lưu token của tài khoản trước khi xóa
-    const previousToken = this.authService.getAccessToken();
-
     this.authService
-      .loginWithRecovery(loginDTO, previousToken!)
+
+      .loginWithRecovery(loginDTO)
       .pipe(
         untilDestroyed(this),
         finalize(() => (this.isLoading = false)),
       )
       .subscribe({
         next: (response: LoginResponse) => {
+          debugger;
           if (response.status == 'OK' && response.data) {
             this.getUserDetails(response.data.token);
           }
         },
         error: (error: any) => {
           this.isLoading = false;
-          this.errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
+          this.errorMessage = 'Đăng nhập thất bại.';
         },
       });
   }
+
   getUserDetails(token: string) {
     this.userDetailService
       .getUserDetail(token)
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (response: any) => {
+        next: (response: ApiResponse<UserResponse>) => {
           if (response.status == 'OK' && response.data) {
             this.userResponse = response.data;
             this.authService.setUser(this.userResponse ?? null);
@@ -123,6 +129,7 @@ export class LoginComponent implements OnInit {
   navigateToRegister(): void {
     this.router.navigate(['/register']);
   }
+
   navigateToResetPassword(): void {
     if (!this.loginForm.get('email')?.value) {
       this.snackBar.show('Vui lòng nhập email hoặc số điện thoại để lấy lại mật khẩu');
@@ -130,8 +137,8 @@ export class LoginComponent implements OnInit {
     }
     this.router.navigate(['/forgot-password']);
   }
+
   loginWithGoogle() {
-    debugger;
     this.authService.authenticate(LoginType.GOOGLE).subscribe({
       next: (url: string) => {
         if (url) {
@@ -141,7 +148,6 @@ export class LoginComponent implements OnInit {
         }
       },
       error: (error: HttpErrorResponse) => {
-        debugger;
         this.snackBar.show('Lỗi khi xác thực với Google:', error?.error?.message ?? '');
       },
     });
@@ -158,7 +164,6 @@ export class LoginComponent implements OnInit {
         }
       },
       error: (error: HttpErrorResponse) => {
-        debugger;
         this.snackBar.show('Lỗi khi xác thực với Facebook:', error?.error?.message ?? '');
       },
     });

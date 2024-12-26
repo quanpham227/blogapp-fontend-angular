@@ -27,11 +27,7 @@
         <div class="admin-media__nav-panel" *ngIf="!isMobileView">
           <ul class="admin-media__tabs-list">
             <li class="admin-media__nav-tab" *ngFor="let type of objectTypes">
-              <a
-                class="admin-media__nav-link"
-                [class.active]="selectedObjectType === type.value"
-                (click)="filterMedia(type.value)"
-              >
+              <a class="admin-media__nav-link" [class.active]="selectedObjectType === type.value" (click)="filterMedia(type.value)">
                 {{ type.label }}
               </a>
             </li>
@@ -122,6 +118,7 @@
             class="admin-media__image"
             [class.temporary]="image.isTemporary"
             (error)="onImageError($event)"
+            loading="lazy"
           />
           <div class="admin-media__uploading-spinner" *ngIf="image.isUploading">
             <i class="fas fa-spinner fa-spin"></i>

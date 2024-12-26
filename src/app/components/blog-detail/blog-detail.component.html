@@ -3,7 +3,13 @@
     <header class="blog-detail__header">
       <h1 class="blog-detail__title">{{ post.title }}</h1>
       <div class="blog-detail__author-info">
-        <img [src]="post.profileImage" (error)="handleImageError($event)" [alt]="post.authorName" class="blog-detail__author-avatar" />
+        <img
+          [src]="post.profileImage"
+          loading="lazy"
+          (error)="handleImageError($event)"
+          [alt]="post.authorName"
+          class="blog-detail__author-avatar"
+        />
         <div class="blog-detail__author-details">
           <span class="blog-detail__author-name">{{ post.authorName }}</span>
           <span class="blog-detail__publish-date">{{ post.createdAt | date: 'mediumDate' }}</span>
@@ -35,6 +41,7 @@
               (error)="handleImageError($event)"
               [alt]="comment.fullName"
               class="blog-detail__comment-avatar"
+              loading="lazy"
             />
             <div class="blog-detail__comment-meta">
               <span class="blog-detail__username">{{ comment.fullName }}</span>
@@ -61,6 +68,7 @@
                   (error)="handleImageError($event)"
                   [alt]="reply.fullName"
                   class="blog-detail__comment-avatar"
+                  loading="lazy"
                 />
                 <div class="blog-detail__comment-meta">
                   <span class="blog-detail__username">{{ reply.fullName }}</span>

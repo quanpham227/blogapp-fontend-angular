@@ -19,9 +19,9 @@ export class SlideComponent implements OnInit, AfterViewInit {
   swiperSlides: Swiper | null = null;
   isLoading = true;
   defaultSlides = [
-    { imageUrl: 'assets/images/slides/slide1.jpg' },
-    { imageUrl: 'assets/images/slides/slide2.jpg' },
-    { imageUrl: 'assets/images/slides/slide3.jpg' },
+    { imageUrl: 'https://res.cloudinary.com/damphlbsi/image/upload/v1735118600/slide_01_wij5fn.jpg' },
+    { imageUrl: 'https://res.cloudinary.com/damphlbsi/image/upload/v1726736214/blogapp/slides/rh6nvmxmr6hmv8zk9cdl.jpg' },
+    { imageUrl: 'https://res.cloudinary.com/damphlbsi/image/upload/v1726736194/blogapp/slides/eicbzthcl0vptudmy02d.jpg' },
   ];
   constructor(
     private slideService: SlideService,

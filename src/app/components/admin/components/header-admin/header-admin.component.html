@@ -2,7 +2,7 @@
 <header class="header-admin">
   <div class="header-admin__logo-container">
     <a class="header-admin__logo" (click)="handleNavigateDashboard()">
-      <img src="assets/images/LOGO.png" alt="Logo" class="header-admin__logo-img" />
+      <img src="assets/svg/logo.svg" loading="lazy" alt="Logo" class="header-admin__logo-img" />
       <span class="header-admin__logo-text">PI VINA DANANG</span>
     </a>
     <i class="header-admin__toggle-sidebar-btn fas fa-bars" (click)="toggleSidebar()"></i>
@@ -20,7 +20,13 @@
       <li class="header-admin__nav-item">
         <a class="header-admin__nav-link" (click)="toggleProfileMenu()">
           <span class="header-admin__nav-text" *ngIf="userResponse">Hello {{ userResponse.fullName }}</span>
-          <img [src]="userResponse?.profileImage" (error)="handleImageError($event)" alt="Profile" class="header-admin__profile-img" />
+          <img
+            [src]="userResponse?.profileImage"
+            loading="lazy"
+            (error)="handleImageError($event)"
+            alt="Profile"
+            class="header-admin__profile-img"
+          />
         </a>
         <ul class="header-admin__profile-menu" [ngClass]="{ 'header-admin__profile-menu--visible': isProfileMenuVisible }">
           <li class="header-admin__profile-item">

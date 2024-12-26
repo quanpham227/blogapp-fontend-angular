@@ -3,6 +3,9 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot, CanActivateFn } from '@ang
 import { Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { Observable, of } from 'rxjs';
+import { map, take } from 'rxjs/operators';
+import { UserResponse } from '../responses/user/user.response';
 
 @Injectable({
   providedIn: 'root',
@@ -13,29 +16,32 @@ export class AuthGuard {
     private authService: AuthService,
   ) {}
 
-  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    console.log('Current route:', next.routeConfig?.path);
-
+  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     const isPublicRoute = next.routeConfig?.path === 'login' || next.routeConfig?.path === 'register';
 
     if (isPublicRoute) {
-      return true;
+      return of(true);
     }
 
-    const token = this.authService.getAccessToken();
-    const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
-    const userId = this.authService.getUser()?.id ?? 0;
-    const isUserIdValid = userId > 0;
+    return this.authService.token$.pipe(
+      take(1),
+      map((token) => {
+        const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
 
-    if (!isTokenExpired && isUserIdValid) {
-      return true;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
-    }
+        // Lấy thông tin người dùng
+        const userResponse: UserResponse | null = this.authService.getUser();
+
+        if (!isTokenExpired && userResponse) {
+          return true;
+        } else {
+          this.router.navigate(['/login']);
+          return false;
+        }
+      }),
+    );
   }
 }
 
-export const AuthGuardFn: CanActivateFn = (next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean => {
+export const AuthGuardFn: CanActivateFn = (next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> => {
   return inject(AuthGuard).canActivate(next, state);
 };

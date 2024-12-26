@@ -223,7 +223,7 @@ export class CommentAdminComponent implements OnInit {
   }
 
   handleImageError(event: any): void {
-    event.target.src = 'assets/images/user-profile-default.jpeg';
+    event.target.src = 'assets/svg/user_icon.svg';
   }
 
   async editComment(comment: any): Promise<void> {

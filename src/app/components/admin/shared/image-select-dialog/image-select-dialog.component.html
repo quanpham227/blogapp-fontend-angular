@@ -23,11 +23,7 @@
         <div class="admin-select-dialog__nav-panel" *ngIf="!isMobileView">
           <ul class="admin-select-dialog__tabs-list">
             <li class="admin-select-dialog__nav-tab" *ngFor="let type of objectTypes">
-              <a
-                class="admin-select-dialog__nav-link"
-                [class.active]="selectedObjectType === type.value"
-                (click)="filterMedia(type.value)"
-              >
+              <a class="admin-select-dialog__nav-link" [class.active]="selectedObjectType === type.value" (click)="filterMedia(type.value)">
                 {{ type.label }}
               </a>
             </li>
@@ -112,11 +108,7 @@
           (click)="toggleSelectImage(image)"
           class="admin-select-dialog__image-item"
         >
-          <mat-card
-            class="admin-select-dialog__image-card"
-            [class.selected]="isSelected(image)"
-            title="{{ image.fileName }}"
-          >
+          <mat-card class="admin-select-dialog__image-card" [class.selected]="isSelected(image)" title="{{ image.fileName }}">
             <img
               [appLazyLoad]="image.imageUrl"
               [transitionDuration]="'5s'"
@@ -124,6 +116,7 @@
               class="admin-select-dialog__image"
               [class.temporary]="image.isTemporary"
               (error)="onImageError($event)"
+              loading="lazy"
             />
             <div class="admin-select-dialog__uploading-spinner" *ngIf="image.isUploading">
               <i class="fas fa-spinner fa-spin"></i>
@@ -145,11 +138,7 @@
   </div>
 
   <div class="admin-select-dialog__footer">
-    <button
-      mat-button
-      class="admin-select-dialog__footer-button admin-select-dialog__footer-button--cancel"
-      (click)="closeModal()"
-    >
+    <button mat-button class="admin-select-dialog__footer-button admin-select-dialog__footer-button--cancel" (click)="closeModal()">
       Hủy
     </button>
     <button

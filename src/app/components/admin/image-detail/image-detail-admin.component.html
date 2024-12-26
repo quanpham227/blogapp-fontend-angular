@@ -2,7 +2,7 @@
   <h1 class="image-detail-dialog__title">Chi tiết ảnh</h1>
   <div fxLayout="row" fxLayout.lt-md="column" fxLayoutAlign="space-between center" fxLayoutGap="10px">
     <div fxFlex="50" fxFlex.lt-md="100">
-      <img [src]="data.image.imageUrl" alt="{{ data.image.fileName }}" class="image-detail-dialog__image" />
+      <img [src]="data.image.imageUrl" loading="lazy" alt="{{ data.image.fileName }}" class="image-detail-dialog__image" />
     </div>
     <div fxFlex="50" fxFlex.lt-md="100" class="image-detail-dialog__info">
       <h2>{{ data.image.fileName }}</h2>

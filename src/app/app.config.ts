@@ -1,5 +1,5 @@
-import { ApplicationConfig, importProvidersFrom, Provider, APP_INITIALIZER } from '@angular/core';
-import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
+import { ApplicationConfig, importProvidersFrom, Provider, APP_INITIALIZER, isDevMode } from '@angular/core';
+import { PreloadAllModules, provideRouter, Router, withPreloading } from '@angular/router';
 import { HttpClientModule, provideHttpClient, HTTP_INTERCEPTORS, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { TokenInterceptor } from './interceptors/token.interceptor';
@@ -17,6 +17,11 @@ import { LoadingBarRouterModule } from '@ngx-loading-bar/router';
 import { ApiResponseInterceptor } from './interceptors/api-response.interceptor';
 import { NewlinePipe } from './pipes/newline.pipe';
 import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
+import { Location } from '@angular/common';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
+
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
   useClass: TokenInterceptor,
@@ -58,11 +63,14 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
-      deps: [TokenService, AuthService],
+      deps: [TokenService, AuthService, Router, Location],
       multi: true,
     },
     importProvidersFrom(LoadingBarHttpClientModule),
     importProvidersFrom(LoadingBarRouterModule),
     provideAnimationsAsync(),
+    provideStore(),
+    provideEffects(),
+    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
   ],
 };

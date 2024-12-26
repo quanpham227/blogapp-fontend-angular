@@ -46,7 +46,7 @@
       <div *ngIf="articles.length > 0; else noResults" class="blog__articles-grid">
         <div *ngFor="let article of articles; trackBy: trackByPost" class="blog__article-card" #articleCard>
           <div class="blog__article-image">
-            <img [appLazyLoad]="article.thumbnailUrl" [transitionDuration]="'3s'" [alt]="article.title" />
+            <img [appLazyLoad]="article.thumbnailUrl" loading="lazy" [transitionDuration]="'3s'" [alt]="article.title" />
           </div>
           <div class="blog__article-content">
             <h2 class="blog__article-title" (click)="onPostClick(article.slug)">{{ article.title }}</h2>

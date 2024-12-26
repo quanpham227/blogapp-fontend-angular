@@ -43,7 +43,6 @@ export class CountsComponent implements OnInit, AfterViewChecked {
       .getActiveAchievementsForUser()
       .pipe(
         map((response) => {
-          console.log('Response data:', response.data);
           return response.data;
         }),
         untilDestroyed(this),

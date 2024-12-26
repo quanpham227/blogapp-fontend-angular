@@ -34,7 +34,6 @@ export class TopbarComponent {
     this.authService.user$.pipe(untilDestroyed(this)).subscribe({
       next: (user) => {
         this.userResponse = user;
-        console.log('User data updated', user);
       },
       error: (err) => {
         console.error('Error fetching user data', err);

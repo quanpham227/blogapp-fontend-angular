@@ -22,7 +22,6 @@ export class UserProfileComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
   userImageUrl: string | null = null;
-  defaultImage = 'assets/images/default-user.png';
   token: string | null = '';
 
   constructor(
@@ -92,10 +91,6 @@ export class UserProfileComponent implements OnInit {
     }
   }
 
-  handleImageError(): void {
-    this.userImageUrl = this.defaultImage;
-  }
-
   resetForm(): void {
     this.updateForm.reset();
     this.userImageUrl = null;
@@ -134,5 +129,8 @@ export class UserProfileComponent implements OnInit {
         }
       });
     }
+  }
+  handleImageError(event: any): void {
+    event.target.src = 'assets/svg/user_icon.svg';
   }
 }

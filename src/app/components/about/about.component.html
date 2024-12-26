@@ -13,6 +13,7 @@
           class="about__image"
           [alt]="about.title || 'About Image'"
           (error)="handleImageError($event)"
+          loading="lazy"
         />
       </div>
       <div class="about__details">

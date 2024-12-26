@@ -1,5 +1,4 @@
-// filepath: /Users/quanpham/MyProject/blogapp/blogapp-fontend/src/app/components/header/header.component.ts
-import { Component, OnInit, Renderer2, Inject } from '@angular/core';
+import { Component, OnInit, Renderer2, Inject, ElementRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll-core';
@@ -33,6 +32,7 @@ export class HeaderComponent implements OnInit {
     private renderer: Renderer2,
     private pageScrollService: PageScrollService,
     @Inject(DOCUMENT) private document: any,
+    private el: ElementRef,
   ) {}
 
   ngOnInit() {
@@ -58,7 +58,9 @@ export class HeaderComponent implements OnInit {
     this.setActiveNavItemBasedOnUrl(this.router.url);
 
     // Listen for scroll events to update menu active state
-    window.addEventListener('scroll', this.onScroll.bind(this));
+    this.renderer.listen(this.el.nativeElement, 'scroll', this.onScroll.bind(this));
+    this.renderer.listen(this.el.nativeElement, 'touchmove', this.onTouchMove.bind(this));
+    this.renderer.listen(this.el.nativeElement, 'touchstart', this.onTouchStart.bind(this));
   }
 
   private checkUserStatus() {
@@ -202,5 +204,13 @@ export class HeaderComponent implements OnInit {
         }
       }
     }
+  }
+
+  private onTouchMove(event: Event) {
+    // Xử lý sự kiện touchmove
+  }
+
+  private onTouchStart(event: Event) {
+    // Xử lý sự kiện touchstart
   }
 }

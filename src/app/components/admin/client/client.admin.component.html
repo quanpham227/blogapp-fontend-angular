@@ -7,7 +7,7 @@
   <!-- Grid View -->
   <div class="admin-client__partners-grid">
     <div *ngFor="let client of clients" class="admin-client__partner-card">
-      <img [src]="client.logo" [alt]="client.name" class="admin-client__card-logo" />
+      <img [src]="client.logo" loading="lazy" [alt]="client.name" class="admin-client__card-logo" />
       <div class="admin-client__card-content">
         <h3>{{ client.name }}</h3>
         <p>{{ truncate(client.description, 100) }}</p>

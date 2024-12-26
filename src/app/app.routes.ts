@@ -3,7 +3,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { WebLayoutComponent } from './components/layouts/web-layout/web-layout.component';
 import { AuthLayoutComponent } from './components/layouts/auth-layout/auth-layout.component';
 import { AdminLayoutComponent } from './components/layouts/admin-layout/admin-layout.component';
-import { NotfoundAdminComponent } from './components/admin/notfound/notfound.admin.component';
 import { AdminGuardFn } from './guards/admin.guard';
 import { AuthGuardFn } from './guards/auth.guard';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
@@ -137,11 +136,7 @@ export const routes: Routes = [
         loadComponent: () => import('./components/admin/media/media.admin.component').then((m) => m.MediaAdminComponent),
         data: { animation: 'MediaPage' },
       },
-      {
-        path: 'emails',
-        loadComponent: () => import('./components/admin/email/email.admin.component').then((m) => m.EmailAdminComponent),
-        data: { animation: 'EmailPage' },
-      },
+
       {
         path: 'profile',
         loadComponent: () => import('./components/admin/profile/profile.admin.component').then((m) => m.ProfileAdminComponent),

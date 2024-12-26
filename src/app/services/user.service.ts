@@ -159,37 +159,7 @@ export class UserService {
       .put<ApiResponse<void>>(url, {}, this.apiConfig)
       .pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
-  saveUserResponseToLocalStorage(userResponse?: UserResponse) {
-    try {
-      if (userResponse == null || !userResponse) {
-        return;
-      }
-      const userResponseJSON = JSON.stringify(userResponse);
-      this.localStorage?.setItem('user', userResponseJSON);
-    } catch (error) {
-      this.snackbarService.show('Error saving user response to local storage:');
-    }
-  }
-  getUserResponseFromLocalStorage(): UserResponse | null {
-    try {
-      const userResponseJSON = this.localStorage?.getItem('user');
-      if (userResponseJSON == null || userResponseJSON == undefined) {
-        return null;
-      }
-      const userResponse = JSON.parse(userResponseJSON!);
-      return userResponse;
-    } catch (error) {
-      this.snackbarService.show('Error retrieving user response from local storage:');
-      return null;
-    }
-  }
-  removeUserFromLocalStorage(): void {
-    try {
-      this.localStorage?.removeItem('user');
-    } catch (error) {
-      this.snackbarService.show('Error removing user data from local storage:');
-    }
-  }
+
   deleteUser(userId: number): Observable<ApiResponse<void>> {
     return this.http
       .delete<ApiResponse<any>>(`${this.apiUsers}/${userId}`)

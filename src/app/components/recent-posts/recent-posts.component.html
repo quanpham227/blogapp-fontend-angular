@@ -9,7 +9,7 @@
       <div class="recent-posts__item" *ngFor="let post of recentPosts">
         <div class="recent-posts__post-box">
           <div class="recent-posts__post-img">
-            <img [appLazyLoad]="post.thumbnailUrl" [transitionDuration]="'0.5s'" class="recent-posts__img" alt="" />
+            <img [appLazyLoad]="post.thumbnailUrl" loading="lazy" [transitionDuration]="'0.5s'" class="recent-posts__img" alt="" />
           </div>
           <div class="recent-posts__meta">
             <a>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { UserResponse } from '../responses/user/user.response';
@@ -13,8 +13,10 @@ import { LoginService } from './login.service';
 import CryptoJS from 'crypto-es';
 import { LoginType } from '../enums/login.type';
 import { Roles } from '../enums/roles.enum';
-import { BroadcastMessages } from '../enums/broadcast-messages.enum';
 
+@Injectable({
+  providedIn: 'root',
+})
 @Injectable({
   providedIn: 'root',
 })
@@ -24,8 +26,10 @@ export class AuthService {
 
   private userSubject: BehaviorSubject<UserResponse | null>;
   public user$: Observable<UserResponse | null>;
+  private tokenSubject: BehaviorSubject<string | null>;
+  public token$: Observable<string | null>;
+
   private jwtHelperService = new JwtHelperService();
-  private broadcastChannel = new BroadcastChannel('auth');
 
   constructor(
     private router: Router,
@@ -33,16 +37,39 @@ export class AuthService {
     private snackbarService: SnackbarService,
     private http: HttpClient,
     private loginService: LoginService,
+    private ngZone: NgZone,
   ) {
     this.userSubject = new BehaviorSubject<UserResponse | null>(null);
     this.user$ = this.userSubject.asObservable();
-    this.broadcastChannel.onmessage = (event) => {
-      if (event.data.type === BroadcastMessages.LOGOUT) {
-        this.clearAuthData();
-      } else if (event.data.type === BroadcastMessages.TOKEN_UPDATE) {
-        this.setAccessToken(event.data.token);
-      }
-    };
+
+    this.tokenSubject = new BehaviorSubject<string | null>(this.getAccessToken());
+    this.token$ = this.tokenSubject.asObservable();
+
+    // Listen to storage events
+    window.addEventListener('storage', this.handleStorageEvent.bind(this));
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener('storage', this.handleStorageEvent.bind(this)); // Remove the event listener when the service is destroyed
+  }
+
+  private handleStorageEvent(event: StorageEvent) {
+    if (event.key === 'accessToken') {
+      this.ngZone.run(() => {
+        const token = event.newValue ? this.decryptData(event.newValue) : null;
+        this.tokenSubject.next(token);
+        if (!token) {
+          this.clearAuthData();
+          this.router.navigate(['/login']);
+        }
+      });
+    }
+  }
+
+  clearAuthData() {
+    localStorage.removeItem('accessToken');
+    this.tokenSubject.next(null); // Phát giá trị null
+    localStorage.setItem('logoutEvent', Date.now().toString()); // Trigger logout event
   }
 
   setUser(user: UserResponse | null) {
@@ -60,7 +87,7 @@ export class AuthService {
   setAccessToken(token: string) {
     const encryptedToken = this.encryptData(token);
     localStorage.setItem('accessToken', encryptedToken);
-    this.broadcastChannel.postMessage({ type: 'TOKEN_UPDATE', token: encryptedToken });
+    this.tokenSubject.next(token); // Phát giá trị mới
   }
 
   getAccessToken(): string | null {
@@ -75,11 +102,6 @@ export class AuthService {
   isLoggedIn(): boolean {
     const token = this.getAccessToken();
     return !!token && !this.isTokenExpired(token);
-  }
-
-  clearAuthData() {
-    localStorage.removeItem('accessToken');
-    this.broadcastChannel.postMessage({ type: BroadcastMessages.LOGOUT });
   }
 
   logout() {
@@ -103,28 +125,25 @@ export class AuthService {
 
   clearPreviousSession() {
     localStorage.removeItem('accessToken'); // Xóa token
-    this.broadcastChannel.postMessage({ type: BroadcastMessages.LOGOUT }); // Gửi thông báo đăng xuất
+    this.tokenSubject.next(null); // Phát giá trị null
+    localStorage.setItem('logoutEvent', Date.now().toString()); // Trigger logout event
   }
 
-  loginWithRecovery(loginDTO: any, previousToken: string): Observable<LoginResponse> {
+  loginWithRecovery(loginDTO: any): Observable<LoginResponse> {
     return this.loginService.login(loginDTO).pipe(
       tap((response: LoginResponse) => {
         if (response.status == 'OK' && response.data) {
-          this.clearPreviousSession();
-          const { token } = response.data;
-          this.setAccessToken(token);
-        } else {
-          this.setAccessToken(previousToken);
+          debugger; // Breakpoint
+          this.clearPreviousSession(); // Xóa session trước đó nếu có
+          this.setAccessToken(response.data.token); // Lưu token mới
         }
       }),
       catchError((error: any) => {
-        this.setAccessToken(previousToken);
         return throwError(() => new Error(error));
       }),
     );
   }
 
-  // Corrected function name and parameter usage
   authenticate(loginType: LoginType): Observable<string> {
     return this.http.get(`${this.apiBaseUrl}/users/auth/social-login?login_type=${loginType}`, { responseType: 'text' });
   }
@@ -148,22 +167,28 @@ export class AuthService {
       return null;
     }
   }
+
   navigateToDashboard(userResponse: UserResponse | null) {
     if (!userResponse) {
-      this.router.navigate(['/']);
+      this.ngZone.run(() => {
+        this.router.navigate(['/']);
+      });
       return;
     }
-    switch (userResponse.role?.name) {
-      case 'ADMIN':
-      case 'MODERATOR':
-        this.router.navigate(['/admin/dashboard']);
-        break;
-      case 'USER':
-        this.router.navigate(['/']);
-        break;
-      default:
-        this.router.navigate(['/']);
-        break;
-    }
+    const role = userResponse.role?.name;
+    this.ngZone.run(() => {
+      switch (role) {
+        case Roles.ADMIN:
+        case Roles.MODERATOR:
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        case Roles.USER:
+          this.router.navigate(['/']);
+          break;
+        default:
+          this.router.navigate(['/']);
+          break;
+      }
+    });
   }
 }

@@ -6,12 +6,7 @@
 
     <div class="profile__content">
       <div class="profile__image">
-        <img
-          [src]="userImageUrl || defaultImage"
-          alt="Profile Picture"
-          (error)="handleImageError()"
-          class="profile__img"
-        />
+        <img [src]="userImageUrl" alt="Profile Picture" (error)="handleImageError($event)" class="profile__img" loading="lazy" />
         <button class="profile__change-photo" (click)="fileInput.click()">
           <i class="fas fa-camera"></i>
           Change Photo
@@ -22,13 +17,7 @@
       <form [formGroup]="updateForm" (ngSubmit)="onSubmit()" class="profile__form">
         <div class="profile__form-group">
           <label for="fullName" class="profile__label">Full Name</label>
-          <input
-            type="text"
-            id="fullName"
-            formControlName="fullName"
-            placeholder="Enter your full name"
-            class="profile__input"
-          />
+          <input type="text" id="fullName" formControlName="fullName" placeholder="Enter your full name" class="profile__input" />
           <div
             class="profile__error-message"
             *ngIf="updateForm.get('fullName')?.errors?.['required'] && updateForm.get('fullName')?.touched"
@@ -39,13 +28,7 @@
 
         <div class="profile__form-group">
           <label for="phoneNumber" class="profile__label">Phone Number</label>
-          <input
-            type="tel"
-            id="phoneNumber"
-            formControlName="phoneNumber"
-            placeholder="Enter your phone number"
-            class="profile__input"
-          />
+          <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="Enter your phone number" class="profile__input" />
           <div
             class="profile__error-message"
             *ngIf="updateForm.get('phoneNumber')?.errors?.['pattern'] && updateForm.get('phoneNumber')?.touched"
@@ -64,19 +47,13 @@
               placeholder="Enter new password"
               class="profile__input"
             />
-            <i
-              class="fas"
-              [class.fa-eye]="!showPassword"
-              [class.fa-eye-slash]="showPassword"
-              (click)="togglePassword()"
-            ></i>
+            <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword" (click)="togglePassword()"></i>
           </div>
           <div
             class="profile__error-message"
             *ngIf="updateForm.get('password')?.errors?.['pattern'] && updateForm.get('password')?.touched"
           >
-            Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special
-            character
+            Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character
           </div>
         </div>
 
@@ -97,10 +74,7 @@
               (click)="toggleConfirmPassword()"
             ></i>
           </div>
-          <div
-            class="profile__error-message"
-            *ngIf="updateForm.errors?.['passwordMismatch'] && updateForm.get('retypePassword')?.touched"
-          >
+          <div class="profile__error-message" *ngIf="updateForm.errors?.['passwordMismatch'] && updateForm.get('retypePassword')?.touched">
             Passwords do not match
           </div>
         </div>

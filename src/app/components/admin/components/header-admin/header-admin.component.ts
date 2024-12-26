@@ -68,7 +68,7 @@ export class HeaderAdminComponent implements OnInit {
     this.toggleProfileMenu();
   }
   handleImageError(event: any): void {
-    event.target.src = 'assets/images/user-profile-default.jpeg';
+    event.target.src = 'assets/svg/user_icon.svg';
   }
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {

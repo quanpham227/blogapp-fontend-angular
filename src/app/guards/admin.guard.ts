@@ -5,6 +5,8 @@ import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { UserResponse } from '../responses/user/user.response';
 import { Roles } from '../enums/roles.enum';
+import { Observable, of } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -15,29 +17,30 @@ export class AdminGuard {
     private authService: AuthService,
   ) {}
 
-  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    console.log('Current route:', next.routeConfig?.path);
-
+  canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     const isPublicRoute = next.routeConfig?.path === 'login' || next.routeConfig?.path === 'register';
 
     if (isPublicRoute) {
-      return true;
+      return of(true);
     }
 
-    const token = this.authService.getAccessToken();
-    const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
-    const userResponse: UserResponse | null = this.authService.getUser();
-    const isAdminOrModerator = userResponse?.role?.name === Roles.ADMIN || userResponse?.role?.name === Roles.MODERATOR;
+    return this.authService.token$.pipe(
+      take(1),
+      map((token) => {
+        const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
+        const userResponse: UserResponse | null = this.authService.getUser();
 
-    if (!isTokenExpired && isAdminOrModerator) {
-      return true;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
-    }
+        if (!isTokenExpired && userResponse) {
+          return true;
+        } else {
+          this.router.navigate(['/login']);
+          return false;
+        }
+      }),
+    );
   }
 }
 
-export const AdminGuardFn: CanActivateFn = (next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean => {
+export const AdminGuardFn: CanActivateFn = (next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> => {
   return inject(AdminGuard).canActivate(next, state);
 };

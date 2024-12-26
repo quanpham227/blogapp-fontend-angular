@@ -52,11 +52,7 @@
       </a>
     </li>
     <li class="sidebar-admin__nav-item">
-      <a
-        class="sidebar-admin__nav-link"
-        [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'emails' }"
-        (click)="showAdminComponent('emails')"
-      >
+      <a class="sidebar-admin__nav-link" [ngClass]="{ 'sidebar-admin__nav-link--active': activeComponent === 'emails' }">
         <i class="fas fa-envelope"></i>
         <span>Hộp thư của tôi</span>
       </a>

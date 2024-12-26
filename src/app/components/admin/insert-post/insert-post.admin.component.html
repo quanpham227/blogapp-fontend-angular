@@ -256,7 +256,13 @@
                   <!-- Kiểm tra nếu có ảnh hay không -->
                   <ng-container *ngIf="selectedThumbnailUrl; else noImage">
                     <!-- Hiển thị ảnh nếu đã chọn -->
-                    <img [src]="selectedThumbnailUrl" alt="Ảnh minh họa" class="sidebar__thumbnail-img" (click)="openImageDialog()" />
+                    <img
+                      [src]="selectedThumbnailUrl"
+                      loading="lazy"
+                      alt="Ảnh minh họa"
+                      class="sidebar__thumbnail-img"
+                      (click)="openImageDialog()"
+                    />
                     <p class="sidebar__thumbnail-description">Nhấn vào ảnh để sửa hoặc cập nhật</p>
                     <a class="sidebar__thumbnail-remove" (click)="removeThumbnail()">Xóa ảnh đại diện</a>
                   </ng-container>

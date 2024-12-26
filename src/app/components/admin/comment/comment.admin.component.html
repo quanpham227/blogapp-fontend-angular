@@ -30,7 +30,13 @@
       <div *ngFor="let comment of comments; trackBy: trackByCommentId" class="comment__card">
         <div class="comment__header">
           <div class="comment__header-user">
-            <img [src]="comment.profileImage" (error)="handleImageError($event)" alt="User Avatar" class="comment__header-avatar" />
+            <img
+              [src]="comment.profileImage"
+              loading="lazy"
+              (error)="handleImageError($event)"
+              alt="User Avatar"
+              class="comment__header-avatar"
+            />
             <div class="comment__header-details">
               <h4>{{ comment.fullName }}</h4>
               <span class="comment__header-date">{{ comment.createdAt | date: 'medium' }}</span>

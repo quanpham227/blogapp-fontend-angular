@@ -75,7 +75,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       retypePassword: this.registerForm.value.confirmPassword,
       facebookAccountId: '',
       googleAccountId: '',
-      roleId: 2,
+      roleId: 3,
     };
 
     this.userService

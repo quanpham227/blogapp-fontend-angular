@@ -7,7 +7,7 @@
   <div class="admin-slide__list" cdkDropList (cdkDropListDropped)="drop($event)">
     <div class="admin-slide__item" *ngFor="let slide of slides; trackBy: trackById" cdkDrag>
       <div class="admin-slide__thumbnail">
-        <img [src]="slide.imageUrl" [alt]="slide.title" />
+        <img [src]="slide.imageUrl" loading="lazy" [alt]="slide.title" />
       </div>
       <div class="admin-slide__content">
         <h3>{{ slide.title }}</h3>
@@ -55,7 +55,7 @@
             <label for="image">Image*</label>
             <div class="admin-slide__image-container">
               <div class="admin-slide__image-preview" *ngIf="imagePreview">
-                <img [src]="imagePreview" alt="Preview" />
+                <img [src]="imagePreview" loading="lazy" alt="Preview" />
               </div>
               <button type="button" class="admin-slide__select-btn" (click)="openImageSelectDialog()">Select Image</button>
             </div>

@@ -13,9 +13,9 @@ export class ApiResponseInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!environment.production) {
-      console.log(`HTTP Request: ${req.method} ${req.url}`); // Log thông tin yêu cầu HTTP trong môi trường phát triển
-    }
+    // if (!environment.production) {
+    //   console.log(`HTTP Request: ${req.method} ${req.url}`); // Log thông tin yêu cầu HTTP trong môi trường phát triển
+    // }
 
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {

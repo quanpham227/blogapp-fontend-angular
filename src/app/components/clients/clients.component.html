@@ -8,7 +8,7 @@
     <div class="clients__slider swiper">
       <div class="clients__swiper-wrapper swiper-wrapper">
         <div class="clients__swiper-slide swiper-slide" *ngFor="let client of clients">
-          <img [src]="client.logo" class="clients__img img-fluid" [alt]="client.name" />
+          <img [src]="client.logo" loading="lazy" class="clients__img img-fluid" [alt]="client.name || 'Default Client'" />
         </div>
       </div>
       <div class="clients__swiper-pagination swiper-pagination"></div>

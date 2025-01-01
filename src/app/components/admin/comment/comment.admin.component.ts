@@ -16,14 +16,13 @@ import { CommentListResponse } from '../../../responses/comment/comment-list-res
 import { ApiResponse } from '../../../models/response';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
 import { CustomPaginationComponent } from '../../common/custom-pagination/custom-pagination.component';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { AuthService } from '../../../services/auth.service';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
   selector: 'comment-admin',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterModule, FlexLayoutModule, CustomPaginationComponent],
+  imports: [FormsModule, CommonModule, RouterModule, CustomPaginationComponent],
   templateUrl: './comment.admin.component.html',
   styleUrls: ['./comment.admin.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -93,13 +92,15 @@ export class CommentAdminComponent implements OnInit {
       )
       .subscribe({
         next: (response: ApiResponse<CommentListResponse>) => {
-          if (response.status === 'OK' && response.data) {
-            const newComments = response.data.comments;
-            if (!isEqual(this.comments, newComments)) {
-              this.comments = newComments;
-              this.commentsCache.next(newComments);
-              this.totalPages = response.data.totalPages;
-              this.cdr.markForCheck();
+          if (response.status === Status.OK) {
+            if (response.data) {
+              const newComments = response.data.comments;
+              if (!isEqual(this.comments, newComments)) {
+                this.comments = newComments;
+                this.commentsCache.next(newComments);
+                this.totalPages = response.data.totalPages;
+                this.cdr.markForCheck();
+              }
             }
           }
         },
@@ -188,7 +189,7 @@ export class CommentAdminComponent implements OnInit {
               .pipe(untilDestroyed(this))
               .subscribe({
                 next: (response: ApiResponse<void>) => {
-                  if (response.status === 'OK') {
+                  if (response.status === Status.OK) {
                     this.getComments();
                     this.cdr.markForCheck();
                   }
@@ -240,13 +241,13 @@ export class CommentAdminComponent implements OnInit {
         };
         this.commentService.editComment(result.id, updateCommentDTO).subscribe({
           next: (response) => {
-            if (response.status === 'OK') {
+            if (response.status === Status.OK) {
               this.getComments();
               this.cdr.markForCheck();
             }
           },
           error: (err) => {
-            this.snackBar.show('Failed to update comment');
+            this.cdr.markForCheck();
           },
         });
       }

@@ -20,6 +20,8 @@ import { ApiResponse } from '../../../models/response';
 import { PostListResponse } from '../../../responses/post/post-list-response';
 import isEqual from 'lodash-es/isEqual';
 import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -28,7 +30,7 @@ import { LazyLoadDirective } from '../../../directives/lazy-load.directive';
   styleUrls: ['./post.admin.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterModule, CustomPaginationComponent, LazyLoadDirective],
+  imports: [FormsModule, CommonModule, RouterModule, CustomPaginationComponent, MatTooltipModule, LazyLoadDirective],
 })
 export class PostAdminComponent implements OnInit {
   posts: Post[] = [];
@@ -99,12 +101,14 @@ export class PostAdminComponent implements OnInit {
       )
       .subscribe({
         next: (response: ApiResponse<PostListResponse>) => {
-          if (response.status === 'OK' && response.data) {
-            const newPosts = response.data.posts;
-            if (!isEqual(this.posts, newPosts)) {
-              this.posts = newPosts;
-              this.totalPages = response.data.totalPages;
-              this.cdr.markForCheck(); // Inform Angular to check for changes
+          if (response.status === Status.OK) {
+            if (response.data) {
+              const newPosts = response.data.posts;
+              if (!isEqual(this.posts, newPosts)) {
+                this.posts = newPosts;
+                this.totalPages = response.data.totalPages;
+                this.cdr.markForCheck(); // Inform Angular to check for changes
+              }
             }
           }
         },
@@ -120,13 +124,18 @@ export class PostAdminComponent implements OnInit {
       )
       .subscribe({
         next: (response: ApiResponse<Category[]>) => {
-          if (response.status === 'OK' && response.data) {
-            const newCategories = response.data;
-            if (!isEqual(this.categories, newCategories)) {
-              this.categories = newCategories;
-              this.cdr.markForCheck(); // Inform Angular to check for changes
+          if (response.status === Status.OK && response.data) {
+            if (response.data) {
+              const newCategories = response.data;
+              if (!isEqual(this.categories, newCategories)) {
+                this.categories = newCategories;
+                this.cdr.markForCheck(); // Inform Angular to check for changes
+              }
             }
           }
+        },
+        error: (error) => {
+          this.cdr.markForCheck();
         },
       });
   }
@@ -249,13 +258,13 @@ export class PostAdminComponent implements OnInit {
               .pipe(untilDestroyed(this))
               .subscribe({
                 next: (response: ApiResponse<void>) => {
-                  if (response.status === 'OK' || response.status === 'DELETED' || response.status === 'DISABLED') {
+                  if (response.status === Status.OK) {
                     this.getPosts();
                     this.cdr.markForCheck();
                   }
                 },
                 error: (error) => {
-                  console.error('Error deleting or disabling post:', error);
+                  this.snackBar.show('Failed to delete post');
                 },
               });
           }

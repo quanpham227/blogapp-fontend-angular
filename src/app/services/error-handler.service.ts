@@ -1,73 +1,90 @@
 import { Injectable } from '@angular/core';
-import { ToasterService } from './toaster.service';
-import { Observable, throwError } from 'rxjs';
 import { SnackbarService } from './snackbar.service';
+import { LoggingService } from './logging.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
+@Injectable({
+  providedIn: 'root',
+})
 export class GlobalErrorHandler {
+  private isErrorLogged = false;
+
   constructor(
-    private toasterService: ToasterService,
     private snackBarService: SnackbarService,
+    private loggingService: LoggingService,
+    private authService: AuthService,
   ) {}
 
-  handleError(error: any): Observable<never> {
-    // Kiểm tra kết nối internet
-    if (error.status === 0 || !navigator.onLine) {
-      this.snackBarService.show('Không có kết nối internet. Vui lòng kiểm tra lại.');
-      return throwError(() => new Error('Không có kết nối internet.'));
+  handleError(error: any): void {
+    // Kiểm tra nếu là lỗi do hết hạn token, không hiển thị thông báo đăng nhập lại
+    const token = this.authService.getAccessToken();
+    if (error.status === 401 && token && this.authService.isTokenExpired(token)) {
+      return; // Nếu token hết hạn, không cần hiển thị thông báo đăng nhập lại
     }
 
-    // Ưu tiên hiển thị thông báo lỗi từ server, nếu không có thì hiển thị thông báo mặc định
-    const errorMessage = error?.error?.message || error?.message || 'Đã xảy ra lỗi không mong muốn, vui lòng thử lại sau.';
+    // Kiểm tra lỗi mạng hoặc không có kết nối internet
+    if (error.status === 0 || !navigator.onLine) {
+      this.snackBarService.show('Không có kết nối internet. Vui lòng kiểm tra lại.');
+      return;
+    }
 
-    // Xử lý theo mã trạng thái HTTP
+    // Kiểm tra lỗi JSON không hợp lệ
+    if (error instanceof SyntaxError && error.message.includes('Unexpected token')) {
+      return;
+    }
+
+    // Kiểm tra lỗi mạng
+    if (error instanceof TypeError && error.message.includes('NetworkError')) {
+      this.snackBarService.show('Không thể kết nối với máy chủ. Vui lòng kiểm tra lại kết nối.');
+      return;
+    }
+
+    // Log lỗi (chỉ log một lần trong môi trường dev)
+    if (!this.isErrorLogged) {
+      this.isErrorLogged = true;
+      this.loggingService.logError('HTTP error occurred', error);
+    }
+
+    // Hiển thị thông báo lỗi cho người dùng theo mã lỗi HTTP
+    let errorMessage = 'Đã xảy ra lỗi không mong muốn.';
+    if (error?.error?.message) {
+      errorMessage = error.error.message;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+
     switch (error.status) {
       case 400:
-        this.snackBarService.show(errorMessage || 'Yêu cầu không hợp lệ.');
+        this.snackBarService.show('Yêu cầu không hợp lệ.');
         break;
       case 401:
-        this.snackBarService.show(errorMessage || 'Vui lòng đăng nhập lại.');
-        break;
-      case 402:
-        this.snackBarService.show(errorMessage || 'Yêu cầu thanh toán.');
+        this.snackBarService.show('Bạn cần đăng nhập lại.');
         break;
       case 403:
-        this.snackBarService.show(errorMessage || 'Bạn không có quyền truy cập vào tài nguyên này.');
+        this.snackBarService.show('Bạn không có quyền truy cập.');
         break;
       case 404:
-        this.snackBarService.show(errorMessage || 'Tài nguyên không tồn tại.');
-        break;
-      case 408:
-        this.snackBarService.show(errorMessage || 'Yêu cầu hết thời gian chờ.');
-        break;
-      case 429:
-        this.snackBarService.show(errorMessage || 'Quá nhiều yêu cầu trong một khoảng thời gian ngắn.');
-        break;
-      case 409:
-        this.snackBarService.show(errorMessage || 'Xung đột dữ liệu.');
+        this.snackBarService.show('Không tìm thấy tài nguyên.');
         break;
       case 500:
-        this.snackBarService.show(errorMessage || 'Đã xảy ra lỗi trên server. Vui lòng thử lại sau.');
+        this.snackBarService.show('Lỗi từ phía máy chủ. Vui lòng thử lại sau.');
         break;
       case 503:
-        this.snackBarService.show(errorMessage || 'Dịch vụ không khả dụng. Vui lòng thử lại sau.');
+        this.snackBarService.show('Dịch vụ không khả dụng. Vui lòng thử lại sau.');
         break;
       default:
         this.snackBarService.show(errorMessage);
         break;
     }
 
-    // Trả về Observable lỗi để các component khác có thể xử lý tiếp
-    return throwError(() => new Error(errorMessage));
+    // Reset trạng thái log lỗi sau 3 giây
+    setTimeout(() => (this.isErrorLogged = false), 3000);
   }
 
-  handleWarning(message: string): void {
-    this.toasterService.warning(message || 'Có một cảnh báo cần chú ý.');
-  }
-
-  handleInfo(message: string): void {
-    this.toasterService.info(message || 'Thông tin cập nhật.');
+  resetErrorLogState(): void {
+    this.isErrorLogged = false;
   }
 }

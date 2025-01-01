@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { LoadingSpinnerComponent } from '../../common/loading-spinner/loading-spinner.component';
 import { SnackbarService } from '../../../services/snackbar.service';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -63,8 +64,10 @@ export class ClientAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Client[]>) => {
-          if (response.status === 'OK' && response.data) {
-            this.clients = response.data;
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.clients = response.data;
+            }
           }
           this.cdr.markForCheck(); // Inform Angular to check for changes
         },
@@ -192,7 +195,7 @@ export class ClientAdminComponent implements OnInit {
             .pipe(untilDestroyed(this))
             .subscribe({
               next: (response: ApiResponse<void>) => {
-                if (response.status === 'OK') {
+                if (response.status === Status.OK) {
                   this.clients = this.clients.filter((client) => client.id !== id);
                   this.cdr.markForCheck(); // Inform Angular to check for changes
                 }
@@ -235,10 +238,12 @@ export class ClientAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Client>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.clients.push(response.data);
-            this.closeForm();
-            this.cdr.markForCheck(); // Inform Angular to check for changes
+          if (response.status === Status.CREATED) {
+            if (response.data) {
+              this.clients.push(response.data);
+              this.closeForm();
+              this.cdr.markForCheck(); // Inform Angular to check for changes
+            }
           }
         },
         error: (error) => {},
@@ -251,13 +256,15 @@ export class ClientAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Client>) => {
-          if (response.status === 'OK' || response.status === 'UPDATED') {
-            const index = this.clients.findIndex((s) => s.id === id);
-            if (index !== -1) {
-              this.clients[index] = response.data;
+          if (response.status === Status.OK) {
+            if (response.data) {
+              const index = this.clients.findIndex((s) => s.id === id);
+              if (index !== -1) {
+                this.clients[index] = response.data;
+              }
+              this.closeForm();
+              this.cdr.markForCheck(); // Inform Angular to check for changes
             }
-            this.closeForm();
-            this.cdr.markForCheck(); // Inform Angular to check for changes
           }
         },
         error: (error) => {

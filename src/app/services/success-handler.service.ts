@@ -11,9 +11,9 @@ export class SuccessHandlerService {
   handleApiResponse(response: ApiResponse<any>) {
     const successStatuses = [
       'OK',
-      'Created',
-      'Accepted',
-      'No Content',
+      'CREATED',
+      'ACCEPTED',
+      'NO CONTENT',
       'Non-Authoritative Information',
       'Reset Content',
       'Partial Content',

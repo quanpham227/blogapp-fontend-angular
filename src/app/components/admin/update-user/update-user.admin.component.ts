@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, 
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -11,12 +10,13 @@ import { distinctUntilChanged } from 'rxjs';
 import isEqual from 'lodash-es/isEqual';
 import { ApiResponse } from '../../../models/response';
 import { Role } from '../../../models/role';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
   selector: 'app-update-user',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, MatSnackBarModule, FlexLayoutModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, MatSnackBarModule],
   templateUrl: './update-user.admin.component.html',
   styleUrls: ['./update-user.admin.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -88,11 +88,13 @@ export class UpdateUserAdminComponent implements OnInit {
       )
       .subscribe({
         next: (response: ApiResponse<Role[]>) => {
-          if (response.status === 'OK' && response.data) {
-            const newRoles = response.data;
-            if (!isEqual(this.roles, newRoles)) {
-              this.roles = newRoles;
-              this.cdr.markForCheck();
+          if (response.status === Status.OK) {
+            if (response.data) {
+              const newRoles = response.data;
+              if (!isEqual(this.roles, newRoles)) {
+                this.roles = newRoles;
+                this.cdr.markForCheck();
+              }
             }
           }
         },

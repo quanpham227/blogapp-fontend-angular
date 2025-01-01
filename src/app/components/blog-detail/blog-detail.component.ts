@@ -15,6 +15,7 @@ import { CommentFormComponent } from '../common/comment-form/comment-form.compon
 import { noWhitespaceValidator } from '../../validators/validators'; // Adjust the import path accordingly
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { SnackbarService } from '../../services/snackbar.service';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -88,12 +89,14 @@ export class BlogDetailComponent implements OnInit {
   async getPostBySlug(slug: string) {
     try {
       const response = await firstValueFrom(this.postService.getPostBySlug(slug));
-      if (response.status === 'OK' && response.data) {
-        this.post = response.data;
-        this.postId = this.post.id;
-        this.updateMetaTags(this.post);
-        this.initializeComments(this.currentPage, this.pageSize); // Gọi sau khi có postId
-        this.cdr.markForCheck();
+      if (response.status === Status.OK) {
+        if (response.data) {
+          this.post = response.data;
+          this.postId = this.post.id;
+          this.updateMetaTags(this.post);
+          this.initializeComments(this.currentPage, this.pageSize); // Gọi sau khi có postId
+          this.cdr.markForCheck();
+        }
       } else {
         this.snackBarService.show('Failed to load post.');
       }
@@ -109,7 +112,7 @@ export class BlogDetailComponent implements OnInit {
       .getCommentsByPostId(this.postId, page, size)
       .pipe(
         map((response: ApiResponse<CommentResponse[]>) => {
-          if (response.status === 'OK' && response.data) {
+          if (response.status === Status.OK && response.data) {
             this.comments = [...this.comments, ...response.data];
             this.comments$.next(this.comments); // Emit the new value
             this.hasMoreComments = response.data.length === size;
@@ -221,17 +224,19 @@ export class BlogDetailComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<CommentResponse>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            // Update the comments array immutably
-            this.comments = [response.data, ...this.comments];
-            // Emit the new value
-            this.comments$.next(this.comments);
-            // Update the comment count
-            if (this.post) {
-              this.post.commentCount++;
+          if (response.status === Status.CREATED) {
+            if (response.data) {
+              // Update the comments array immutably
+              this.comments = [response.data, ...this.comments];
+              // Emit the new value
+              this.comments$.next(this.comments);
+              // Update the comment count
+              if (this.post) {
+                this.post.commentCount++;
+              }
+              // Trigger change detection manually
+              this.cdr.markForCheck();
             }
-            // Trigger change detection manually
-            this.cdr.markForCheck();
           }
 
           // Reset the form and toggle the comment form
@@ -259,28 +264,30 @@ export class BlogDetailComponent implements OnInit {
       )
       .subscribe({
         next: (response: ApiResponse<CommentResponse>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            const parentCommentIndex = this.comments.findIndex((comment) => comment.id === commentId);
-            if (parentCommentIndex !== -1) {
-              const parentComment = this.comments[parentCommentIndex];
-              const updatedReplies = [response.data, ...(parentComment.replies || [])]; // Add the new reply at the beginning
-              const updatedComment = {
-                ...parentComment,
-                replies: updatedReplies,
-              };
-              this.comments = [
-                ...this.comments.slice(0, parentCommentIndex),
-                updatedComment,
-                ...this.comments.slice(parentCommentIndex + 1),
-              ];
-              // Emit the new value
-              this.comments$.next(this.comments);
-              // Update the comment count
-              if (this.post) {
-                this.post.commentCount++;
+          if (response.status === Status.CREATED) {
+            if (response.data) {
+              const parentCommentIndex = this.comments.findIndex((comment) => comment.id === commentId);
+              if (parentCommentIndex !== -1) {
+                const parentComment = this.comments[parentCommentIndex];
+                const updatedReplies = [response.data, ...(parentComment.replies || [])]; // Add the new reply at the beginning
+                const updatedComment = {
+                  ...parentComment,
+                  replies: updatedReplies,
+                };
+                this.comments = [
+                  ...this.comments.slice(0, parentCommentIndex),
+                  updatedComment,
+                  ...this.comments.slice(parentCommentIndex + 1),
+                ];
+                // Emit the new value
+                this.comments$.next(this.comments);
+                // Update the comment count
+                if (this.post) {
+                  this.post.commentCount++;
+                }
+                // Trigger change detection manually
+                this.cdr.markForCheck();
               }
-              // Trigger change detection manually
-              this.cdr.markForCheck();
             }
           }
           this.toggleReplyForm(commentId);

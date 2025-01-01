@@ -53,6 +53,23 @@
       }
     }
 
+    &-group--row {
+      display: flex;
+      gap: 10px;
+    }
+
+    &-group--flex-70 {
+      flex: 1 1 70%;
+    }
+
+    &-group--flex-30 {
+      flex: 1 1 30%;
+    }
+
+    &-group--flex-50 {
+      flex: 1 1 50%;
+    }
+
     &-group-relative {
       position: relative;
 

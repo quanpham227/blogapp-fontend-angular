@@ -14,28 +14,19 @@ import { Router, NavigationExtras } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ImageSelectDialogAdminComponent } from '../shared/image-select-dialog/image-select-dialog.component';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BehaviorSubject } from 'rxjs';
 import { PostEnumService } from '../../../utils/post-enum.service';
 import { SnackbarService } from '../../../services/snackbar.service';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
-  selector: 'app-insert-post-admin',
+  selector: 'app-insert-post-adm in',
   standalone: true,
-  imports: [
-    TinymceEditorComponent,
-    FlexLayoutModule,
-    MatTooltipModule,
-    MatSnackBarModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-  ],
+  imports: [TinymceEditorComponent, MatTooltipModule, MatSnackBarModule, CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule],
   templateUrl: './insert-post.admin.component.html',
   styleUrls: ['./insert-post.admin.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,7 +89,7 @@ export class InsertPostAdminComponent implements OnInit {
       }),
       status: [this.postEnumService.getPostStatus().Published, Validators.required],
       visibility: [this.postEnumService.getPostVisibility().Public, Validators.required],
-      tags: [[], [nonEmptyTagsValidator(), maxTagsValidator(5)]],
+      tags: [[], [maxTagsValidator(5)]],
       thumbnail: [null, Validators.required],
       publicId: [null, Validators.required],
     });
@@ -235,9 +226,11 @@ export class InsertPostAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Category[]>) => {
-          if (response.status === 'OK' && response.data) {
-            this.categoriesSubject.next(response.data);
-            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.categoriesSubject.next(response.data);
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            }
           }
         },
       });
@@ -252,9 +245,11 @@ export class InsertPostAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Category[]>) => {
-          if (response.status === 'OK' && response.data) {
-            this.topCategoriesSubject.next(response.data);
-            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.topCategoriesSubject.next(response.data);
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            }
           }
         },
       });
@@ -284,13 +279,18 @@ export class InsertPostAdminComponent implements OnInit {
         .pipe(untilDestroyed(this))
         .subscribe({
           next: (response: ApiResponse<Category>) => {
-            if (response.status === 'OK' || response.status === 'CREATED') {
-              this.loadCategories(true);
-              this.loadTopCategories(true);
-              this.toggleAddCategory();
-              this.newCategoryNameControl.reset();
-              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            if (response.status === Status.CREATED) {
+              if (response.data) {
+                this.loadCategories(true);
+                this.loadTopCategories(true);
+                this.toggleAddCategory();
+                this.newCategoryNameControl.reset();
+                this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+              }
             }
+          },
+          error: (error) => {
+            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
           },
         });
     } else {
@@ -314,15 +314,17 @@ export class InsertPostAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Post>) => {
-          if (response.status === 'CREATED' || response.status === 'OK') {
-            const navigationExtras: NavigationExtras = {
-              state: { message: response.message },
-            };
-            setTimeout(() => {
-              this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
-                this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
-              });
-            }, 3000);
+          if (response.status === Status.CREATED) {
+            if (response.data) {
+              const navigationExtras: NavigationExtras = {
+                state: { message: response.message },
+              };
+              setTimeout(() => {
+                this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
+                  this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+                });
+              }, 3000);
+            }
           } else {
             this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
           }

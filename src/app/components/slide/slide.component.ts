@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SlideService } from '../../services/slide.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { ApiResponse } from '../../models/response';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -23,10 +25,7 @@ export class SlideComponent implements OnInit, AfterViewInit {
     { imageUrl: 'https://res.cloudinary.com/damphlbsi/image/upload/v1726736214/blogapp/slides/rh6nvmxmr6hmv8zk9cdl.jpg' },
     { imageUrl: 'https://res.cloudinary.com/damphlbsi/image/upload/v1726736194/blogapp/slides/eicbzthcl0vptudmy02d.jpg' },
   ];
-  constructor(
-    private slideService: SlideService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+  constructor(private slideService: SlideService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.getSlides();
@@ -65,13 +64,15 @@ export class SlideComponent implements OnInit, AfterViewInit {
       .getActiveSlidesForUser()
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (response: any) => {
-          this.slides = response.data.length > 0 ? response.data : this.defaultSlides;
-          this.isLoading = false;
-          this.cdr.detectChanges();
-          setTimeout(() => {
-            this.initSwiperSlides();
-          }, 0);
+        next: (response: ApiResponse<Slide[]>) => {
+          if (response.status === Status.OK && response.data) {
+            this.slides = response.data;
+            this.isLoading = false;
+            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.initSwiperSlides();
+            }, 0);
+          }
         },
         error: (error: any) => {
           this.isLoading = false;

@@ -58,7 +58,7 @@ export class PostService {
   }
 
   getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number): Observable<ApiResponse<PostListResponse>> {
-    let params = new HttpParams()
+    const params = new HttpParams()
       .set('keyword', keyword)
       .set('categorySlug', categorySlug)
       .set('page', page.toString())
@@ -132,7 +132,7 @@ export class PostService {
   }
 
   getPostById(id: number): Observable<ApiResponse<Post>> {
-    return this.http.get<ApiResponse<Post>>(`${this.apiAdminPosts}/details/${id}`).pipe(
+    return this.http.get<ApiResponse<Post>>(`${this.apiAdminPosts}/${id}`).pipe(
       map((response) => {
         if (response && response.data) {
           response.data = convertToCamelCase(response.data);
@@ -142,7 +142,7 @@ export class PostService {
     );
   }
   deleteOrDisablePost(id: number, isPermanent: boolean): Observable<ApiResponse<any>> {
-    const url = `${this.apiAdminPosts}/disable/${id}/${isPermanent}`;
+    const url = `${this.apiAdminPosts}/${id}?isPermanent=${isPermanent}`;
     return this.http.delete<ApiResponse<any>>(url).pipe(tap((response) => this.successHandlerService.handleApiResponse(response)));
   }
 }

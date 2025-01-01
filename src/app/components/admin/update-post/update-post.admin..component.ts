@@ -14,7 +14,6 @@ import { Router, NavigationExtras, ActivatedRoute } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ImageSelectDialogAdminComponent } from '../shared/image-select-dialog/image-select-dialog.component';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -24,20 +23,12 @@ import { SnackbarService } from '../../../services/snackbar.service';
 import { MessageService } from '../../../services/message.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
 import { SharedDataService } from '../../../services/help-text.service';
+import { Status } from '../../../enums/status.enum';
 @UntilDestroy()
 @Component({
   selector: 'app-update-post-admin',
   standalone: true,
-  imports: [
-    TinymceEditorComponent,
-    FlexLayoutModule,
-    MatTooltipModule,
-    MatSnackBarModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-  ],
+  imports: [TinymceEditorComponent, MatTooltipModule, MatSnackBarModule, CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule],
   templateUrl: './update-post.admin..component.html',
   styleUrls: ['./update-post.admin..component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -114,7 +105,7 @@ export class UpdatePostAdminComponent implements OnInit {
       }),
       status: [this.postEnumService.getPostStatus().Published, Validators.required],
       visibility: [this.postEnumService.getPostVisibility().Public, Validators.required],
-      tags: [[], [nonEmptyTagsValidator(), maxTagsValidator(5)]],
+      tags: [[], [maxTagsValidator(5)]],
       thumbnail: [null],
       publicId: [null],
     });
@@ -133,32 +124,35 @@ export class UpdatePostAdminComponent implements OnInit {
     });
   }
   getPostById(postId: number): void {
+    console.log(postId);
     this.postService
       .getPostById(postId)
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Post>) => {
-          if (response.status === 'OK' && response.data) {
-            this.post = response.data;
-            const { title, content, category, status, visibility, revisionCount, tags, thumbnailUrl, publicId, authorName, updatedAt } =
-              this.post;
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.post = response.data;
+              const { title, content, category, status, visibility, revisionCount, tags, thumbnailUrl, publicId, authorName, updatedAt } =
+                this.post;
 
-            this.postForm.patchValue({
-              title,
-              content,
-              category: { categoryId: category.id },
-              status,
-              visibility,
-              revisionCount,
-              tags: tags.map((tag) => tag.name),
-              thumbnail: thumbnailUrl,
-              publicId,
-            });
+              this.postForm.patchValue({
+                title,
+                content,
+                category: { categoryId: category.id },
+                status,
+                visibility,
+                revisionCount,
+                tags: tags.map((tag) => tag.name),
+                thumbnail: thumbnailUrl,
+                publicId,
+              });
 
-            this.selectedThumbnailUrl = thumbnailUrl;
-            this.tags = tags.map((tag) => tag.name);
-            this.updateHelpText(authorName, updatedAt);
-            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+              this.selectedThumbnailUrl = thumbnailUrl;
+              this.tags = tags.map((tag) => tag.name);
+              this.updateHelpText(authorName, updatedAt);
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            }
           }
         },
       });
@@ -180,9 +174,11 @@ export class UpdatePostAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Category[]>) => {
-          if (response.status === 'OK' && response.data) {
-            this.categoriesSubject.next(response.data);
-            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.categoriesSubject.next(response.data);
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            }
           }
         },
       });
@@ -197,9 +193,11 @@ export class UpdatePostAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Category[]>) => {
-          if (response.status === 'OK' && response.data) {
-            this.topCategoriesSubject.next(response.data);
-            this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.topCategoriesSubject.next(response.data);
+              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            }
           }
         },
       });
@@ -275,12 +273,14 @@ export class UpdatePostAdminComponent implements OnInit {
         .pipe(untilDestroyed(this))
         .subscribe({
           next: (response: ApiResponse<Category>) => {
-            if (response.status === 'OK' || response.status === 'CREATED') {
-              this.loadCategories(true);
-              this.loadTopCategories(true);
-              this.toggleAddCategory();
-              this.newCategoryNameControl.reset();
-              this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+            if (response.status === Status.CREATED) {
+              if (response.data) {
+                this.loadCategories(true);
+                this.loadTopCategories(true);
+                this.toggleAddCategory();
+                this.newCategoryNameControl.reset();
+                this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+              }
             }
           },
         });
@@ -305,15 +305,17 @@ export class UpdatePostAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Post>) => {
-          if (response.status === 'CREATE' || response.status === 'OK') {
-            const navigationExtras: NavigationExtras = {
-              state: { message: response.message },
-            };
-            setTimeout(() => {
-              this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
-                this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
-              });
-            }, 3000);
+          if (response.status === Status.OK) {
+            if (response.data) {
+              const navigationExtras: NavigationExtras = {
+                state: { message: response.message },
+              };
+              setTimeout(() => {
+                this.router.navigate(['/admin/posts'], navigationExtras).then(() => {
+                  this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
+                });
+              }, 3000);
+            }
           } else {
             this.cdr.markForCheck(); // Đánh dấu để kiểm tra thay đổi
           }
@@ -354,7 +356,7 @@ export class UpdatePostAdminComponent implements OnInit {
             .pipe(untilDestroyed(this))
             .subscribe({
               next: (response: ApiResponse<void>) => {
-                if (response.status === 'OK' || response.status === 'DELETED') {
+                if (response.status === Status.OK) {
                   this.messageService.setMessage(response.message);
                   setTimeout(() => {
                     this.router.navigate(['/admin/posts']).then(() => {});

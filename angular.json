@@ -15,11 +15,14 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "customWebpackConfig": {
+              "path": "./webpack.config.js"
+            },
             "outputPath": "dist/blogapp-fontend",
             "index": "src/index.html",
-            "browser": "src/main.ts",
+            "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -93,18 +96,35 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "webpack-debug": {
+              "customWebpackConfig": {
+                "path": "./webpack.config.js"
+              },
+              "optimization": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "extractLicenses": false,
+              "vendorChunk": true,
+              "buildOptimizer": false
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "blogapp-fontend:build"
+          },
           "configurations": {
             "production": {
               "buildTarget": "blogapp-fontend:build:production"
             },
             "development": {
               "buildTarget": "blogapp-fontend:build:development"
+            },
+            "webpack-debug": {
+              "buildTarget": "blogapp-fontend:build:webpack-debug"
             }
           },
           "defaultConfiguration": "development"

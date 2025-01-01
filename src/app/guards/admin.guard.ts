@@ -12,10 +12,7 @@ import { map, take } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class AdminGuard {
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-  ) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     const isPublicRoute = next.routeConfig?.path === 'login' || next.routeConfig?.path === 'register';
@@ -30,9 +27,10 @@ export class AdminGuard {
         const isTokenExpired = token ? this.authService.isTokenExpired(token) : true;
         const userResponse: UserResponse | null = this.authService.getUser();
 
-        if (!isTokenExpired && userResponse) {
+        if (!isTokenExpired && userResponse && (userResponse.role.name === Roles.ADMIN || userResponse.role.name === Roles.MODERATOR)) {
           return true;
         } else {
+          this.authService.clearAuthData();
           this.router.navigate(['/login']);
           return false;
         }

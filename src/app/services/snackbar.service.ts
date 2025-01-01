@@ -19,6 +19,7 @@ export class SnackbarService {
       verticalPosition,
     });
   }
+
   success(
     message: string,
     duration: number = 5000,

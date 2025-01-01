@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Chart, ChartConfiguration, ChartOptions, registerables } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 import { DashboardService } from '../../../services/dashboard.service';
 import { Dashboard } from '../../../models/dashboard';
 import { Post } from '../../../models/post';
@@ -21,7 +21,15 @@ Chart.register(...registerables);
   templateUrl: './dashboard.admin.component.html',
   styleUrls: ['./dashboard.admin.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatGridListModule, MatListModule, MatSlideToggleModule, BaseChartDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatGridListModule,
+    MatListModule,
+    MatSlideToggleModule,
+    NgChartsModule, // Thêm NgChartsModule vào đây
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardAdminComponent implements OnInit {
@@ -97,11 +105,7 @@ export class DashboardAdminComponent implements OnInit {
     },
   };
 
-  constructor(
-    private dashboardService: DashboardService,
-    private cdr: ChangeDetectorRef,
-    private snackbar: SnackbarService,
-  ) {}
+  constructor(private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private snackbar: SnackbarService) {}
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -131,8 +135,14 @@ export class DashboardAdminComponent implements OnInit {
 
     // Cập nhật dữ liệu biểu đồ
     this.pageViewsChartData.datasets[0].data = data.pageViewsPerDayLastWeek || [];
-    // this.engagementChartData.datasets[0].data = [data.likes || 0, data.shares || 0, data.comments || 0];
     this.commentsChartData.datasets[0].data = data.commentsPerDayLastWeek || [];
+
+    // Giả lập dữ liệu cho biểu đồ User Engagement
+    const likes = Math.floor(Math.random() * 100); // Giả lập số lượng likes ngẫu nhiên
+    const shares = Math.floor(Math.random() * 50); // Giả lập số lượng shares ngẫu nhiên
+    const comments = Math.floor(Math.random() * 30); // Giả lập số lượng comments ngẫu nhiên
+
+    this.engagementChartData.datasets[0].data = [likes, shares, comments];
 
     this.cdr.markForCheck();
   }

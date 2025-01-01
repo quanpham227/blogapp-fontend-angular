@@ -18,9 +18,6 @@ import { ApiResponseInterceptor } from './interceptors/api-response.interceptor'
 import { NewlinePipe } from './pipes/newline.pipe';
 import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 import { Location } from '@angular/common';
-import { provideStore } from '@ngrx/store';
-import { provideEffects } from '@ngrx/effects';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
 
 const tokenInterceptorProvider: Provider = {
   provide: HTTP_INTERCEPTORS,
@@ -69,8 +66,5 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom(LoadingBarHttpClientModule),
     importProvidersFrom(LoadingBarRouterModule),
     provideAnimationsAsync(),
-    provideStore(),
-    provideEffects(),
-    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
   ],
 };

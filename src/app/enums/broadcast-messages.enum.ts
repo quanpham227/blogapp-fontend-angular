@@ -1,4 +1,5 @@
 export enum BroadcastMessages {
   LOGOUT = 'LOGOUT',
-  TOKEN_UPDATE = 'TOKEN_UPDATE',
+  SET_TOKEN = 'SET_TOKEN',
+  SET_USER = 'SET_USER',
 }

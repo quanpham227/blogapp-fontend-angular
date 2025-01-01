@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { UserService } from '../../services/user.service';
 import { UserDetailService } from '../../services/user.details';
 import { LoginResponse } from '../../responses/user/login.response';
 import { UserResponse } from './../../responses/user/user.response';
@@ -14,6 +13,7 @@ import { emailOrPhoneValidator } from '../../validators/validators';
 import { SnackbarService } from '../../services/snackbar.service';
 import { LoginType } from '../../enums/login.type';
 import { ApiResponse } from '../../models/response';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -74,10 +74,6 @@ export class LoginComponent implements OnInit {
 
   login() {
     if (this.loginForm.invalid) return;
-    const existingToken = this.authService.getAccessToken();
-    if (existingToken) {
-      this.authService.clearPreviousSession(); // Xóa token cũ trước khi đăng nhập lại
-    }
 
     this.isLoading = true;
     const loginDTO = this.loginForm.value;
@@ -91,8 +87,7 @@ export class LoginComponent implements OnInit {
       )
       .subscribe({
         next: (response: LoginResponse) => {
-          debugger;
-          if (response.status == 'OK' && response.data) {
+          if (response.status == Status.OK && response.data) {
             this.getUserDetails(response.data.token);
           }
         },
@@ -109,7 +104,7 @@ export class LoginComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<UserResponse>) => {
-          if (response.status == 'OK' && response.data) {
+          if (response.status == Status.OK && response.data) {
             this.userResponse = response.data;
             this.authService.setUser(this.userResponse ?? null);
             this.authService.navigateToDashboard(this.userResponse ?? null); // Sử dụng toán tử ?? để đảm bảo giá trị không phải undefined

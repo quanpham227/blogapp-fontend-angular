@@ -11,6 +11,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { SnackbarService } from '../../../services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -57,12 +58,20 @@ export class AchievementAdminComponent implements OnInit {
     this.achievementService
       .getAchievementsForAdmin()
       .pipe(
-        map((response: ApiResponse<Achievement[]>) => response.data),
+        map((response: ApiResponse<Achievement[]>) => {
+          if (response.status === Status.OK) {
+            return response.data;
+          } else {
+            throw new Error('Failed to load achievements');
+          }
+        }),
         untilDestroyed(this),
       )
-      .subscribe((achievements: Achievement[]) => {
-        this.achievementsSubject.next(achievements);
-        this.cdr.markForCheck();
+      .subscribe((achievements: Achievement[] | null) => {
+        if (achievements) {
+          this.achievementsSubject.next(achievements);
+          this.cdr.markForCheck();
+        }
       });
   }
 
@@ -84,10 +93,12 @@ export class AchievementAdminComponent implements OnInit {
         .updateAchievement(this.editingId, achievement)
         .pipe(untilDestroyed(this))
         .subscribe((response: ApiResponse<Achievement>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.updateLocalAchievement(response.data);
-            this.closeForm();
-            this.cdr.markForCheck();
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.updateLocalAchievement(response.data);
+              this.closeForm();
+              this.cdr.markForCheck();
+            }
           }
         });
     } else {
@@ -95,10 +106,12 @@ export class AchievementAdminComponent implements OnInit {
         .createAchievement(achievement)
         .pipe(untilDestroyed(this))
         .subscribe((response: ApiResponse<Achievement>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.addLocalAchievement(response.data);
-            this.closeForm();
-            this.cdr.markForCheck();
+          if (response.status === Status.CREATED) {
+            if (response.data) {
+              this.addLocalAchievement(response.data);
+              this.closeForm();
+              this.cdr.markForCheck();
+            }
           }
         });
     }
@@ -143,7 +156,7 @@ export class AchievementAdminComponent implements OnInit {
             .deleteAchievement(id)
             .pipe(untilDestroyed(this))
             .subscribe((response: ApiResponse<void>) => {
-              if (response.status === 'OK') {
+              if (response.status === Status.OK) {
                 this.achievementsSubject.next(this.achievementsSubject.getValue().filter((a) => a.id !== id));
                 this.cdr.markForCheck(); // Inform Angular to check for changes
               }

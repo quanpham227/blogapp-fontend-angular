@@ -2,7 +2,6 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { About } from '../../models/about';
-import { Subject, takeUntil } from 'rxjs';
 import { AboutService } from '../../services/about.service';
 import { LoggingService } from '../../services/logging.service';
 import { NewlinePipe } from '../../pipes/newline.pipe';
@@ -11,6 +10,7 @@ import { EmailService } from '../../services/email.service.';
 import { ApiResponse } from '../../models/response';
 import { SuccessHandlerService } from '../../services/success-handler.service';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -63,7 +63,6 @@ export class ContactComponent implements OnInit {
         next: (response: ApiResponse<any>) => {
           this.contactForm.reset();
           this.cdr.markForCheck();
-          this.successDialogService.handleApiResponse(response);
         },
         error: (error: any) => {
           this.cdr.markForCheck();
@@ -76,11 +75,11 @@ export class ContactComponent implements OnInit {
       .getAbout()
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (response: any) => {
-          if (response && response.data) {
+        next: (response: ApiResponse<About>) => {
+          if (response.status === Status.OK && response.data) {
             this.about = response.data;
+            this.cdr.markForCheck();
           }
-          this.cdr.markForCheck();
         },
         error: (error: any) => {
           this.cdr.markForCheck();

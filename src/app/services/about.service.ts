@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { About } from '../models/about';
 import { ApiResponse } from '../models/response';
 import { environment } from '../../environments/environment';
-import { SuccessHandlerService } from './success-handler.service';
 import { map, tap } from 'rxjs/operators';
 import { convertToCamelCase, convertToSnakeCase } from '../utils/case-converter';
 import { SnackbarService } from './snackbar.service';
@@ -15,11 +14,7 @@ import { SnackbarService } from './snackbar.service';
 export class AboutService {
   private apiAbout = `${environment.apiBaseUrl}/about`;
 
-  constructor(
-    private http: HttpClient,
-    private successHandlerService: SuccessHandlerService,
-    private snackBarService: SnackbarService,
-  ) {}
+  constructor(private http: HttpClient, private snackBarService: SnackbarService) {}
 
   getAbout(): Observable<ApiResponse<About>> {
     return this.http.get<ApiResponse<About>>(this.apiAbout).pipe(
@@ -31,6 +26,7 @@ export class AboutService {
       }),
     );
   }
+
   updateAbout(id: number, about: About): Observable<ApiResponse<About>> {
     const snakeCaseAbout = convertToSnakeCase(about);
     return this.http

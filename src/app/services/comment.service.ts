@@ -40,7 +40,7 @@ export class CommentService {
 
   // Lấy danh sách bình luận theo postId
   getCommentsByPostId(postId: number, page: number, size: number): Observable<ApiResponse<CommentResponse[]>> {
-    let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    const params = new HttpParams().set('page', page.toString()).set('size', size.toString());
 
     return this.http.get<ApiResponse<CommentResponse[]>>(`${this.apiComments}/post/${postId}`, { params }).pipe(
       map((response) => {

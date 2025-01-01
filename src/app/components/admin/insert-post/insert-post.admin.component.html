@@ -1,281 +1,277 @@
 <form [formGroup]="postForm" (ngSubmit)="onSubmitPost()">
-  <div class="admin-add-post" fxLayout="column" fxLayout.lt-md="column" fxLayoutGap="10px">
-    <div fxFlex="100">
-      <h2 class="admin-add-post__title">Thêm bài viết</h2>
+  <div class="admin-add-post">
+    <div class="admin-add-post__header">
+      <h2 class="admin-add-post__header-title">Thêm bài viết</h2>
     </div>
-    <div fxLayout="row" fxLayout.lt-md="column" fxLayoutGap="10px">
-      <div fxFlex="75" fxFlex.lt-md="100">
-        <div class="main">
-          <input class="main__title" type="text" placeholder="Tiêu đề bài viết" formControlName="title" />
-          <div class="main__editor">
-            <app-tinymce-editor [editorConfig]="{ height: 900 }" formControlName="content"></app-tinymce-editor>
-          </div>
+    <div class="admin-add-post__content">
+      <div class="main">
+        <input class="main__title" type="text" placeholder="Tiêu đề bài viết" formControlName="title" />
+        <div class="main__editor">
+          <app-tinymce-editor [editorConfig]="{ height: 912 }" formControlName="content"></app-tinymce-editor>
         </div>
       </div>
-      <div fxFlex="25" fxFlex.lt-md="100">
-        <div class="sidebar">
-          <ng-container *ngFor="let card of cards; let i = index">
-            <div [ngSwitch]="card">
-              <div *ngSwitchCase="'category'" class="sidebar__category">
-                <div class="sidebar__category-header" (click)="toggleCardBody('category')">
-                  <h5 class="sidebar__category-header-title">Chuyên mục</h5>
-                  <div class="sidebar__category-header-controls">
-                    <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                    <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
-                    <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['category'] }"></i>
-                  </div>
-                </div>
-                <div class="sidebar__category-body" *ngIf="cardVisibility['category']">
-                  <ul class="category__tabs">
-                    <li class="category__tabs-tab" [class.active]="isCategoryTabActive('all')">
-                      <a class="category__tabs-link" (click)="setActiveCategoryTab('all')">Tất cả</a>
-                    </li>
-                    <li class="category__tabs-tab" [class.active]="isCategoryTabActive('popular')">
-                      <a class="category__tabs-link" (click)="setActiveCategoryTab('popular')">Dùng nhiều nhất</a>
-                    </li>
-                  </ul>
-                  <div class="category__content">
-                    <!-- "Tất cả" Tab Content -->
-                    <div *ngIf="isCategoryTabActive('all')" class="category__content-pane" formGroupName="category">
-                      <ul class="category__content-list">
-                        <li class="category__content-item" *ngFor="let category of categories$ | async">
-                          <label class="category__content-label">
-                            <input
-                              class="category__content-radio"
-                              type="radio"
-                              formControlName="categoryId"
-                              [value]="category.id"
-                              (click)="onCategoryChange(category.id)"
-                            />
-                            {{ category.name }}
-                          </label>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div *ngIf="isCategoryTabActive('popular')" class="category__content-pane" formGroupName="category">
-                      <ul class="category__content-list">
-                        <li class="category__content-item" *ngFor="let categoryTop of topCategories$ | async">
-                          <label class="category__content-label">
-                            <input
-                              class="category__content-radio"
-                              type="radio"
-                              formControlName="categoryId"
-                              [value]="categoryTop.id"
-                              (click)="onCategoryChange(categoryTop.id)"
-                            />
-                            {{ categoryTop.name }}
-                          </label>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div class="category__content-add">
-                      <button type="button" class="category__add-btn" (click)="toggleAddCategory()">+ Thêm chuyên mục</button>
-
-                      <div *ngIf="showAddCategory">
-                        <div class="category__add-input-wrapper">
-                          <input type="text" class="category__add-input" [formControl]="newCategoryNameControl" />
-                          <div *ngIf="newCategoryNameControl.invalid && newCategoryNameControl.touched" class="category__add-error-wrapper">
-                            <small class="category__add-error" *ngIf="newCategoryNameControl.errors?.['required']">
-                              Vui lòng nhập tên chuyên mục.
-                            </small>
-                            <small class="category__add-error" *ngIf="newCategoryNameControl.errors?.['minlength']">
-                              Tên chuyên mục phải có ít nhất 3 ký tự.
-                            </small>
-                            <small class="category__add-error" *ngIf="newCategoryNameControl.errors?.['maxlength']">
-                              Tên chuyên mục không được vượt quá 50 ký tự.
-                            </small>
-                          </div>
-                        </div>
-                        <select class="category__add-select">
-                          <option value="" disabled>— Chuyên mục hiện tại —</option>
-                          <option *ngFor="let category of categories$ | async" [value]="category.id">
-                            {{ category.name }}
-                          </option>
-                        </select>
-                        <button
-                          type="button"
-                          class="category__add-submit"
-                          (click)="addCategory()"
-                          [disabled]="newCategoryNameControl.invalid"
-                        >
-                          Thêm chuyên mục
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+      <div class="sidebar">
+        <ng-container *ngFor="let card of cards; let i = index">
+          <div [ngSwitch]="card">
+            <div *ngSwitchCase="'category'" class="sidebar__category">
+              <div class="sidebar__category-header" (click)="toggleCardBody('category')">
+                <h5 class="sidebar__category-header-title">Chuyên mục</h5>
+                <div class="sidebar__category-header-controls">
+                  <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['category'] }"></i>
                 </div>
               </div>
-              <div *ngSwitchCase="'publish'" class="sidebar__publish">
-                <div class="sidebar__publish-header" (click)="toggleCardBody('publish')">
-                  <h5 class="sidebar__publish-header-title">Xuất bản</h5>
-                  <div class="sidebar__publish-header-controls">
-                    <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                    <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
-                    <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['publish'] }"></i>
-                  </div>
-                </div>
-
-                <div *ngIf="cardVisibility['publish']" class="sidebar__publish-body">
-                  <div class="publish__status">
-                    <span *ngIf="!isEditingStatus">
-                      <i class="fa-solid fa-battery-three-quarters"></i>
-                      <strong>Trạng thái:</strong>
-                      {{ postForm.get('status')?.value }}
-                      <a (click)="startEditStatus()">Sửa</a>
-                    </span>
-                    <span *ngIf="isEditingStatus">
-                      <i class="fa-solid fa-battery-three-quarters"></i>
-                      <strong>Trạng thái:</strong>
-                      {{ postForm.get('status')?.value }}
-                      <div class="publish__status-edit">
-                        <select formControlName="status" class="publish__status-select">
-                          <option value="" disabled>— Chọn trạng thái —</option>
-                          <option *ngFor="let status of PostStatus | keyvalue" [value]="status.value">
-                            {{ status.value }}
-                          </option>
-                        </select>
-                        <button type="button" class="publish__status-button" (click)="saveStatus()">OK</button>
-                        <a class="publish__status-cancel" (click)="cancelEditStatus()">Huỷ bỏ</a>
-                      </div>
-                    </span>
-                  </div>
-                  <div class="publish__visibility">
-                    <span *ngIf="!isEditingVisibility">
-                      <i class="fa-solid fa-eye-slash"></i>
-                      <strong>Chế độ xem:</strong>
-                      {{ postForm.get('visibility')?.value }}
-                      <a (click)="startEditVisibility()">Sửa</a>
-                    </span>
-                    <span *ngIf="isEditingVisibility">
-                      <i class="fa-solid fa-eye-slash"></i>
-                      <strong>Chế độ xem:</strong>
-                      {{ postForm.get('visibility')?.value }}
-                      <div class="publish__visibility-edit">
-                        <div *ngFor="let visibility of PostVisibility | keyvalue" class="publish__visibility-option">
+              <div class="sidebar__category-body" *ngIf="cardVisibility['category']">
+                <ul class="category__tabs">
+                  <li class="category__tabs-tab" [class.active]="isCategoryTabActive('all')">
+                    <a class="category__tabs-link" (click)="setActiveCategoryTab('all')">Tất cả</a>
+                  </li>
+                  <li class="category__tabs-tab" [class.active]="isCategoryTabActive('popular')">
+                    <a class="category__tabs-link" (click)="setActiveCategoryTab('popular')">Dùng nhiều nhất</a>
+                  </li>
+                </ul>
+                <div class="category__content">
+                  <!-- "Tất cả" Tab Content -->
+                  <div *ngIf="isCategoryTabActive('all')" class="category__content-pane" formGroupName="category">
+                    <ul class="category__content-list">
+                      <li class="category__content-item" *ngFor="let category of categories$ | async">
+                        <label class="category__content-label">
                           <input
+                            class="category__content-radio"
                             type="radio"
-                            [value]="visibility.value"
-                            formControlName="visibility"
-                            id="{{ visibility.key }}"
-                            class="publish__visibility-radio"
+                            formControlName="categoryId"
+                            [value]="category.id"
+                            (click)="onCategoryChange(category.id)"
                           />
-                          <label [for]="visibility.key" class="publish__visibility-label">{{ visibility.value }}</label>
+                          {{ category.name }}
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div *ngIf="isCategoryTabActive('popular')" class="category__content-pane" formGroupName="category">
+                    <ul class="category__content-list">
+                      <li class="category__content-item" *ngFor="let categoryTop of topCategories$ | async">
+                        <label class="category__content-label">
+                          <input
+                            class="category__content-radio"
+                            type="radio"
+                            formControlName="categoryId"
+                            [value]="categoryTop.id"
+                            (click)="onCategoryChange(categoryTop.id)"
+                          />
+                          {{ categoryTop.name }}
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="category__content-add">
+                    <button type="button" class="category__add-btn" (click)="toggleAddCategory()">+ Thêm chuyên mục</button>
+
+                    <div *ngIf="showAddCategory">
+                      <div class="category__add-input-wrapper">
+                        <input type="text" class="category__add-input" [formControl]="newCategoryNameControl" />
+                        <div *ngIf="newCategoryNameControl.invalid && newCategoryNameControl.touched" class="category__add-error-wrapper">
+                          <small class="category__add-error" *ngIf="newCategoryNameControl.errors?.['required']">
+                            Vui lòng nhập tên chuyên mục.
+                          </small>
+                          <small class="category__add-error" *ngIf="newCategoryNameControl.errors?.['minlength']">
+                            Tên chuyên mục phải có ít nhất 3 ký tự.
+                          </small>
+                          <small class="category__add-error" *ngIf="newCategoryNameControl.errors?.['maxlength']">
+                            Tên chuyên mục không được vượt quá 50 ký tự.
+                          </small>
                         </div>
-                        <button type="button" class="publish__visibility-button" (click)="saveVisibility()">OK</button>
-                        <a class="publish__visibility-cancel" (click)="cancelEditVisibility()">Huỷ bỏ</a>
                       </div>
-                    </span>
+                      <select class="category__add-select">
+                        <option value="" disabled>— Chuyên mục hiện tại —</option>
+                        <option *ngFor="let category of categories$ | async" [value]="category.id">
+                          {{ category.name }}
+                        </option>
+                      </select>
+                      <button
+                        type="button"
+                        class="category__add-submit"
+                        (click)="addCategory()"
+                        [disabled]="newCategoryNameControl.invalid"
+                      >
+                        Thêm chuyên mục
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div class="sidebar__publish-footer">
-                  <button type="submit" class="sidebar__publish-submit" [disabled]="postForm.invalid">Xuất bản</button>
-                </div>
-              </div>
-              <div *ngSwitchCase="'tags'" class="sidebar__tags">
-                <div class="sidebar__tags-header" (click)="toggleCardBody('tags')">
-                  <h5 class="sidebar__tags-header-title">Thẻ</h5>
-                  <div class="sidebar__tags-header-controls">
-                    <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                    <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
-                    <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['tags'] }"></i>
-                  </div>
-                </div>
-
-                <div *ngIf="cardVisibility['tags']" class="sidebar__tags-body">
-                  <div class="sidebar__tags-controls">
-                    <input type="text" class="tags__controls-input" [formControl]="tagInputControl" (keydown.enter)="addTag()" />
-                    <button
-                      type="button"
-                      class="tags__controls-button"
-                      [disabled]="tagInputControl.invalid || !tagInputControl.value?.trim()"
-                      (click)="addTag()"
-                    >
-                      Thêm
-                    </button>
-                  </div>
-                  <div *ngIf="tagInputControl.invalid && (tagInputControl.dirty || tagInputControl.touched)" class="sidebar__tags-error">
-                    <div *ngIf="tagInputControl.errors?.['required']">Thẻ không được để trống.</div>
-                    <div *ngIf="tagInputControl.errors?.['minlength']">Thẻ phải có ít nhất 3 ký tự.</div>
-                  </div>
-                  <p class="sidebar__tags-span">Phân cách các thẻ bằng dấu phẩy (,).</p>
-                  <div class="sidebar__tags-list">
-                    <span class="sidebar__tags-tag" *ngFor="let tag of tags; let i = index">
-                      {{ tag }}
-                      <i class="fa-solid fa-times" (click)="removeTag(i)"></i>
-                    </span>
-                  </div>
-                  <a class="sidebar__tags-popular">Chọn từ những thẻ được dùng nhiều nhất</a>
-                  <div *ngIf="tagLimitExceeded" class="sidebar__tags-warning">Bạn chỉ có thể thêm tối đa {{ maxTags }} thẻ.</div>
-                </div>
-              </div>
-              <div *ngSwitchCase="'favorite'" class="sidebar__favorite">
-                <div class="sidebar__favorite-header" (click)="toggleCardBody('favorite')">
-                  <h5 class="sidebar__favorite-header-title">Lượt thích và chia sẻ</h5>
-                  <div class="sidebar__favorite-header-controls">
-                    <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                    <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
-                    <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['favorite'] }"></i>
-                  </div>
-                </div>
-
-                <div *ngIf="cardVisibility['favorite']" class="sidebar__favorite-body">
-                  <ul class="sidebar__favorite-list">
-                    <li class="sidebar__favorite-item">
-                      <label class="sidebar__favorite-checkbox">
-                        <input type="checkbox" checked />
-                        Hiển thị lượt thích
-                      </label>
-                    </li>
-                    <li class="sidebar__favorite-item">
-                      <label class="sidebar__favorite-checkbox">
-                        <input type="checkbox" checked />
-                        Hiển thị những nút chia sẻ
-                      </label>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div *ngSwitchCase="'thumbnail'" class="sidebar__thumbnail">
-                <div class="sidebar__thumbnail-header" (click)="toggleCardBody('thumbnail')">
-                  <h5 class="sidebar__thumbnail-header-title">Ảnh minh họa</h5>
-                  <div class="sidebar__thumbnail-header-controls">
-                    <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
-                    <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
-                    <i
-                      class="fa-solid fa-caret-up"
-                      [ngClass]="{
-                        'fa-rotate-180': !cardVisibility['thumbnail'],
-                      }"
-                    ></i>
-                  </div>
-                </div>
-
-                <div *ngIf="cardVisibility['thumbnail']" class="sidebar__thumbnail-body">
-                  <!-- Kiểm tra nếu có ảnh hay không -->
-                  <ng-container *ngIf="selectedThumbnailUrl; else noImage">
-                    <!-- Hiển thị ảnh nếu đã chọn -->
-                    <img
-                      [src]="selectedThumbnailUrl"
-                      loading="lazy"
-                      alt="Ảnh minh họa"
-                      class="sidebar__thumbnail-img"
-                      (click)="openImageDialog()"
-                    />
-                    <p class="sidebar__thumbnail-description">Nhấn vào ảnh để sửa hoặc cập nhật</p>
-                    <a class="sidebar__thumbnail-remove" (click)="removeThumbnail()">Xóa ảnh đại diện</a>
-                  </ng-container>
-
-                  <!-- Template để hiển thị khi không có ảnh -->
-                  <ng-template #noImage>
-                    <button type="button" class="sidebar__thumbnail-button" (click)="openImageDialog()">+ Chọn ảnh minh họa</button>
-                  </ng-template>
                 </div>
               </div>
             </div>
-          </ng-container>
-        </div>
+            <div *ngSwitchCase="'publish'" class="sidebar__publish">
+              <div class="sidebar__publish-header" (click)="toggleCardBody('publish')">
+                <h5 class="sidebar__publish-header-title">Xuất bản</h5>
+                <div class="sidebar__publish-header-controls">
+                  <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['publish'] }"></i>
+                </div>
+              </div>
+
+              <div *ngIf="cardVisibility['publish']" class="sidebar__publish-body">
+                <div class="publish__status">
+                  <span *ngIf="!isEditingStatus">
+                    <i class="fa-solid fa-battery-three-quarters"></i>
+                    <strong>Trạng thái:</strong>
+                    {{ postForm.get('status')?.value }}
+                    <a (click)="startEditStatus()">Sửa</a>
+                  </span>
+                  <span *ngIf="isEditingStatus">
+                    <i class="fa-solid fa-battery-three-quarters"></i>
+                    <strong>Trạng thái:</strong>
+                    {{ postForm.get('status')?.value }}
+                    <div class="publish__status-edit">
+                      <select formControlName="status" class="publish__status-select">
+                        <option value="" disabled>— Chọn trạng thái —</option>
+                        <option *ngFor="let status of PostStatus | keyvalue" [value]="status.value">
+                          {{ status.value }}
+                        </option>
+                      </select>
+                      <button type="button" class="publish__status-button" (click)="saveStatus()">OK</button>
+                      <a class="publish__status-cancel" (click)="cancelEditStatus()">Huỷ bỏ</a>
+                    </div>
+                  </span>
+                </div>
+                <div class="publish__visibility">
+                  <span *ngIf="!isEditingVisibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                    <strong>Chế độ xem:</strong>
+                    {{ postForm.get('visibility')?.value }}
+                    <a (click)="startEditVisibility()">Sửa</a>
+                  </span>
+                  <span *ngIf="isEditingVisibility">
+                    <i class="fa-solid fa-eye-slash"></i>
+                    <strong>Chế độ xem:</strong>
+                    {{ postForm.get('visibility')?.value }}
+                    <div class="publish__visibility-edit">
+                      <div *ngFor="let visibility of PostVisibility | keyvalue" class="publish__visibility-option">
+                        <input
+                          type="radio"
+                          [value]="visibility.value"
+                          formControlName="visibility"
+                          id="{{ visibility.key }}"
+                          class="publish__visibility-radio"
+                        />
+                        <label [for]="visibility.key" class="publish__visibility-label">{{ visibility.value }}</label>
+                      </div>
+                      <button type="button" class="publish__visibility-button" (click)="saveVisibility()">OK</button>
+                      <a class="publish__visibility-cancel" (click)="cancelEditVisibility()">Huỷ bỏ</a>
+                    </div>
+                  </span>
+                </div>
+              </div>
+              <div class="sidebar__publish-footer">
+                <button type="submit" class="sidebar__publish-submit" [disabled]="postForm.invalid">Xuất bản</button>
+              </div>
+            </div>
+            <div *ngSwitchCase="'tags'" class="sidebar__tags">
+              <div class="sidebar__tags-header" (click)="toggleCardBody('tags')">
+                <h5 class="sidebar__tags-header-title">Thẻ</h5>
+                <div class="sidebar__tags-header-controls">
+                  <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['tags'] }"></i>
+                </div>
+              </div>
+
+              <div *ngIf="cardVisibility['tags']" class="sidebar__tags-body">
+                <div class="sidebar__tags-controls">
+                  <input type="text" class="tags__controls-input" [formControl]="tagInputControl" (keydown.enter)="addTag()" />
+                  <button
+                    type="button"
+                    class="tags__controls-button"
+                    [disabled]="tagInputControl.invalid || !tagInputControl.value?.trim()"
+                    (click)="addTag()"
+                  >
+                    Thêm
+                  </button>
+                </div>
+                <div *ngIf="tagInputControl.invalid && (tagInputControl.dirty || tagInputControl.touched)" class="sidebar__tags-error">
+                  <div *ngIf="tagInputControl.errors?.['required']">Thẻ không được để trống.</div>
+                  <div *ngIf="tagInputControl.errors?.['minlength']">Thẻ phải có ít nhất 3 ký tự.</div>
+                </div>
+                <p class="sidebar__tags-span">Phân cách các thẻ bằng dấu phẩy (,).</p>
+                <div class="sidebar__tags-list">
+                  <span class="sidebar__tags-tag" *ngFor="let tag of tags; let i = index">
+                    {{ tag }}
+                    <i class="fa-solid fa-times" (click)="removeTag(i)"></i>
+                  </span>
+                </div>
+                <a class="sidebar__tags-popular">Chọn từ những thẻ được dùng nhiều nhất</a>
+                <div *ngIf="tagLimitExceeded" class="sidebar__tags-warning">Bạn chỉ có thể thêm tối đa {{ maxTags }} thẻ.</div>
+              </div>
+            </div>
+            <div *ngSwitchCase="'favorite'" class="sidebar__favorite">
+              <div class="sidebar__favorite-header" (click)="toggleCardBody('favorite')">
+                <h5 class="sidebar__favorite-header-title">Lượt thích và chia sẻ</h5>
+                <div class="sidebar__favorite-header-controls">
+                  <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i class="fa-solid fa-caret-up" [ngClass]="{ 'fa-rotate-180': !cardVisibility['favorite'] }"></i>
+                </div>
+              </div>
+
+              <div *ngIf="cardVisibility['favorite']" class="sidebar__favorite-body">
+                <ul class="sidebar__favorite-list">
+                  <li class="sidebar__favorite-item">
+                    <label class="sidebar__favorite-checkbox">
+                      <input type="checkbox" checked />
+                      Hiển thị lượt thích
+                    </label>
+                  </li>
+                  <li class="sidebar__favorite-item">
+                    <label class="sidebar__favorite-checkbox">
+                      <input type="checkbox" checked />
+                      Hiển thị những nút chia sẻ
+                    </label>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div *ngSwitchCase="'thumbnail'" class="sidebar__thumbnail">
+              <div class="sidebar__thumbnail-header" (click)="toggleCardBody('thumbnail')">
+                <h5 class="sidebar__thumbnail-header-title">Ảnh minh họa</h5>
+                <div class="sidebar__thumbnail-header-controls">
+                  <i class="fa-solid fa-chevron-up" (click)="moveCardUp(i)"></i>
+                  <i class="fa-solid fa-chevron-down" (click)="moveCardDown(i)"></i>
+                  <i
+                    class="fa-solid fa-caret-up"
+                    [ngClass]="{
+                      'fa-rotate-180': !cardVisibility['thumbnail'],
+                    }"
+                  ></i>
+                </div>
+              </div>
+
+              <div *ngIf="cardVisibility['thumbnail']" class="sidebar__thumbnail-body">
+                <!-- Kiểm tra nếu có ảnh hay không -->
+                <ng-container *ngIf="selectedThumbnailUrl; else noImage">
+                  <!-- Hiển thị ảnh nếu đã chọn -->
+                  <img
+                    [src]="selectedThumbnailUrl"
+                    loading="lazy"
+                    alt="Ảnh minh họa"
+                    class="sidebar__thumbnail-img"
+                    (click)="openImageDialog()"
+                  />
+                  <p class="sidebar__thumbnail-description">Nhấn vào ảnh để sửa hoặc cập nhật</p>
+                  <a class="sidebar__thumbnail-remove" (click)="removeThumbnail()">Xóa ảnh đại diện</a>
+                </ng-container>
+
+                <!-- Template để hiển thị khi không có ảnh -->
+                <ng-template #noImage>
+                  <div class="sidebar__thumbnail-placeholder" (click)="openImageDialog()">+ Chọn ảnh minh họa</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>

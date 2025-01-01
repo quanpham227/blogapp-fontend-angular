@@ -34,7 +34,8 @@ export class AuthGuard {
         if (!isTokenExpired && userResponse) {
           return true;
         } else {
-          this.router.navigate(['/login']);
+          this.authService.clearAuthData();
+          this.router.navigate(['/']);
           return false;
         }
       }),

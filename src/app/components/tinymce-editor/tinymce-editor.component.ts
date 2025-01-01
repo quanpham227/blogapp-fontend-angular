@@ -19,7 +19,7 @@ import { from } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedDataService } from '../../services/help-text.service';
 
-declare var tinymce: any;
+declare let tinymce: any;
 
 @UntilDestroy()
 @Component({
@@ -132,7 +132,6 @@ export class TinymceEditorComponent implements ControlValueAccessor, AfterViewIn
       'media',
       'table',
       'help',
-      'paste',
       'wordcount',
       'emoticons',
       'autosave',

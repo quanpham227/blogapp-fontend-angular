@@ -25,7 +25,7 @@ export class ImageService {
     page: number,
     limit: number,
   ): Observable<ApiResponse<ImageListResponse>> {
-    let params = new HttpParams()
+    const params = new HttpParams()
       .set('keyword', keyword)
       .set('object_type', objectType)
       .set('page', page.toString())

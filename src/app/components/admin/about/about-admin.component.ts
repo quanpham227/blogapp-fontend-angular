@@ -5,6 +5,7 @@ import { About } from '../../../models/about';
 import { ApiResponse } from '../../../models/response';
 import { CommonModule } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { Status } from '../../../enums/status.enum';
 
 @Component({
   selector: 'app-about-admin',
@@ -29,10 +30,7 @@ export class AboutAdminComponent implements OnInit {
   isLoading = false;
   successMessage: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private aboutService: AboutService,
-  ) {
+  constructor(private fb: FormBuilder, private aboutService: AboutService) {
     this.businessForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
       content: ['', Validators.maxLength(10000)],
@@ -56,9 +54,11 @@ export class AboutAdminComponent implements OnInit {
   loadAbout(): void {
     this.aboutService.getAbout().subscribe({
       next: (data: ApiResponse<About>) => {
-        if (data.status === 'OK' || data.status === 'ok') {
-          this.about = data.data;
-          this.businessForm.patchValue(this.about);
+        if (data.status === 'OK') {
+          if (data.data) {
+            this.about = data.data;
+            this.businessForm.patchValue(this.about);
+          }
         } else {
           console.error('Failed to load about information:', data.message);
         }
@@ -86,8 +86,11 @@ export class AboutAdminComponent implements OnInit {
     const updatedAbout = this.businessForm.value;
     this.aboutService.updateAbout(this.about.id, updatedAbout).subscribe({
       next: (response: ApiResponse<About>) => {
-        if (response.status === 'OK' || response.status === 'CREATED') {
-          this.about = response.data;
+        if (response.status === Status.OK) {
+          if (response.data) {
+            this.about = response.data;
+            this.businessForm.patchValue(this.about);
+          }
         }
         this.isLoading = false;
         this.toggleEditMode();

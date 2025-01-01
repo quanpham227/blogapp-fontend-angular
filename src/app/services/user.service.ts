@@ -29,8 +29,6 @@ export class UserService {
   private apiBlockUser = `${environment.apiBaseUrl}/users/block`;
   private apiUpdateUserByAdmin = `${environment.apiBaseUrl}/users/admin/update`;
 
-  localStorage?: Storage;
-
   private apiConfig = {
     headers: this.createHeaders(),
   };
@@ -49,7 +47,6 @@ export class UserService {
     private snackbarService: SnackbarService,
     @Inject(DOCUMENT) private document: Document,
   ) {
-    this.localStorage = this.document.defaultView?.localStorage;
     this.checkTokenValidity();
   }
 
@@ -60,9 +57,9 @@ export class UserService {
     }
   }
 
-  register(registerDTO: RegisterDTO): Observable<any> {
+  register(registerDTO: RegisterDTO): Observable<ApiResponse<UserResponse>> {
     const snakeCaseDTO = convertToSnakeCase(registerDTO);
-    return this.http.post(this.apiRegister, snakeCaseDTO, this.apiConfig);
+    return this.http.post<ApiResponse<UserResponse>>(this.apiRegister, snakeCaseDTO, this.apiConfig);
   }
 
   getUserDetail(token: string): Observable<ApiResponse<UserResponse>> {
@@ -86,22 +83,24 @@ export class UserService {
       );
   }
 
-  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<any> {
+  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<ApiResponse<UserResponse>> {
     this.checkTokenValidity();
     const userResponse = this.authService.getUser();
     const snakeCaseDTO = convertToSnakeCase(updateUserDTO);
+
     return this.http
-      .put(`${this.apiUserDetail}/${userResponse?.id}`, snakeCaseDTO, {
+      .put<ApiResponse<UserResponse>>(`${this.apiUserDetail}/${userResponse?.id}`, snakeCaseDTO, {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         }),
       })
       .pipe(
-        map((response) => convertToCamelCase(response)),
+        map((response) => convertToCamelCase(response)), // Convert keys to camelCase
         tap((response) => this.successHandlerService.handleApiResponse(response)),
       );
   }
+
   updateUserByAdmin(token: string, userId: number, updateUserByAdminDTO: UpdateUserByAdminDTO): Observable<ApiResponse<User>> {
     this.checkTokenValidity();
     const snakeCaseDTO = convertToSnakeCase(updateUserByAdminDTO);
@@ -137,7 +136,7 @@ export class UserService {
     page: number = 0,
     limit: number = 10,
   ): Observable<ApiResponse<UserListResponse>> {
-    let params = new HttpParams()
+    const params = new HttpParams()
       .set('keyword', keyword)
       .set('status', status !== null ? status.toString() : '')
       .set('roleId', roleId)

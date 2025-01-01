@@ -8,6 +8,8 @@ import { UserService } from '../../services/user.service';
 import { UpdateUserDTO } from '../../dtos/user/update.user';
 import { AuthService } from '../../services/auth.service';
 import { ApiResponse } from '../../models/response';
+import { Status } from '../../enums/status.enum';
+import { SnackbarService } from '../../services/snackbar.service';
 
 @Component({
   selector: 'app-profile-update',
@@ -27,6 +29,7 @@ export class UserProfileComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private snackBar: SnackbarService,
     private userService: UserService,
     private authService: AuthService,
   ) {
@@ -46,13 +49,15 @@ export class UserProfileComponent implements OnInit {
     if (this.token) {
       this.userService.getUserDetail(this.token).subscribe({
         next: (response: ApiResponse<UserResponse>) => {
-          const userResponse: UserResponse = response.data;
-          this.updateForm.patchValue({
-            fullName: userResponse.fullName,
-            phoneNumber: userResponse.phoneNumber,
-          });
-          this.userImageUrl = userResponse.profileImage;
-          this.authService.setUser(userResponse);
+          if (response.status === Status.OK && response.data) {
+            const userResponse: UserResponse = response.data;
+            this.updateForm.patchValue({
+              fullName: userResponse.fullName,
+              phoneNumber: userResponse.phoneNumber,
+            });
+            this.userImageUrl = userResponse.profileImage;
+            this.authService.setUser(userResponse);
+          }
         },
         error: (error: HttpErrorResponse) => {
           console.error(error?.error?.message ?? '');
@@ -97,39 +102,54 @@ export class UserProfileComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.updateForm.valid) {
-      this.isSubmitting = true;
-      const updateUserDTO: UpdateUserDTO = {
-        fullName: this.updateForm.get('fullName')?.value,
-        phoneNumber: this.updateForm.get('phoneNumber')?.value,
-        password: this.updateForm.get('password')?.value,
-        retypePassword: this.updateForm.get('retypePassword')?.value,
-      };
+    if (!this.token) {
+      // Nếu không có token, chuyển người dùng đến trang đăng nhập
+      this.router.navigate(['/login']);
+      return;
+    }
 
-      if (this.token) {
-        this.userService.updateUserDetail(this.token, updateUserDTO).subscribe({
-          next: (response: UserResponse) => {
-            this.authService.setUser(null);
-            this.authService.clearAuthData();
-            this.router.navigate(['/login']);
-          },
-          error: (error: HttpErrorResponse) => {
-            console.error(error?.error?.message ?? '');
-            this.isSubmitting = false;
-          },
-        });
-      } else {
-        this.router.navigate(['/login']);
-      }
-    } else {
+    if (this.updateForm.invalid) {
+      // Đánh dấu các trường không hợp lệ
       Object.keys(this.updateForm.controls).forEach((key) => {
         const control = this.updateForm.get(key);
         if (control?.invalid) {
           control.markAsTouched();
         }
       });
+      return;
     }
+
+    this.isSubmitting = true;
+
+    // Tạo DTO từ form data
+    const updateUserDTO: UpdateUserDTO = {
+      fullName: this.updateForm.get('fullName')?.value,
+      phoneNumber: this.updateForm.get('phoneNumber')?.value,
+      password: this.updateForm.get('password')?.value,
+      retypePassword: this.updateForm.get('retypePassword')?.value,
+    };
+
+    // Gọi API và xử lý kết quả trả về
+    this.userService.updateUserDetail(this.token, updateUserDTO).subscribe({
+      next: (response: ApiResponse<UserResponse>) => {
+        if (response.status === Status.OK && response.data) {
+          // Xử lý khi cập nhật thành công
+          this.authService.setUser(null);
+          this.authService.clearAuthData();
+          this.router.navigate(['/login']);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        // hieenr thị thông báo lỗi
+        this.snackBar.show(error?.error?.message ?? '');
+        this.isSubmitting = false;
+      },
+      complete: () => {
+        this.isSubmitting = false; // Đảm bảo trạng thái nộp đơn được reset
+      },
+    });
   }
+
   handleImageError(event: any): void {
     event.target.src = 'assets/svg/user_icon.svg';
   }

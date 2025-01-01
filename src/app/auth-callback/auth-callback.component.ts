@@ -10,6 +10,7 @@ import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { SnackbarService } from '../services/snackbar.service';
 import { LoginType } from '../enums/login.type';
+import { Status } from '../enums/status.enum';
 
 interface TokenResponse {
   token: string;
@@ -49,12 +50,20 @@ export class AuthCallbackComponent implements OnInit {
           if (code) {
             return this.authService.exchangeCodeForToken(code, loginType).pipe(
               tap((response: ApiResponse<TokenResponse>) => {
-                const token = response.data.token;
-                this.authService.setAccessToken(token);
+                if (response.status === Status.OK && response.data) {
+                  const token = response.data.token;
+                  this.authService.setAccessToken(token);
+                }
               }),
               switchMap((response: ApiResponse<TokenResponse>) => {
-                const token = response.data.token;
-                return this.userService.getUserDetail(token);
+                if (response.status === Status.OK && response.data) {
+                  const token = response.data.token;
+                  return this.userService.getUserDetail(token);
+                } else {
+                  // Nếu không có dữ liệu hợp lệ, trả về một Observable rỗng
+                  this.snackbarService.show('Không thể lấy token từ phản hồi.');
+                  return []; // hoặc dùng `of(null)` nếu cần Observable hợp lệ
+                }
               }),
             );
           } else {
@@ -65,9 +74,11 @@ export class AuthCallbackComponent implements OnInit {
       )
       .subscribe({
         next: (apiResponse: ApiResponse<UserResponse>) => {
-          this.userResponse = apiResponse.data;
-          this.authService.setUser(this.userResponse ?? null);
-          this.authService.navigateToDashboard(this.userResponse);
+          if (apiResponse.status === Status.OK && apiResponse.data) {
+            this.userResponse = apiResponse.data;
+            this.authService.setUser(this.userResponse ?? null);
+            this.authService.navigateToDashboard(this.userResponse);
+          }
         },
         error: (error: HttpErrorResponse) => {
           console.error(error);

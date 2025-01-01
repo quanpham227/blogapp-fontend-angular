@@ -2,15 +2,15 @@
   <div class="user-dialog-admin__content">
     <h2 class="user-dialog-admin__title">Edit User</h2>
     <form [formGroup]="userForm" (ngSubmit)="submitForm()" class="user-dialog-admin__form">
-      <div class="user-dialog-admin__form-group" fxLayout="row" fxLayoutGap="10px">
-        <div fxFlex="70">
+      <div class="user-dialog-admin__form-group user-dialog-admin__form-group--row">
+        <div class="user-dialog-admin__form-group--flex-70">
           <label for="fullName" class="user-dialog-admin__form-label">Name</label>
           <input id="name" type="text" formControlName="fullName" class="user-dialog-admin__form-input" required />
           <div class="user-dialog-admin__form-error" *ngIf="userForm.get('fullName')?.invalid && userForm.get('fullName')?.touched">
             FullName is required
           </div>
         </div>
-        <div fxFlex="30">
+        <div class="user-dialog-admin__form-group--flex-30">
           <div class="user-dialog-admin__form-group">
             <label for="role" class="user-dialog-admin__form-label">Role</label>
             <select formControlName="roleId" class="user-dialog-admin__form-select" required (change)="onRoleChange()">
@@ -23,15 +23,15 @@
         </div>
       </div>
 
-      <div class="user-dialog-admin__form-group" fxLayout="row" fxLayoutGap="10px">
-        <div fxFlex="50" class="user-dialog-admin__form-group-relative">
+      <div class="user-dialog-admin__form-group user-dialog-admin__form-group--row">
+        <div class="user-dialog-admin__form-group--flex-50 user-dialog-admin__form-group-relative">
           <label for="email" class="user-dialog-admin__form-label">Email</label>
           <input id="email" type="email" formControlName="email" class="user-dialog-admin__form-input" required />
           <div class="user-dialog-admin__form-error" *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
             Please enter a valid email
           </div>
         </div>
-        <div fxFlex="50" class="user-dialog-admin__form-group-relative">
+        <div class="user-dialog-admin__form-group--flex-50 user-dialog-admin__form-group-relative">
           <label for="phoneNumber" class="user-dialog-admin__form-label">Phone</label>
           <input id="phoneNumber" type="text" formControlName="phoneNumber" class="user-dialog-admin__form-input" required />
           <div class="user-dialog-admin__form-error" *ngIf="userForm.get('phoneNumber')?.invalid && userForm.get('phoneNumber')?.touched">

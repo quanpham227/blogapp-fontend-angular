@@ -14,6 +14,7 @@ import { ImageSelectDialogAdminComponent } from '../shared/image-select-dialog/i
 import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
 import { LoadingSpinnerComponent } from '../../common/loading-spinner/loading-spinner.component';
 import { SnackbarService } from '../../../services/snackbar.service';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -63,9 +64,11 @@ export class SlideAdminComponent implements OnInit {
       .getSlidesForAdmin()
       .pipe(untilDestroyed(this))
       .subscribe((response: ApiResponse<Slide[]>) => {
-        if (response.status === 'OK' && response.data) {
-          this.slides = response.data;
-          this.cdr.markForCheck(); // Inform Angular to check for changes
+        if (response.status === Status.OK) {
+          if (response.data) {
+            this.slides = response.data;
+            this.cdr.markForCheck(); // Inform Angular to check for changes
+          }
         }
       });
   }
@@ -181,7 +184,7 @@ export class SlideAdminComponent implements OnInit {
           .deleteSlide(id)
           .pipe(untilDestroyed(this))
           .subscribe((response: ApiResponse<any>) => {
-            if (response.status === 'OK') {
+            if (response.status === Status.OK) {
               this.slides = this.slides.filter((slide) => slide.id !== id);
               this.cdr.markForCheck(); // Inform Angular to check for changes
             }
@@ -218,10 +221,12 @@ export class SlideAdminComponent implements OnInit {
       .insertSlide(slideRequest)
       .pipe(untilDestroyed(this))
       .subscribe((response: ApiResponse<Slide>) => {
-        if (response.status === 'OK' || response.status === 'CREATED') {
-          this.slides.push(response.data);
-          this.closeForm();
-          this.cdr.markForCheck(); // Inform Angular to check for changes
+        if (response.status === Status.CREATED) {
+          if (response.data) {
+            this.slides.push(response.data);
+            this.closeForm();
+            this.cdr.markForCheck(); // Inform Angular to check for changes
+          }
         }
       });
   }
@@ -231,13 +236,15 @@ export class SlideAdminComponent implements OnInit {
       .updateSlide(id, slideRequest)
       .pipe(untilDestroyed(this))
       .subscribe((response: ApiResponse<Slide>) => {
-        if (response.status === 'OK' || response.status === 'UPDATED') {
-          const index = this.slides.findIndex((s) => s.id === id);
-          if (index !== -1) {
-            this.slides[index] = response.data;
+        if (response.status === Status.OK) {
+          if (response.data) {
+            const index = this.slides.findIndex((s) => s.id === id);
+            if (index !== -1) {
+              this.slides[index] = response.data;
+            }
+            this.closeForm();
+            this.cdr.markForCheck(); // Inform Angular to check for changes
           }
-          this.closeForm();
-          this.cdr.markForCheck(); // Inform Angular to check for changes
         }
       });
   }

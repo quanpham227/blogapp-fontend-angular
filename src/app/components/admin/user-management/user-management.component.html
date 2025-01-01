@@ -6,8 +6,8 @@
     </a>
   </div>
 
-  <div class="users-admin__filters" fxLayout="row" fxLayoutGap="5px">
-    <div class="users-admin__search" fxFlex="70">
+  <div class="users-admin__filters">
+    <div class="users-admin__search">
       <i class="fas fa-search users-admin__search-icon"></i>
       <input
         type="text"
@@ -20,12 +20,12 @@
       <i class="fas fa-times users-admin__search-clear" (click)="clearSearch($event)" *ngIf="showClearIcon"></i>
     </div>
 
-    <select class="users-admin__filter-select" (change)="onStatusChange($event)" fxFlex="15">
+    <select class="users-admin__filter-select" (change)="onStatusChange($event)">
       <option [value]="userStatus.All">All Statuses</option>
       <option [value]="userStatus.Active">Active</option>
       <option [value]="userStatus.Inactive">Inactive</option>
     </select>
-    <select class="users-admin__filter-select" (change)="onRoleChange($event)" fxFlex="15">
+    <select class="users-admin__filter-select" (change)="onRoleChange($event)">
       <option value="">All Roles</option>
       <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
     </select>

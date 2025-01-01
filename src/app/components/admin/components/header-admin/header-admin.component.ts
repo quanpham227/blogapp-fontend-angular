@@ -18,7 +18,6 @@ import { AuthService } from '../../../../services/auth.service';
 export class HeaderAdminComponent implements OnInit {
   userResponse?: UserResponse | null;
   activeComponent: string = ''; // Thêm thuộc tính này
-  localStorage?: Storage;
   isSidebarVisible: boolean = true;
   isProfileMenuVisible = false;
   isNotificationsVisible = false;
@@ -27,11 +26,7 @@ export class HeaderAdminComponent implements OnInit {
     private sidebarService: SidebarAdminService,
     private authService: AuthService,
     private router: Router,
-
-    @Inject(DOCUMENT) private document: Document,
-  ) {
-    this.localStorage = this.document.defaultView?.localStorage;
-  }
+  ) {}
 
   ngOnInit() {
     // Subscribe to the sidebar visibility

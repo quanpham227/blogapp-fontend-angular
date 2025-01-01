@@ -6,6 +6,7 @@ import { AdminLayoutComponent } from './components/layouts/admin-layout/admin-la
 import { AdminGuardFn } from './guards/admin.guard';
 import { AuthGuardFn } from './guards/auth.guard';
 import { LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { ForbiddenComponent } from './components/forbidden/forbidden.component';
 
 export const routes: Routes = [
   {
@@ -57,7 +58,6 @@ export const routes: Routes = [
         loadComponent: () => import('./components/blog-detail/blog-detail.component').then((m) => m.BlogDetailComponent),
         data: { animation: 'BlogDetailPage' },
       },
-
       {
         path: 'user-profile',
         loadComponent: () => import('./components/user-profile/user-profile.component').then((m) => m.UserProfileComponent),
@@ -136,7 +136,6 @@ export const routes: Routes = [
         loadComponent: () => import('./components/admin/media/media.admin.component').then((m) => m.MediaAdminComponent),
         data: { animation: 'MediaPage' },
       },
-
       {
         path: 'profile',
         loadComponent: () => import('./components/admin/profile/profile.admin.component').then((m) => m.ProfileAdminComponent),
@@ -169,14 +168,14 @@ export const routes: Routes = [
         path: 'users',
         loadComponent: () => import('./components/admin/user-management/user-management.component').then((m) => m.UserManagementComponent),
       },
-
       {
         path: '**',
         loadComponent: () => import('./components/admin/notfound/notfound.admin.component').then((m) => m.NotfoundAdminComponent),
       },
     ],
   },
-  { path: '**', redirectTo: '', pathMatch: 'full' },
+  { path: 'forbidden', component: ForbiddenComponent },
+  { path: '**', redirectTo: '/forbidden', pathMatch: 'full' },
 ];
 
 @NgModule({

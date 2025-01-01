@@ -30,6 +30,7 @@ import { Title, Meta } from '@angular/platform-browser';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { SnackbarService } from '../../services/snackbar.service';
 import { CustomPaginationComponent } from '../common/custom-pagination/custom-pagination.component';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -85,7 +86,6 @@ export class BlogComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('Component ngOnInit');
     this.getCategories();
     combineLatest([this.route.params, this.route.queryParams])
       .pipe(
@@ -171,23 +171,19 @@ export class BlogComponent implements OnInit {
   }
 
   getPostsForUser(keyword: string, categorySlug: string, page: number, limit: number) {
-    console.log('Calling getPostsForUser with:', {
-      keyword,
-      categorySlug,
-      page,
-      limit,
-    });
     this.postService
       .getPostsForUser(keyword, categorySlug, page - 1, limit)
       .pipe(
         untilDestroyed(this),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         tap((response: ApiResponse<PostListResponse>) => {
-          if (response.status == 'OK' && response.data.posts) {
-            const newPosts = response.data.posts;
-            if (!isEqual(this.articles, newPosts)) {
-              this.blogStateService.setArticles(newPosts);
-              this.blogStateService.setTotalPages(response.data.totalPages);
+          if (response.status == Status.OK) {
+            if (response.data) {
+              const newPosts = response.data.posts;
+              if (!isEqual(this.articles, newPosts)) {
+                this.blogStateService.setArticles(newPosts);
+                this.blogStateService.setTotalPages(response.data.totalPages);
+              }
             }
           }
         }),
@@ -206,10 +202,11 @@ export class BlogComponent implements OnInit {
         untilDestroyed(this),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         tap((response: ApiResponse<Category[]>) => {
-          if (response.status === 'OK' && response.data) {
-            console.log('Categories:', response.data);
-            if (!isEqual(this.categories, response.data)) {
-              this.blogStateService.setCategories(response.data);
+          if (response.status === Status.OK) {
+            if (response.data) {
+              if (!isEqual(this.categories, response.data)) {
+                this.blogStateService.setCategories(response.data);
+              }
             }
           }
         }),
@@ -258,13 +255,13 @@ export class BlogComponent implements OnInit {
           ? categorySlug
             ? ['/blog/category', categorySlug]
             : keyword
-              ? ['/blog/search', this.formatKeyword(keyword)]
-              : ['/blog']
+            ? ['/blog/search', this.formatKeyword(keyword)]
+            : ['/blog']
           : categorySlug
-            ? ['/blog/category', categorySlug, 'page', page]
-            : keyword
-              ? ['/blog/search', this.formatKeyword(keyword), 'page', page]
-              : ['/blog/page', page];
+          ? ['/blog/category', categorySlug, 'page', page]
+          : keyword
+          ? ['/blog/search', this.formatKeyword(keyword), 'page', page]
+          : ['/blog/page', page];
 
       this.navigateToRoute(route);
     }
@@ -299,12 +296,12 @@ export class BlogComponent implements OnInit {
   }
 
   limitWords(event: any, maxWords: number, maxChars: number): void {
-    let input = event.target.value;
-    let words = input.split(/\s+/).filter(Boolean); // Split input into words and remove extra spaces
-    let truncatedWords: string[] = [];
+    const input = event.target.value;
+    const words = input.split(/\s+/).filter(Boolean); // Split input into words and remove extra spaces
+    const truncatedWords: string[] = [];
     let charCount = 0;
 
-    for (let word of words) {
+    for (const word of words) {
       if (truncatedWords.length >= maxWords || charCount + word.length > maxChars) break;
       truncatedWords.push(word);
       charCount += word.length + 1; // Add 1 for space

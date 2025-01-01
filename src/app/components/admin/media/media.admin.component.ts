@@ -25,6 +25,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { SnackbarService } from '../../../services/snackbar.service';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -137,7 +138,7 @@ export class MediaAdminComponent implements AfterViewInit, OnDestroy {
           untilDestroyed(this),
           distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
           tap((response: ApiResponse<ImageListResponse>) => {
-            if (response && response.data) {
+            if (response.status === Status.OK && response.data) {
               const newImages = response.data.images;
               if (!isEqual(this.images, newImages)) {
                 if (append) {
@@ -159,7 +160,7 @@ export class MediaAdminComponent implements AfterViewInit, OnDestroy {
         ),
       );
     } catch (error) {
-      this.snackbarService.show('Error loading images', 300, 'center', 'top');
+      this.snackbarService.show('Error loading images');
     }
   }
   checkIfMoreImagesNeeded() {
@@ -245,7 +246,7 @@ export class MediaAdminComponent implements AfterViewInit, OnDestroy {
             this.cdRef.markForCheck();
           } else if (event.type === HttpEventType.Response && event.body) {
             const responseBody = event.body as ApiResponse<Image>;
-            if (responseBody.status === 'OK') {
+            if (responseBody.status === Status.CREATED) {
               if (index !== -1) {
                 this.images[index] = {
                   ...convertToCamelCase(responseBody.data),
@@ -302,22 +303,26 @@ export class MediaAdminComponent implements AfterViewInit, OnDestroy {
   }
 
   async removeSelectedImages(): Promise<void> {
+    if (this.selectedImages.length === 0) {
+      this.snackbarService.show('No images selected to delete');
+      return;
+    }
     this.isDeleting = true;
     this.cdRef.markForCheck();
     const idsToDelete = this.selectedImages.map((image) => image.id);
     try {
       const response = await firstValueFrom(this.imageService.deleteImages(idsToDelete).pipe(untilDestroyed(this)));
-      this.selectedImages.forEach((image) => {
-        const index = this.images.indexOf(image);
-        if (index !== -1) {
-          this.images.splice(index, 1);
-        }
-      });
-      this.selectedImages = [];
-      this.currentPage = 0;
-      this.loadImages(false);
+      if (response?.status === Status.OK) {
+        this.images = this.images.filter((image) => !idsToDelete.includes(image.id));
+        this.selectedImages = [];
+        this.currentPage = 0;
+        this.loadImages(false);
+        this.snackbarService.show('Images deleted successfully');
+      } else {
+        this.snackbarService.show('Failed to delete images. Please try again.');
+      }
     } catch (error) {
-      this.snackbarService.show('Error deleting images', 300, 'center', 'top');
+      this.snackbarService.show('Error deleting images');
     } finally {
       this.isDeleting = false;
       this.cdRef.markForCheck();

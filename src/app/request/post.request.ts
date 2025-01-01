@@ -6,8 +6,8 @@ export interface PostRequest {
   title: string;
   content: string;
   categoryId: number;
-  thumbnail: String;
-  publicId: String;
+  thumbnail: string;
+  publicId: string;
   status: PostStatus;
   visibility: PostVisibility;
   tags: TagRequest[];

@@ -67,7 +67,7 @@ export class SidebarAdminComponent implements OnInit {
     this.sidebarService.toggleMenuCollapse(this.isMenuCollapsed);
     if (this.isMenuCollapsed) {
       // Đóng tất cả các menu con khi sidebar thu nhỏ
-      for (let nav in this.navStates) {
+      for (const nav in this.navStates) {
         if (this.navStates.hasOwnProperty(nav)) {
           this.navStates[nav] = false;
         }

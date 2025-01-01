@@ -6,6 +6,8 @@ import { BehaviorSubject } from 'rxjs';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { map } from 'rxjs/operators';
 import { CountUp } from 'countup.js';
+import { ApiResponse } from '../../models/response';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -22,7 +24,7 @@ export class CountsComponent implements OnInit, AfterViewChecked {
   private initialized = false;
 
   constructor(
-    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(PLATFORM_ID) private platformId: object,
     private achievementService: AchievementService,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -41,15 +43,19 @@ export class CountsComponent implements OnInit, AfterViewChecked {
   loadAchievements(): void {
     this.achievementService
       .getActiveAchievementsForUser()
-      .pipe(
-        map((response) => {
-          return response.data;
-        }),
-        untilDestroyed(this),
-      )
-      .subscribe((achievements: Achievement[]) => {
-        this.achievementsSubject.next(achievements);
-        this.cdr.markForCheck();
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: (response: ApiResponse<Achievement[]>) => {
+          if (response.status === Status.OK && response.data) {
+            const achievements = response.data;
+            this.achievementsSubject.next(achievements);
+          }
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error fetching achievements:', error);
+          this.cdr.markForCheck();
+        },
       });
   }
 

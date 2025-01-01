@@ -5,6 +5,8 @@ import { Client } from '../../models/client';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { ApiResponse } from '../../models/response';
+import { Status } from '../../enums/status.enum';
 
 Swiper.use([Pagination, Autoplay, Navigation]);
 
@@ -20,11 +22,7 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   clients: Client[] = [];
   private swiperClients: Swiper | null = null;
 
-  constructor(
-    private clientService: ClientService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef,
-  ) {}
+  constructor(private clientService: ClientService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.getClients();
@@ -56,7 +54,6 @@ export class ClientsComponent implements OnInit, AfterViewInit {
           320: { slidesPerView: 2, spaceBetween: 40 },
           480: { slidesPerView: 3, spaceBetween: 60 },
           640: { slidesPerView: 4, spaceBetween: 80 },
-          992: { slidesPerView: 6, spaceBetween: 120 },
         },
       });
     });
@@ -74,10 +71,14 @@ export class ClientsComponent implements OnInit, AfterViewInit {
       .getClients()
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (response: any) => {
-          this.clients = response.data;
-          this.cdr.detectChanges();
-          this.initSwiperClients();
+        next: (response: ApiResponse<Client[]>) => {
+          if (response.status === Status.OK) {
+            if (response.data) {
+              this.clients = response.data;
+              this.cdr.detectChanges();
+              this.initSwiperClients();
+            }
+          }
         },
         error: (error: any) => {},
       });

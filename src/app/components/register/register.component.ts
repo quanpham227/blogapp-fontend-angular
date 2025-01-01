@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { UserService } from '../../services/user.service';
@@ -7,6 +7,9 @@ import { SnackbarService } from '../../services/snackbar.service';
 import { RegisterDTO } from '../../dtos/user/register.dto';
 import { passwordMatchValidator } from '../../validators/validators';
 import { CommonModule } from '@angular/common';
+import { ApiResponse } from '../../models/response';
+import { UserResponse } from '../../responses/user/user.response';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -22,12 +25,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   showConfirmPassword = false;
   isLoading = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private userService: UserService,
-    private snackBar: SnackbarService,
-  ) {
+  constructor(private fb: FormBuilder, private router: Router, private userService: UserService, private snackBar: SnackbarService) {
     this.registerForm = this.fb.group(
       {
         fullName: ['', Validators.required],
@@ -50,7 +48,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {}
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    // Clean up any subscriptions if needed
+  }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -66,7 +66,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isLoading = true;
+    this.isLoading = true; // Show loading spinner or indicator
     const registerDTO: RegisterDTO = {
       fullName: this.registerForm.value.fullName,
       phoneNumber: this.registerForm.value.phone,
@@ -82,14 +82,20 @@ export class RegisterComponent implements OnInit, OnDestroy {
       .register(registerDTO)
       .pipe(untilDestroyed(this))
       .subscribe({
-        next: (response) => {
-          if (response.status === 'OK') {
+        next: (response: ApiResponse<UserResponse>) => {
+          if (response.status === Status.CREATED) {
             this.snackBar.show('Registration successful. Please login to continue.');
             this.router.navigate(['/login']);
+          } else {
+            this.snackBar.show('Registration failed. Please try again.');
           }
         },
-        error: () => {
-          this.snackBar.show('Registration failed. Please try again.');
+        error: (error) => {
+          this.isLoading = false;
+          console.error(error); // Log the error for debugging
+          // Check if there's an error message in the response
+          const errorMessage = error?.error?.message ?? 'An unknown error occurred. Please try again later.';
+          this.snackBar.show(errorMessage);
         },
         complete: () => {
           this.isLoading = false;

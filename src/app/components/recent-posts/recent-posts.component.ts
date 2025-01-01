@@ -11,6 +11,7 @@ import isEqual from 'lodash-es/isEqual';
 import { catchError, distinctUntilChanged, take, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { SnackbarService } from '../../services/snackbar.service';
+import { Status } from '../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -47,7 +48,7 @@ export class RecentPostsComponent implements OnInit {
         untilDestroyed(this),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         tap((response) => {
-          if (response.status === 'OK' && response.data.posts) {
+          if (response.status === Status.OK && response.data) {
             this.recentPosts = response.data.posts;
           } else {
             this.errorMessage = 'Failed to load posts. Please try again later.';

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { CustomPaginationComponent } from '../../common/custom-pagination/custom-pagination.component';
 import { User } from '../../../models/user';
 import { Role } from '../../../models/role';
@@ -21,6 +20,7 @@ import { UpdateUserAdminComponent } from '../update-user/update-user.admin.compo
 import { AuthService } from '../../../services/auth.service';
 import { UpdateUserByAdminDTO } from '../../../dtos/user/update.user.admin';
 import { UserStatus } from '../../../enums/user-status.enum';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -29,7 +29,7 @@ import { UserStatus } from '../../../enums/user-status.enum';
   styleUrls: ['./user-management.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, FormsModule, MatTooltipModule, ReactiveFormsModule, FlexLayoutModule, CustomPaginationComponent],
+  imports: [CommonModule, RouterModule, FormsModule, MatTooltipModule, ReactiveFormsModule, CustomPaginationComponent],
 })
 export class UserManagementComponent implements OnInit {
   users: User[] = [];
@@ -97,13 +97,15 @@ export class UserManagementComponent implements OnInit {
   }
 
   private handleUserResponse(response: ApiResponse<UserListResponse>) {
-    if (response.status === 'OK' && response.data) {
-      const { users, totalPages } = response.data;
-      if (!isEqual(this.users, users)) {
-        this.users = users;
-        this.totalPages = totalPages;
-        this.usersCache.next(users);
-        this.cdr.markForCheck();
+    if (response.status === Status.OK) {
+      if (response.data) {
+        const { users, totalPages } = response.data;
+        if (!isEqual(this.users, users)) {
+          this.users = users;
+          this.totalPages = totalPages;
+          this.usersCache.next(users);
+          this.cdr.markForCheck();
+        }
       }
     }
   }
@@ -121,12 +123,14 @@ export class UserManagementComponent implements OnInit {
         )
         .subscribe({
           next: (response: ApiResponse<Role[]>) => {
-            if (response.status === 'OK' && response.data) {
-              const newRoles = response.data;
-              if (!isEqual(this.roles, newRoles)) {
-                this.roles = newRoles;
-                this.rolesCache.next(newRoles);
-                this.cdr.markForCheck();
+            if (response.status === Status.OK) {
+              if (response.data) {
+                const newRoles = response.data;
+                if (!isEqual(this.roles, newRoles)) {
+                  this.roles = newRoles;
+                  this.rolesCache.next(newRoles);
+                  this.cdr.markForCheck();
+                }
               }
             }
           },
@@ -224,7 +228,7 @@ export class UserManagementComponent implements OnInit {
             .pipe(untilDestroyed(this))
             .subscribe({
               next: (response: ApiResponse<void>) => {
-                if (response.status === 'OK') {
+                if (response.status === Status.OK) {
                   this.users = this.users.map((user) => {
                     if (user.id === id) {
                       user.isActive = active;
@@ -258,7 +262,7 @@ export class UserManagementComponent implements OnInit {
         if (this.token) {
           this.userService.updateUserByAdmin(this.token, user.id, new UpdateUserByAdminDTO(result)).subscribe({
             next: (response: ApiResponse<User>) => {
-              if (response.status === 'OK') {
+              if (response.status === Status.OK) {
                 this.getUsers();
               }
             },
@@ -298,7 +302,7 @@ export class UserManagementComponent implements OnInit {
           .deleteUser(id)
           .pipe(untilDestroyed(this))
           .subscribe((response: ApiResponse<any>) => {
-            if (response.status === 'OK') {
+            if (response.status === Status.OK) {
               this.users = this.users.filter((user) => user.id !== id);
               this.cdr.markForCheck(); // Inform Angular to check for changes
             }

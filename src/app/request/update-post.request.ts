@@ -6,8 +6,8 @@ export interface UpdatePostRequest {
   title: string;
   content: string;
   category_id: number;
-  thumbnail: String;
-  public_id: String;
+  thumbnail: string;
+  public_id: string;
   status: PostStatus;
   visibility: PostVisibility;
   tags: TagRequest[];

@@ -10,19 +10,17 @@ import { environment } from '../../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { LoginResponse } from '../responses/user/login.response';
 import { LoginService } from './login.service';
-import CryptoJS from 'crypto-es';
 import { LoginType } from '../enums/login.type';
 import { Roles } from '../enums/roles.enum';
+import { BroadcastMessages } from '../enums/broadcast-messages.enum';
 
-@Injectable({
-  providedIn: 'root',
-})
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apiBaseUrl = environment.apiBaseUrl;
-  private secretKey = environment.secretKey;
+  private accessToken: string | null = null;
+  private authChannel = new BroadcastChannel('auth_channel');
 
   private userSubject: BehaviorSubject<UserResponse | null>;
   public user$: Observable<UserResponse | null>;
@@ -45,35 +43,13 @@ export class AuthService {
     this.tokenSubject = new BehaviorSubject<string | null>(this.getAccessToken());
     this.token$ = this.tokenSubject.asObservable();
 
-    // Listen to storage events
-    window.addEventListener('storage', this.handleStorageEvent.bind(this));
-  }
-
-  ngOnDestroy() {
-    window.removeEventListener('storage', this.handleStorageEvent.bind(this)); // Remove the event listener when the service is destroyed
-  }
-
-  private handleStorageEvent(event: StorageEvent) {
-    if (event.key === 'accessToken') {
-      this.ngZone.run(() => {
-        const token = event.newValue ? this.decryptData(event.newValue) : null;
-        this.tokenSubject.next(token);
-        if (!token) {
-          this.clearAuthData();
-          this.router.navigate(['/login']);
-        }
-      });
-    }
-  }
-
-  clearAuthData() {
-    localStorage.removeItem('accessToken');
-    this.tokenSubject.next(null); // Phát giá trị null
-    localStorage.setItem('logoutEvent', Date.now().toString()); // Trigger logout event
+    // Lắng nghe sự kiện để đồng bộ trạng thái đăng nhập giữa các tab
+    this.authChannel.onmessage = (event) => this.syncAuthState(event);
   }
 
   setUser(user: UserResponse | null) {
     this.userSubject.next(user);
+    this.authChannel.postMessage({ event: BroadcastMessages.SET_USER, user });
   }
 
   getUser(): UserResponse | null {
@@ -84,19 +60,27 @@ export class AuthService {
     return this.getUser()?.id ?? 0;
   }
 
-  setAccessToken(token: string) {
-    const encryptedToken = this.encryptData(token);
-    localStorage.setItem('accessToken', encryptedToken);
-    this.tokenSubject.next(token); // Phát giá trị mới
+  setAccessToken(accessToken: string) {
+    if (this.accessToken !== accessToken) {
+      // Chỉ lưu khi có sự khác biệt rõ ràng
+      this.accessToken = accessToken;
+      this.tokenSubject.next(accessToken); // Phát giá trị mới
+      this.authChannel.postMessage({ event: BroadcastMessages.SET_TOKEN, token: accessToken }); // Phát sự kiện đăng nhập
+    }
   }
 
   getAccessToken(): string | null {
-    const encryptedToken = localStorage.getItem('accessToken');
-    return encryptedToken ? this.decryptData(encryptedToken) : null;
+    return this.accessToken;
   }
 
   isTokenExpired(token: string): boolean {
-    return !token || token.split('.').length !== 3 || this.jwtHelperService.isTokenExpired(token);
+    // Kiểm tra nếu token là chuỗi hợp lệ trước khi gọi jwtHelperService
+    if (typeof token !== 'string') {
+      return true; // Nếu không phải chuỗi hợp lệ, coi như token đã hết hạn
+    }
+
+    // Kiểm tra token hết hạn bằng jwtHelperService
+    return !token || this.jwtHelperService.isTokenExpired(token);
   }
 
   isLoggedIn(): boolean {
@@ -106,6 +90,21 @@ export class AuthService {
 
   logout() {
     this.clearAuthData(); // Xóa dữ liệu xác thực
+    this.authChannel.postMessage({ event: BroadcastMessages.LOGOUT }); // Phát sự kiện đăng xuất
+  }
+
+  clearAuthData() {
+    this.clearToken();
+    this.clearUser();
+  }
+
+  clearToken() {
+    this.accessToken = null;
+    this.tokenSubject.next(null); // Phát giá trị null
+  }
+
+  clearUser() {
+    this.userSubject.next(null); // Xóa thông tin người dùng
   }
 
   isAdminOrModerator(): boolean {
@@ -114,6 +113,10 @@ export class AuthService {
   }
 
   async setUserFromToken(token: string): Promise<void> {
+    if (!token) {
+      throw new Error('Token is null or undefined');
+    }
+
     try {
       const response = await firstValueFrom(this.userDetailService.getUserDetail(token));
       this.setUser(response.data ?? null);
@@ -123,18 +126,10 @@ export class AuthService {
     }
   }
 
-  clearPreviousSession() {
-    localStorage.removeItem('accessToken'); // Xóa token
-    this.tokenSubject.next(null); // Phát giá trị null
-    localStorage.setItem('logoutEvent', Date.now().toString()); // Trigger logout event
-  }
-
   loginWithRecovery(loginDTO: any): Observable<LoginResponse> {
     return this.loginService.login(loginDTO).pipe(
       tap((response: LoginResponse) => {
         if (response.status == 'OK' && response.data) {
-          debugger; // Breakpoint
-          this.clearPreviousSession(); // Xóa session trước đó nếu có
           this.setAccessToken(response.data.token); // Lưu token mới
         }
       }),
@@ -152,20 +147,6 @@ export class AuthService {
     const params = new HttpParams().set('code', code).set('login_type', loginType);
 
     return this.http.get<any>(`${this.apiBaseUrl}/users/auth/social/callback`, { params, withCredentials: true });
-  }
-
-  private encryptData(data: string): string {
-    return CryptoJS.AES.encrypt(data, this.secretKey).toString();
-  }
-
-  private decryptData(encryptedData: string): string | null {
-    try {
-      const bytes = CryptoJS.AES.decrypt(encryptedData, this.secretKey);
-      return bytes.toString(CryptoJS.enc.Utf8);
-    } catch (error) {
-      console.error('Lỗi khi giải mã token:', error, encryptedData);
-      return null;
-    }
   }
 
   navigateToDashboard(userResponse: UserResponse | null) {
@@ -190,5 +171,24 @@ export class AuthService {
           break;
       }
     });
+  }
+
+  private syncAuthState(event: MessageEvent) {
+    if (event.data.event === BroadcastMessages.LOGOUT) {
+      this.clearAuthData();
+      this.router.navigate(['/login']);
+    } else if (event.data.event === BroadcastMessages.SET_TOKEN) {
+      const token = event.data.token;
+      if (token) {
+        this.accessToken = token;
+        this.tokenSubject.next(this.accessToken);
+        if (this.accessToken) {
+          this.setUserFromToken(this.accessToken);
+        }
+      }
+    } else if (event.data.event === BroadcastMessages.SET_USER) {
+      const user = event.data.user;
+      this.userSubject.next(user);
+    }
   }
 }

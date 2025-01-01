@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../shared/confirm-dialog/confirm-dialog.component';
 import { CategoryRequest } from '../../../request/category.request';
+import { Status } from '../../../enums/status.enum';
 
 @UntilDestroy()
 @Component({
@@ -130,7 +131,7 @@ export class CategoryAdminComponent implements OnInit {
             .pipe(untilDestroyed(this))
             .subscribe({
               next: (response: ApiResponse<void>) => {
-                if (response.status === 'OK' || response.status === 'DELETED') {
+                if (response.status === Status.OK) {
                   this.categories = this.categories.filter((client) => client.id !== id);
                   this.cdr.markForCheck(); // Inform Angular to check for changes
                 }
@@ -176,10 +177,12 @@ export class CategoryAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Category>) => {
-          if (response.status === 'OK' || response.status === 'CREATED') {
-            this.categories.push(response.data);
-            this.closeForm();
-            this.cdr.markForCheck(); // Inform Angular to check for changes
+          if (response.status === Status.CREATED) {
+            if (response.data) {
+              this.categories.push(response.data);
+              this.closeForm();
+              this.cdr.markForCheck(); // Inform Angular to check for changes
+            }
           }
         },
         error: (error) => {},
@@ -191,13 +194,15 @@ export class CategoryAdminComponent implements OnInit {
       .pipe(untilDestroyed(this))
       .subscribe({
         next: (response: ApiResponse<Category>) => {
-          if (response.status === 'OK' || response.status === 'UPDATED') {
-            const index = this.categories.findIndex((s) => s.id === id);
-            if (index !== -1) {
-              this.categories[index] = response.data;
+          if (response.status === Status.OK) {
+            if (response.data) {
+              const index = this.categories.findIndex((s) => s.id === id);
+              if (index !== -1) {
+                this.categories[index] = response.data;
+              }
+              this.closeForm();
+              this.cdr.markForCheck(); // Inform Angular to check for changes
             }
-            this.closeForm();
-            this.cdr.markForCheck(); // Inform Angular to check for changes
           }
         },
         error: (error) => {
